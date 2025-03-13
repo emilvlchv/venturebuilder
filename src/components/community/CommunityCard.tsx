@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, MessageSquare, CalendarDays } from 'lucide-react';
+import { User, MessageSquare, CalendarDays, ThumbsUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CommunityCardProps {
@@ -14,10 +14,9 @@ interface CommunityCardProps {
   date: string;
   description: string;
   tags?: string[];
-  engagement?: {
-    comments?: number;
-    likes?: number;
-  };
+  likes?: number;
+  comments?: number;
+  image?: string;
   className?: string;
 }
 
@@ -28,7 +27,9 @@ const CommunityCard = ({
   date,
   description,
   tags = [],
-  engagement,
+  likes,
+  comments,
+  image,
   className,
 }: CommunityCardProps) => {
   
@@ -87,6 +88,16 @@ const CommunityCard = ({
         </span>
       </div>
       
+      {image && (
+        <div className="mb-3 -mx-5 -mt-3">
+          <img 
+            src={image} 
+            alt={title} 
+            className="w-full h-48 object-cover"
+          />
+        </div>
+      )}
+      
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
       <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{description}</p>
       
@@ -109,12 +120,21 @@ const CommunityCard = ({
           {date}
         </div>
         
-        {engagement && engagement.comments !== undefined && (
-          <div className="flex items-center">
-            <MessageSquare size={14} className="mr-1" />
-            {engagement.comments} comment{engagement.comments !== 1 ? 's' : ''}
-          </div>
-        )}
+        <div className="flex items-center space-x-3">
+          {likes !== undefined && (
+            <div className="flex items-center">
+              <ThumbsUp size={14} className="mr-1" />
+              {likes}
+            </div>
+          )}
+          
+          {comments !== undefined && (
+            <div className="flex items-center">
+              <MessageSquare size={14} className="mr-1" />
+              {comments}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

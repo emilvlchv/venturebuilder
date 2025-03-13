@@ -61,7 +61,7 @@ const Blog = () => {
                 <Tabs defaultValue="all" onValueChange={setActiveCategory}>
                   <TabsList className="mb-4 flex flex-wrap h-auto">
                     <TabsTrigger value="all">All Posts</TabsTrigger>
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <TabsTrigger key={category} value={category}>
                         {category}
                       </TabsTrigger>
@@ -70,17 +70,17 @@ const Blog = () => {
                   
                   <TabsContent value="all" className="mt-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {filteredPosts.map(post => (
-                        <BlogCard key={post.slug} post={post} />
+                      {filteredPosts.map((post) => (
+                        <BlogCard key={post.id} post={post} />
                       ))}
                     </div>
                   </TabsContent>
                   
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <TabsContent key={category} value={category} className="mt-0">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredPosts.map(post => (
-                          <BlogCard key={post.slug} post={post} />
+                        {filteredPosts.map((post) => (
+                          <BlogCard key={post.id} post={post} />
                         ))}
                       </div>
                     </TabsContent>
@@ -93,7 +93,7 @@ const Blog = () => {
               <div className="bg-secondary/50 rounded-lg p-6 mb-6">
                 <h3 className="text-xl font-semibold mb-4">Popular Topics</h3>
                 <div className="flex flex-wrap gap-2">
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <Badge 
                       key={category}
                       variant="outline" 
@@ -127,7 +127,20 @@ const Blog = () => {
   );
 };
 
-const BlogCard = ({ post }) => {
+interface BlogCardProps {
+  post: {
+    id: number;
+    slug: string;
+    title: string;
+    excerpt: string;
+    categories: string[];
+    author: string;
+    date: string;
+    image?: string;
+  };
+}
+
+const BlogCard = ({ post }: BlogCardProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       {post.image && (
@@ -141,7 +154,7 @@ const BlogCard = ({ post }) => {
       )}
       <CardHeader className="pb-2">
         <div className="flex gap-2 flex-wrap mb-2">
-          {post.categories.map(category => (
+          {post.categories.map((category) => (
             <Badge key={category} variant="secondary" className="text-xs">
               {category}
             </Badge>

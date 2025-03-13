@@ -4,16 +4,16 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, User, Clock, ArrowLeft, Share2, Bookmark, ThumbsUp } from 'lucide-react';
-import { blogPosts } from '@/data/blogPosts';
+import { Calendar, Clock, ArrowLeft, Share2, Bookmark, ThumbsUp } from 'lucide-react';
+import { blogPosts, BlogPost as BlogPostType } from '@/data/blogPosts';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
 const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState(null);
-  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [post, setPost] = useState<BlogPostType | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
   
   useEffect(() => {
     // Find the post by slug
@@ -121,7 +121,7 @@ const BlogPost = () => {
               <h2 className="text-2xl font-bold mb-6">Related Articles</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map(relatedPost => (
-                  <div key={relatedPost.slug} className="bg-secondary/30 rounded-lg overflow-hidden">
+                  <div key={relatedPost.id} className="bg-secondary/30 rounded-lg overflow-hidden">
                     {relatedPost.image && (
                       <img 
                         src={relatedPost.image} 

@@ -65,6 +65,10 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const goToProfile = () => {
+    navigate('/profile');
+  };
+
   const NavLink = ({ path, name }: { path: string; name: string }) => {
     const isActive = location.pathname === path;
     
@@ -126,13 +130,13 @@ const Navbar = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={goToProfile}>
                     <User size={16} className="mr-2" />
                     {user?.firstName || 'Profile'}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <div className="px-2 py-1.5">
+                  <div className="px-2 py-1.5 cursor-pointer" onClick={goToProfile}>
                     <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
                     <p className="text-xs text-muted-foreground">@{user?.username}</p>
                   </div>
@@ -208,7 +212,7 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <div className="px-4 py-2 border-t border-border mt-2 pt-4">
-                    <div className="flex items-center space-x-2 mb-4">
+                    <div className="flex items-center space-x-2 mb-4 cursor-pointer" onClick={goToProfile}>
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <User size={20} />
                       </div>

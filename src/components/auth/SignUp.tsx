@@ -73,7 +73,8 @@ const SignUp = () => {
         description: "Welcome to VentureWayfinder!",
       });
       
-      navigate('/journey');
+      // Redirect to profile page instead of journey
+      navigate('/profile');
     } catch (error) {
       toast({
         variant: "destructive",

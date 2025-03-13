@@ -81,6 +81,10 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     }
   };
 
+  const handleViewJourney = () => {
+    navigate('/journey-details');
+  };
+
   const renderAssistantMessage = (message: string) => {
     return (
       <div className="flex items-start space-x-3 max-w-3xl animate-fade-in">
@@ -133,7 +137,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
             {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Click below to view your roadmap and begin your journey.")}
             <div className="ml-11">
               <Button 
-                onClick={handleComplete} 
+                onClick={handleViewJourney} 
                 icon={<ArrowRight size={16} />} 
                 iconPosition="right"
               >

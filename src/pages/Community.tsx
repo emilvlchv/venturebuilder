@@ -163,6 +163,7 @@ const Community = () => {
         {featuredPosts.map((post) => (
           <CommunityCard 
             key={post.id}
+            type="discussion"
             title={post.title}
             description={post.description}
             author={post.author}
@@ -181,6 +182,7 @@ const Community = () => {
         {regularPosts.map((post) => (
           <CommunityCard 
             key={post.id}
+            type="discussion"
             title={post.title}
             description={post.description}
             author={post.author}

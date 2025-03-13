@@ -25,7 +25,7 @@ const PostsSection: React.FC<PostsSectionProps> = ({
         {posts.map((post) => (
           <CommunityCard 
             key={post.id}
-            type="discussion"
+            type="discussion" // Adding the required type prop
             title={post.title}
             description={post.description}
             author={post.author}

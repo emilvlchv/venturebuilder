@@ -35,6 +35,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Debug: Monitor step changes
+  useEffect(() => {
+    console.log("Current step changed to:", currentStep);
+  }, [currentStep]);
+  
   const handleStartChat = () => {
     setCurrentStep('chat');
   };
@@ -46,17 +51,18 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     
     // Simulate AI generating the journey
     setTimeout(() => {
+      console.log("Setting step to complete");
       setCurrentStep('complete');
       toast({
         title: "Journey Created",
         description: "Your personalized business journey is ready to view.",
       });
-      console.log("Current step set to complete");
     }, 3000);
   };
   
   // Function to handle completion of the initial chat
   const handleComplete = () => {
+    console.log("handleComplete called");
     // Save business idea to user profile if available
     try {
       // Store in local storage for demo purposes
@@ -92,6 +98,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   useEffect(() => {
     // If we're on the complete step, call handleComplete
     if (currentStep === 'complete') {
+      console.log("Current step is complete, calling handleComplete");
       handleComplete();
     }
   }, [currentStep]);
@@ -115,6 +122,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   };
 
   const renderStepContent = () => {
+    console.log("Rendering step:", currentStep);
     switch (currentStep) {
       case 'welcome':
         return (

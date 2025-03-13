@@ -108,12 +108,29 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         // Complete the chat after a brief delay
         setTimeout(() => {
           console.log("Chat completed, sending data to parent:", updatedBusinessData);
+          // Make sure to call onComplete with the updated data
           onComplete(updatedBusinessData);
         }, 2000);
       }
       
       setIsTyping(false);
     }, 1500);
+  };
+
+  // For testing: allow skipping to the end
+  const handleSkipToEnd = () => {
+    // Only for development/testing to quickly reach the end
+    const updatedBusinessData = {
+      businessIdea: 'Test business idea',
+      teamComposition: 'Solo founder',
+      teamStrengths: 'Development, marketing',
+      teamWeaknesses: 'Finance, legal',
+      targetCustomers: 'Small businesses',
+      additionalInfo: 'Need help with initial funding',
+    };
+    
+    console.log("Skipping to end, sending data:", updatedBusinessData);
+    onComplete(updatedBusinessData);
   };
 
   // Handle pressing Enter to send message
@@ -191,6 +208,14 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
           </button>
         </div>
       )}
+      
+      {/* For testing purposes - uncomment to enable quick testing */}
+      {/* <button 
+        onClick={handleSkipToEnd}
+        className="mt-4 p-2 bg-orange-500 text-white rounded"
+      >
+        Skip to End (Testing Only)
+      </button> */}
     </div>
   );
 };

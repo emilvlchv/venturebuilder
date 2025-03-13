@@ -9,7 +9,11 @@ interface CommunityPost {
   id: number;
   title: string;
   description: string;
-  author: string;
+  author: {
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
   date: string;
   likes: number;
   comments: number;
@@ -22,7 +26,10 @@ const SAMPLE_POSTS: CommunityPost[] = [
     id: 1,
     title: 'How I Secured My First Investor',
     description: 'After months of pitching, I finally got my first yes! Here are the lessons I learned along the way...',
-    author: 'Alex Johnson',
+    author: {
+      name: 'Alex Johnson',
+      role: 'Founder'
+    },
     date: '2 days ago',
     likes: 48,
     comments: 12,
@@ -33,7 +40,10 @@ const SAMPLE_POSTS: CommunityPost[] = [
     id: 2,
     title: 'Marketing on a Zero Budget',
     description: 'Discover how I grew my customer base without spending a dime on marketing...',
-    author: 'Sam Wilson',
+    author: {
+      name: 'Sam Wilson',
+      role: 'Marketing Lead'
+    },
     date: '1 week ago',
     likes: 124,
     comments: 35,
@@ -43,7 +53,10 @@ const SAMPLE_POSTS: CommunityPost[] = [
     id: 3,
     title: 'The MVP Mindset: Build Less, Learn More',
     description: 'Why building a minimal viable product saved my startup from failure...',
-    author: 'Taylor Smith',
+    author: {
+      name: 'Taylor Smith',
+      role: 'Product Manager'
+    },
     date: '2 weeks ago',
     likes: 87,
     comments: 19,
@@ -54,7 +67,10 @@ const SAMPLE_POSTS: CommunityPost[] = [
     id: 4,
     title: 'Finding Co-Founders: My Journey',
     description: 'The story of how I met my co-founders and built a successful team...',
-    author: 'Jordan Lee',
+    author: {
+      name: 'Jordan Lee',
+      role: 'Co-founder'
+    },
     date: '3 weeks ago',
     likes: 63,
     comments: 22,
@@ -64,7 +80,10 @@ const SAMPLE_POSTS: CommunityPost[] = [
     id: 5,
     title: 'Legal Essentials for New Startups',
     description: 'A beginner\'s guide to the legal requirements when starting your business...',
-    author: 'Casey Morgan',
+    author: {
+      name: 'Casey Morgan',
+      role: 'Legal Advisor'
+    },
     date: '1 month ago',
     likes: 105,
     comments: 41,

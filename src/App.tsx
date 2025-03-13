@@ -11,6 +11,7 @@ import Community from "./pages/Community";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/community" element={<Community />} />
           <Route path="/about" element={<About />} />
           <Route path="/subscription" element={<Subscription />} />
+          <Route path="/pricing" element={<Pricing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

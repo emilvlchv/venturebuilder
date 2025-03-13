@@ -1,0 +1,241 @@
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, X, Crown, Rocket, Leaf } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { createCheckoutSession } from '@/lib/stripe';
+import { useToast } from '@/hooks/use-toast';
+
+interface PricingFeature {
+  name: string;
+  included: boolean;
+}
+
+interface PricingPlan {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  price: number;
+  currency: string;
+  billingPeriod: string;
+  features: PricingFeature[];
+  highlighted?: boolean;
+  badge?: string;
+  ctaText: string;
+  priceId: string;
+}
+
+const pricingPlans: PricingPlan[] = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    icon: <Leaf className="h-6 w-6 text-green-500" />,
+    description: 'Perfect for exploring entrepreneurship basics',
+    price: 0,
+    currency: '$',
+    billingPeriod: 'forever',
+    features: [
+      { name: 'Basic personalized journey', included: true },
+      { name: 'Limited access to learning materials', included: true },
+      { name: 'Community forum access', included: true },
+      { name: 'Progress tracking', included: true },
+      { name: 'Advanced AI guidance', included: false },
+      { name: 'Mentorship sessions', included: false },
+      { name: 'Premium courses', included: false },
+      { name: 'Networking events', included: false },
+    ],
+    ctaText: 'Get Started Free',
+    priceId: 'free_tier'
+  },
+  {
+    id: 'growth',
+    name: 'Growth',
+    icon: <Rocket className="h-6 w-6 text-purple-500" />,
+    description: 'For serious entrepreneurs ready to scale',
+    price: 29,
+    currency: '$',
+    billingPeriod: 'per month',
+    features: [
+      { name: 'Advanced personalized journey', included: true },
+      { name: 'Full access to learning materials', included: true },
+      { name: 'Community forum access', included: true },
+      { name: 'Detailed progress analytics', included: true },
+      { name: 'Advanced AI guidance', included: true },
+      { name: 'Monthly mentorship session', included: true },
+      { name: 'Premium courses', included: true },
+      { name: 'Networking events', included: false },
+    ],
+    highlighted: true,
+    badge: 'Most Popular',
+    ctaText: 'Subscribe Now',
+    priceId: 'price_growth_monthly'
+  },
+  {
+    id: 'accelerate',
+    name: 'Accelerate',
+    icon: <Crown className="h-6 w-6 text-amber-500" />,
+    description: 'Complete support system for rapid growth',
+    price: 299,
+    currency: '$',
+    billingPeriod: 'per year',
+    features: [
+      { name: 'Advanced personalized journey', included: true },
+      { name: 'Full access to learning materials', included: true },
+      { name: 'Priority community support', included: true },
+      { name: 'Detailed progress analytics', included: true },
+      { name: 'Advanced AI guidance', included: true },
+      { name: 'Weekly mentorship sessions', included: true },
+      { name: 'All premium courses', included: true },
+      { name: 'Exclusive networking events', included: true },
+    ],
+    badge: 'Best Value',
+    ctaText: 'Subscribe Annually',
+    priceId: 'price_accelerate_yearly'
+  },
+];
+
+const FeatureCheckmark = ({ included }: { included: boolean }) => (
+  included ? (
+    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+  ) : (
+    <X className="h-5 w-5 text-gray-300 flex-shrink-0" />
+  )
+);
+
+const Pricing = () => {
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = React.useState<string | null>(null);
+
+  const handleSubscription = async (plan: PricingPlan) => {
+    setLoadingPlan(plan.id);
+    
+    try {
+      // In a real implementation, this would create a checkout session and redirect
+      await createCheckoutSession(plan.priceId);
+      
+      if (plan.id === 'starter') {
+        toast({
+          title: "Free plan activated",
+          description: "You now have access to our free tier. Enjoy your journey!",
+        });
+      } else {
+        toast({
+          title: "Subscription process initiated",
+          description: "You'll be redirected to complete your payment shortly.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Unable to process your subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  return (
+    <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="text-center max-w-3xl mx-auto mb-16">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+          Invest in Your Entrepreneurial Journey
+        </h1>
+        <p className="text-xl text-muted-foreground">
+          Choose a plan that fits your ambition level and access the tools, guidance, and community you need.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {pricingPlans.map((plan) => (
+          <motion.div
+            key={plan.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: pricingPlans.findIndex(p => p.id === plan.id) * 0.1 }}
+            className="flex"
+          >
+            <Card className={cn(
+              "flex flex-col w-full",
+              plan.highlighted && "border-primary shadow-lg relative",
+            )}>
+              {plan.badge && (
+                <div className="absolute -top-3 right-0 left-0 flex justify-center">
+                  <Badge variant="default" className="bg-primary text-primary-foreground">
+                    {plan.badge}
+                  </Badge>
+                </div>
+              )}
+              
+              <CardHeader className={cn(
+                "text-center pb-8",
+                plan.highlighted && "bg-primary/5 rounded-t-lg"
+              )}>
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 rounded-full bg-primary/10">
+                    {plan.icon}
+                  </div>
+                </div>
+                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <CardDescription className="mt-1.5">{plan.description}</CardDescription>
+                <div className="mt-6 flex items-baseline justify-center">
+                  <span className="text-5xl font-extrabold tracking-tight">
+                    {plan.currency}{plan.price}
+                  </span>
+                  <span className="ml-1 text-muted-foreground">
+                    /{plan.billingPeriod}
+                  </span>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="flex-grow">
+                <ul className="space-y-3">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <FeatureCheckmark included={feature.included} />
+                      <span className={cn(
+                        "ml-3",
+                        !feature.included && "text-muted-foreground"
+                      )}>
+                        {feature.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              
+              <CardFooter className="pt-4">
+                <Button
+                  onClick={() => handleSubscription(plan)}
+                  variant={plan.highlighted ? "default" : "outline"}
+                  className="w-full"
+                  disabled={loadingPlan === plan.id}
+                >
+                  {loadingPlan === plan.id ? (
+                    <span className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Processing...
+                    </span>
+                  ) : plan.ctaText}
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-16 text-center max-w-2xl mx-auto">
+        <h3 className="text-2xl font-semibold mb-4">100% Satisfaction Guarantee</h3>
+        <p className="text-muted-foreground">
+          We're confident you'll love our platform. If you're not completely satisfied within 14 days, we'll refund your subscription - no questions asked.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Pricing;

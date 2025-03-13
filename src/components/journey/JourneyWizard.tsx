@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, Send, User, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ChatConversation from './ChatConversation';
+import { useToast } from "@/hooks/use-toast";
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
 
@@ -32,18 +33,25 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     targetCustomers: '',
   });
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleStartChat = () => {
     setCurrentStep('chat');
   };
   
   const handleChatComplete = (data: BusinessIdeaData) => {
+    console.log("Chat completed with data:", data);
     setBusinessData(data);
     setCurrentStep('generating');
     
     // Simulate AI generating the journey
     setTimeout(() => {
       setCurrentStep('complete');
+      toast({
+        title: "Journey Created",
+        description: "Your personalized business journey is ready to view.",
+      });
+      console.log("Current step set to complete");
     }, 3000);
   };
   
@@ -81,7 +89,15 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     }
   };
 
+  useEffect(() => {
+    // If we're on the complete step, call handleComplete
+    if (currentStep === 'complete') {
+      handleComplete();
+    }
+  }, [currentStep]);
+
   const handleViewJourney = () => {
+    console.log("Navigating to journey-details page");
     navigate('/journey-details');
   };
 
@@ -132,6 +148,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
         );
         
       case 'complete':
+        console.log("Rendering complete step content with View My Journey button");
         return (
           <div className="space-y-6">
             {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Click below to view your roadmap and begin your journey.")}
@@ -140,6 +157,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
                 onClick={handleViewJourney} 
                 icon={<ArrowRight size={16} />} 
                 iconPosition="right"
+                variant="primary"
               >
                 View My Journey
               </Button>

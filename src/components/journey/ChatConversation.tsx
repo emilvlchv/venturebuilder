@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User } from 'lucide-react';
 import { BusinessIdeaData } from './JourneyWizard';
@@ -106,6 +107,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         
         // Complete the chat after a brief delay
         setTimeout(() => {
+          console.log("Chat completed, sending data to parent:", updatedBusinessData);
           onComplete(updatedBusinessData);
         }, 2000);
       }

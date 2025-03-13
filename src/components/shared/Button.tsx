@@ -68,7 +68,7 @@ const Button = ({
         <span className="mr-2">{icon}</span>
       ) : null}
       
-      <span className="animate-fade-in">{children}</span>
+      <span>{children}</span>
       
       {icon && iconPosition === 'right' && !loading ? (
         <span className="ml-2">{icon}</span>

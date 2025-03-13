@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
@@ -67,6 +66,7 @@ const Navbar = () => {
   };
 
   const goToProfile = () => {
+    console.log("Navigating to profile");
     navigate('/profile');
   };
 
@@ -134,60 +134,50 @@ const Navbar = () => {
           {/* CTA Button - Fixed to always show authenticated state properly */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      // Prevent triggering the dropdown if clicking directly on name
-                      if ((e.target as HTMLElement).tagName === 'SPAN') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        goToProfile();
-                      }
-                    }}
-                  >
-                    <Avatar className="h-6 w-6 mr-2">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span 
-                      className="cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        goToProfile();
-                      }}
-                    >
-                      {user?.firstName || 'Profile'}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <div className="px-2 py-1.5 cursor-pointer" onClick={goToProfile}>
-                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-muted-foreground">@{user?.username}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
-                    My Journey
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
-                    <Settings size={16} className="mr-2" />
-                    Profile Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
-                    Subscription
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                    <LogOut size={16} className="mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center">
+                {/* Make the entire profile button clickable independently of dropdown */}
+                <div 
+                  onClick={goToProfile}
+                  className="flex items-center mr-2 px-4 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                >
+                  <Avatar className="h-6 w-6 mr-2">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{user?.firstName || 'Profile'}</span>
+                </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="px-2">
+                      <Settings size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-xs text-muted-foreground">@{user?.username}</p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
+                      My Journey
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
+                      <Settings size={16} className="mr-2" />
+                      Profile Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
+                      Subscription
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                      <LogOut size={16} className="mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <>
                 <Link to="/signin">

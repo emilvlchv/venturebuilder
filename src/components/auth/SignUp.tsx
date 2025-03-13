@@ -58,7 +58,15 @@ const SignUp = () => {
     try {
       // Remove confirmPassword before sending
       const { confirmPassword, ...signupData } = data;
-      await signup(signupData);
+      
+      // Ensure all required fields are present and not undefined
+      await signup({
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        username: signupData.username,
+        email: signupData.email,
+        password: signupData.password
+      });
       
       toast({
         title: "Account created successfully",

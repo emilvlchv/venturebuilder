@@ -11,6 +11,7 @@ import Journey from "./pages/Journey";
 import Education from "./pages/Education";
 import Community from "./pages/Community";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import Pricing from "./pages/Pricing";
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/education" element={<Education />} />
             <Route path="/community" element={<Community />} />
             <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/subscription" element={
               <ProtectedRoute>

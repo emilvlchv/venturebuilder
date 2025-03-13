@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
@@ -135,13 +136,33 @@ const Navbar = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="cursor-pointer">
+                  <Button 
+                    variant="outline" 
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      // Prevent triggering the dropdown if clicking directly on name
+                      if ((e.target as HTMLElement).tagName === 'SPAN') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        goToProfile();
+                      }
+                    }}
+                  >
                     <Avatar className="h-6 w-6 mr-2">
                       <AvatarFallback className="bg-primary/10 text-primary text-xs">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="cursor-pointer" onClick={goToProfile}>{user?.firstName || 'Profile'}</span>
+                    <span 
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        goToProfile();
+                      }}
+                    >
+                      {user?.firstName || 'Profile'}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

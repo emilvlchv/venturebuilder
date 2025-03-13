@@ -1,129 +1,184 @@
+
 import React, { useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import CommunityCard from '@/components/community/CommunityCard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
+import CommunityCard from '@/components/community/CommunityCard';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 interface CommunityPost {
   id: number;
   title: string;
+  description: string;
   author: string;
   date: string;
-  content: string;
-  replies: number;
   likes: number;
+  comments: number;
+  tags: string[];
+  image?: string;
 }
 
+const SAMPLE_POSTS: CommunityPost[] = [
+  {
+    id: 1,
+    title: 'How I Secured My First Investor',
+    description: 'After months of pitching, I finally got my first yes! Here are the lessons I learned along the way...',
+    author: 'Alex Johnson',
+    date: '2 days ago',
+    likes: 48,
+    comments: 12,
+    tags: ['Fundraising', 'Pitch Deck'],
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop'
+  },
+  {
+    id: 2,
+    title: 'Marketing on a Zero Budget',
+    description: 'Discover how I grew my customer base without spending a dime on marketing...',
+    author: 'Sam Wilson',
+    date: '1 week ago',
+    likes: 124,
+    comments: 35,
+    tags: ['Marketing', 'Bootstrapping'],
+  },
+  {
+    id: 3,
+    title: 'The MVP Mindset: Build Less, Learn More',
+    description: 'Why building a minimal viable product saved my startup from failure...',
+    author: 'Taylor Smith',
+    date: '2 weeks ago',
+    likes: 87,
+    comments: 19,
+    tags: ['Product Development', 'MVP'],
+    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2940&auto=format&fit=crop'
+  },
+  {
+    id: 4,
+    title: 'Finding Co-Founders: My Journey',
+    description: 'The story of how I met my co-founders and built a successful team...',
+    author: 'Jordan Lee',
+    date: '3 weeks ago',
+    likes: 63,
+    comments: 22,
+    tags: ['Team Building', 'Co-Founders'],
+  },
+  {
+    id: 5,
+    title: 'Legal Essentials for New Startups',
+    description: 'A beginner\'s guide to the legal requirements when starting your business...',
+    author: 'Casey Morgan',
+    date: '1 month ago',
+    likes: 105,
+    comments: 41,
+    tags: ['Legal', 'Business Formation'],
+    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2940&auto=format&fit=crop'
+  },
+];
+
 const Community = () => {
-  const [posts, setPosts] = useState<CommunityPost[]>([
-    {
-      id: 1,
-      title: "Best Resources for New Entrepreneurs",
-      author: "Daria Lazarova",
-      date: "2024-03-15",
-      content: "I've compiled a list of the best free resources that helped me when I was starting my first business. Check it out and let me know what you think!",
-      replies: 15,
-      likes: 42
-    },
-    {
-      id: 2,
-      title: "Seeking Feedback on My Business Plan",
-      author: "Emil Valchev",
-      date: "2024-03-10",
-      content: "I'm looking for constructive criticism on my business plan. Any advice on market analysis or financial projections would be greatly appreciated!",
-      replies: 8,
-      likes: 28
-    },
-    {
-      id: 3,
-      title: "How to Overcome Imposter Syndrome",
-      author: "Dimitrina Pashova",
-      date: "2024-03-05",
-      content: "Imposter syndrome can be a real challenge for entrepreneurs. Here are some strategies that have helped me build confidence and stay motivated.",
-      replies: 22,
-      likes: 61
-    },
-    {
-      id: 4,
-      title: "Networking Opportunities for Startups",
-      author: "Filip Andonov",
-      date: "2024-02-28",
-      content: "I'm sharing a list of upcoming networking events and conferences for startups. These are great opportunities to connect with investors, mentors, and potential partners.",
-      replies: 12,
-      likes: 35
-    },
-  ]);
-
   const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  
+  // Get all unique tags
+  const allTags = Array.from(
+    new Set(SAMPLE_POSTS.flatMap(post => post.tags))
   );
+  
+  // Filter posts based on search and tag
+  const filteredPosts = SAMPLE_POSTS.filter(post => {
+    const matchesSearch = searchTerm === '' || 
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesTag = selectedTag === null || post.tags.includes(selectedTag);
+    
+    return matchesSearch && matchesTag;
+  });
+  
+  // Split posts into featured and regular
+  const featuredPosts = filteredPosts.slice(0, 2);
+  const regularPosts = filteredPosts.slice(2);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-24 pb-16 md:pt-32 md:pb-24">
-        <div className="container-padding">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="h2 mb-8 md:mb-12 text-center animate-fade-in">
-              Connect, Share, and Grow Together
-            </h1>
-
-            {/* Search Bar */}
-            <div className="mb-6 md:mb-8 animate-fade-in delay-[50ms]">
-              <Input
-                type="text"
-                placeholder="Search for posts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-1/2 mx-auto"
-              />
-            </div>
-
-            {/* Tabs */}
-            <Tabs defaultValue="recent" className="w-full animate-fade-in delay-[100ms]">
-              <TabsList className="w-full md:w-1/2 mx-auto bg-secondary/50 rounded-lg p-1 flex justify-between">
-                <TabsTrigger value="recent" className="data-[state=active]:bg-background">
-                  Recent
-                </TabsTrigger>
-                <TabsTrigger value="popular" className="data-[state=active]:bg-background">
-                  Popular
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="recent" className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredPosts.map((post) => (
-                    <CommunityCard key={post.id} post={post} />
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="popular" className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Display popular posts here (e.g., based on likes or replies) */}
-                  {filteredPosts
-                    .sort((a, b) => b.likes - a.likes) // Sort by likes
-                    .map((post) => (
-                      <CommunityCard key={post.id} post={post} />
-                    ))}
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            {/* CTA for creating a post */}
-            <div className="text-center mt-12 animate-fade-in delay-[150ms]">
-              <Button variant="primary" size="lg" icon={<MessageSquare size={20} />} iconPosition="left">
-                Start a Discussion
-              </Button>
-            </div>
-          </div>
+    <div className="container mx-auto py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">Community Hub</h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Connect with fellow entrepreneurs, share experiences, and learn from each other's journeys.
+        </p>
+      </div>
+      
+      {/* Search and filter */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search discussions..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      </main>
-      <Footer />
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant={selectedTag === null ? "default" : "outline"}
+            onClick={() => setSelectedTag(null)}
+            size="sm"
+          >
+            All
+          </Button>
+          {allTags.map((tag, index) => (
+            <Button
+              key={index}
+              variant={selectedTag === tag ? "default" : "outline"}
+              onClick={() => setSelectedTag(tag)}
+              size="sm"
+            >
+              {tag}
+            </Button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Featured posts */}
+      <h2 className="text-2xl font-semibold mb-4">Featured Discussions</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {featuredPosts.map((post) => (
+          <CommunityCard 
+            key={post.id}
+            title={post.title}
+            description={post.description}
+            author={post.author}
+            date={post.date}
+            likes={post.likes}
+            comments={post.comments}
+            tags={post.tags}
+            image={post.image}
+          />
+        ))}
+      </div>
+      
+      {/* Regular posts */}
+      <h2 className="text-2xl font-semibold mb-4">Recent Discussions</h2>
+      <div className="grid grid-cols-1 gap-6">
+        {regularPosts.map((post) => (
+          <CommunityCard 
+            key={post.id}
+            title={post.title}
+            description={post.description}
+            author={post.author}
+            date={post.date}
+            likes={post.likes}
+            comments={post.comments}
+            tags={post.tags}
+            image={post.image}
+          />
+        ))}
+      </div>
+      
+      {/* Call to action */}
+      <div className="mt-12 text-center">
+        <p className="mb-4 text-muted-foreground">Have something to share with the community?</p>
+        <Button variant="default">Start a Discussion</Button>
+      </div>
     </div>
   );
 };

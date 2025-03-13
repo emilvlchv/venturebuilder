@@ -7,6 +7,7 @@ import { Check, X, Crown, Rocket, Leaf } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createCheckoutSession } from '@/lib/stripe';
 import { useToast } from '@/hooks/use-toast';
+import Layout from '@/components/layout/Layout';
 
 interface PricingFeature {
   name: string;
@@ -148,121 +149,123 @@ const Pricing = () => {
   };
 
   return (
-    <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-          Invest in Your Entrepreneurial Journey
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          Choose a plan that fits your ambition level and access the tools, guidance, and community you need.
-        </p>
-      </div>
+    <Layout>
+      <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+            Invest in Your Entrepreneurial Journey
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Choose a plan that fits your ambition level and access the tools, guidance, and community you need.
+          </p>
+        </div>
 
-      <div className="flex justify-center mb-8">
-        <div className="bg-muted p-1 rounded-lg inline-flex items-center">
-          <button
-            onClick={() => setAnnualBilling(false)}
-            className={`px-4 py-2 rounded-md ${!annualBilling ? 'bg-white shadow-sm' : ''}`}
-          >
-            Monthly billing
-          </button>
-          <button
-            onClick={() => setAnnualBilling(true)}
-            className={`px-4 py-2 rounded-md ${annualBilling ? 'bg-white shadow-sm' : ''}`}
-          >
-            Annual billing <span className="text-green-600 font-medium">(-5%)</span>
-          </button>
+        <div className="flex justify-center mb-8">
+          <div className="bg-muted p-1 rounded-lg inline-flex items-center">
+            <button
+              onClick={() => setAnnualBilling(false)}
+              className={`px-4 py-2 rounded-md ${!annualBilling ? 'bg-white shadow-sm' : ''}`}
+            >
+              Monthly billing
+            </button>
+            <button
+              onClick={() => setAnnualBilling(true)}
+              className={`px-4 py-2 rounded-md ${annualBilling ? 'bg-white shadow-sm' : ''}`}
+            >
+              Annual billing <span className="text-green-600 font-medium">(-5%)</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {pricingPlans.map((plan) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: pricingPlans.findIndex(p => p.id === plan.id) * 0.1 }}
+              className="flex"
+            >
+              <Card className={cn(
+                "flex flex-col w-full",
+                plan.highlighted && "border-primary shadow-lg relative",
+              )}>
+                {plan.badge && (
+                  <div className="absolute -top-3 right-0 left-0 flex justify-center">
+                    <Badge variant="default" className="bg-primary text-primary-foreground">
+                      {plan.badge}
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className={cn(
+                  "text-center pb-8",
+                  plan.highlighted && "bg-primary/5 rounded-t-lg"
+                )}>
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      {plan.icon}
+                    </div>
+                  </div>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription className="mt-1.5">{plan.description}</CardDescription>
+                  <div className="mt-6 flex items-baseline justify-center">
+                    <span className="text-5xl font-extrabold tracking-tight">
+                      {plan.currency}{annualBilling && plan.annualPrice ? plan.annualPrice : plan.price}
+                    </span>
+                    <span className="ml-1 text-muted-foreground">
+                      /{plan.billingPeriod}
+                    </span>
+                  </div>
+                  {annualBilling && plan.price > 0 && (
+                    <p className="mt-1 text-sm text-green-600">Billed annually (5% discount)</p>
+                  )}
+                </CardHeader>
+                
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <FeatureCheckmark included={feature.included} />
+                        <span className={cn(
+                          "ml-3",
+                          !feature.included && "text-muted-foreground"
+                        )}>
+                          {feature.name}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                
+                <CardFooter className="pt-4">
+                  <Button
+                    onClick={() => handleSubscription(plan)}
+                    variant={plan.highlighted ? "default" : "outline"}
+                    className="w-full"
+                    disabled={loadingPlan === plan.id}
+                  >
+                    {loadingPlan === plan.id ? (
+                      <span className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Processing...
+                      </span>
+                    ) : plan.ctaText}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-16 text-center max-w-2xl mx-auto">
+          <h3 className="text-2xl font-semibold mb-4">100% Satisfaction Guarantee</h3>
+          <p className="text-muted-foreground">
+            We're confident you'll love our platform. If you're not completely satisfied within 14 days, we'll refund your subscription - no questions asked.
+          </p>
         </div>
       </div>
-
-      <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        {pricingPlans.map((plan) => (
-          <motion.div
-            key={plan.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: pricingPlans.findIndex(p => p.id === plan.id) * 0.1 }}
-            className="flex"
-          >
-            <Card className={cn(
-              "flex flex-col w-full",
-              plan.highlighted && "border-primary shadow-lg relative",
-            )}>
-              {plan.badge && (
-                <div className="absolute -top-3 right-0 left-0 flex justify-center">
-                  <Badge variant="default" className="bg-primary text-primary-foreground">
-                    {plan.badge}
-                  </Badge>
-                </div>
-              )}
-              
-              <CardHeader className={cn(
-                "text-center pb-8",
-                plan.highlighted && "bg-primary/5 rounded-t-lg"
-              )}>
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 rounded-full bg-primary/10">
-                    {plan.icon}
-                  </div>
-                </div>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription className="mt-1.5">{plan.description}</CardDescription>
-                <div className="mt-6 flex items-baseline justify-center">
-                  <span className="text-5xl font-extrabold tracking-tight">
-                    {plan.currency}{annualBilling && plan.annualPrice ? plan.annualPrice : plan.price}
-                  </span>
-                  <span className="ml-1 text-muted-foreground">
-                    /{plan.billingPeriod}
-                  </span>
-                </div>
-                {annualBilling && plan.price > 0 && (
-                  <p className="mt-1 text-sm text-green-600">Billed annually (5% discount)</p>
-                )}
-              </CardHeader>
-              
-              <CardContent className="flex-grow">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <FeatureCheckmark included={feature.included} />
-                      <span className={cn(
-                        "ml-3",
-                        !feature.included && "text-muted-foreground"
-                      )}>
-                        {feature.name}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              
-              <CardFooter className="pt-4">
-                <Button
-                  onClick={() => handleSubscription(plan)}
-                  variant={plan.highlighted ? "default" : "outline"}
-                  className="w-full"
-                  disabled={loadingPlan === plan.id}
-                >
-                  {loadingPlan === plan.id ? (
-                    <span className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      Processing...
-                    </span>
-                  ) : plan.ctaText}
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="mt-16 text-center max-w-2xl mx-auto">
-        <h3 className="text-2xl font-semibold mb-4">100% Satisfaction Guarantee</h3>
-        <p className="text-muted-foreground">
-          We're confident you'll love our platform. If you're not completely satisfied within 14 days, we'll refund your subscription - no questions asked.
-        </p>
-      </div>
-    </div>
+    </Layout>
   );
 };
 

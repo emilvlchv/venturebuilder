@@ -21,6 +21,7 @@ interface PricingPlan {
   name: string;
   description: string;
   price: number;
+  annualPrice?: number;
   interval: 'month' | 'year';
   features: PlanFeature[];
   popular?: boolean;
@@ -50,6 +51,7 @@ const pricingPlans: PricingPlan[] = [
     name: 'Premium',
     description: 'Everything you need for serious entrepreneurs',
     price: 29,
+    annualPrice: 27.55, // 5% discount
     interval: 'month',
     features: [
       { name: 'Personalized journey', included: true },
@@ -64,10 +66,11 @@ const pricingPlans: PricingPlan[] = [
     buttonText: 'Subscribe Now'
   },
   {
-    id: 'annual',
-    name: 'Annual',
+    id: 'accelerate',
+    name: 'Accelerate',
     description: 'Best value for committed founders',
-    price: 19,
+    price: 39,
+    annualPrice: 37.05, // 5% discount
     interval: 'month',
     features: [
       { name: 'Personalized journey', included: true },
@@ -78,13 +81,14 @@ const pricingPlans: PricingPlan[] = [
       { name: 'Priority support', included: true },
       { name: 'Premium courses', included: true },
     ],
-    buttonText: 'Subscribe Annually'
+    buttonText: 'Subscribe Now'
   }
 ];
 
 const Subscription = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
+  const [annualBilling, setAnnualBilling] = useState<boolean>(false);
 
   const handleSubscription = async (planId: string) => {
     setLoading(planId);
@@ -130,6 +134,23 @@ const Subscription = () => {
         </p>
       </div>
 
+      <div className="flex justify-center mb-8">
+        <div className="bg-muted p-1 rounded-lg inline-flex items-center">
+          <button
+            onClick={() => setAnnualBilling(false)}
+            className={`px-4 py-2 rounded-md ${!annualBilling ? 'bg-white shadow-sm' : ''}`}
+          >
+            Monthly billing
+          </button>
+          <button
+            onClick={() => setAnnualBilling(true)}
+            className={`px-4 py-2 rounded-md ${annualBilling ? 'bg-white shadow-sm' : ''}`}
+          >
+            Annual billing <span className="text-green-600 font-medium">(-5%)</span>
+          </button>
+        </div>
+      </div>
+
       <Alert className="max-w-3xl mx-auto mb-8">
         <Info className="h-4 w-4" />
         <AlertTitle>Secure payments powered by Stripe</AlertTitle>
@@ -150,10 +171,10 @@ const Subscription = () => {
               <CardTitle>{plan.name}</CardTitle>
               <CardDescription>{plan.description}</CardDescription>
               <div className="mt-4">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">/{plan.interval}</span>
-                {plan.id === 'annual' && (
-                  <span className="ml-2 text-sm text-green-600">Save 35%</span>
+                <span className="text-4xl font-bold">${annualBilling && plan.annualPrice ? plan.annualPrice : plan.price}</span>
+                <span className="text-muted-foreground">/month</span>
+                {annualBilling && plan.price > 0 && (
+                  <div className="text-sm text-green-600 mt-1">Save 5% with annual billing</div>
                 )}
               </div>
             </CardHeader>

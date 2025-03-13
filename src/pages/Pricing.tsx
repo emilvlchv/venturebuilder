@@ -20,6 +20,7 @@ interface PricingPlan {
   icon: React.ReactNode;
   description: string;
   price: number;
+  annualPrice?: number;
   currency: string;
   billingPeriod: string;
   features: PricingFeature[];
@@ -27,6 +28,7 @@ interface PricingPlan {
   badge?: string;
   ctaText: string;
   priceId: string;
+  annualPriceId?: string;
 }
 
 const pricingPlans: PricingPlan[] = [
@@ -37,7 +39,7 @@ const pricingPlans: PricingPlan[] = [
     description: 'Perfect for exploring entrepreneurship basics',
     price: 0,
     currency: '$',
-    billingPeriod: 'forever',
+    billingPeriod: 'month',
     features: [
       { name: 'Basic personalized journey', included: true },
       { name: 'Limited access to learning materials', included: true },
@@ -57,8 +59,9 @@ const pricingPlans: PricingPlan[] = [
     icon: <Rocket className="h-6 w-6 text-purple-500" />,
     description: 'For serious entrepreneurs ready to scale',
     price: 29,
+    annualPrice: 27.55, // 5% discount
     currency: '$',
-    billingPeriod: 'per month',
+    billingPeriod: 'month',
     features: [
       { name: 'Advanced personalized journey', included: true },
       { name: 'Full access to learning materials', included: true },
@@ -72,16 +75,18 @@ const pricingPlans: PricingPlan[] = [
     highlighted: true,
     badge: 'Most Popular',
     ctaText: 'Subscribe Now',
-    priceId: 'price_growth_monthly'
+    priceId: 'price_growth_monthly',
+    annualPriceId: 'price_growth_yearly'
   },
   {
     id: 'accelerate',
     name: 'Accelerate',
     icon: <Crown className="h-6 w-6 text-amber-500" />,
     description: 'Complete support system for rapid growth',
-    price: 299,
+    price: 39,
+    annualPrice: 37.05, // 5% discount
     currency: '$',
-    billingPeriod: 'per year',
+    billingPeriod: 'month',
     features: [
       { name: 'Advanced personalized journey', included: true },
       { name: 'Full access to learning materials', included: true },
@@ -93,8 +98,9 @@ const pricingPlans: PricingPlan[] = [
       { name: 'Exclusive networking events', included: true },
     ],
     badge: 'Best Value',
-    ctaText: 'Subscribe Annually',
-    priceId: 'price_accelerate_yearly'
+    ctaText: 'Subscribe Now',
+    priceId: 'price_accelerate_monthly',
+    annualPriceId: 'price_accelerate_yearly'
   },
 ];
 
@@ -109,13 +115,15 @@ const FeatureCheckmark = ({ included }: { included: boolean }) => (
 const Pricing = () => {
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = React.useState<string | null>(null);
+  const [annualBilling, setAnnualBilling] = React.useState<boolean>(false);
 
   const handleSubscription = async (plan: PricingPlan) => {
     setLoadingPlan(plan.id);
     
     try {
       // In a real implementation, this would create a checkout session and redirect
-      await createCheckoutSession(plan.priceId);
+      const priceId = annualBilling && plan.annualPriceId ? plan.annualPriceId : plan.priceId;
+      await createCheckoutSession(priceId);
       
       if (plan.id === 'starter') {
         toast({
@@ -148,6 +156,23 @@ const Pricing = () => {
         <p className="text-xl text-muted-foreground">
           Choose a plan that fits your ambition level and access the tools, guidance, and community you need.
         </p>
+      </div>
+
+      <div className="flex justify-center mb-8">
+        <div className="bg-muted p-1 rounded-lg inline-flex items-center">
+          <button
+            onClick={() => setAnnualBilling(false)}
+            className={`px-4 py-2 rounded-md ${!annualBilling ? 'bg-white shadow-sm' : ''}`}
+          >
+            Monthly billing
+          </button>
+          <button
+            onClick={() => setAnnualBilling(true)}
+            className={`px-4 py-2 rounded-md ${annualBilling ? 'bg-white shadow-sm' : ''}`}
+          >
+            Annual billing <span className="text-green-600 font-medium">(-5%)</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -184,12 +209,15 @@ const Pricing = () => {
                 <CardDescription className="mt-1.5">{plan.description}</CardDescription>
                 <div className="mt-6 flex items-baseline justify-center">
                   <span className="text-5xl font-extrabold tracking-tight">
-                    {plan.currency}{plan.price}
+                    {plan.currency}{annualBilling && plan.annualPrice ? plan.annualPrice : plan.price}
                   </span>
                   <span className="ml-1 text-muted-foreground">
                     /{plan.billingPeriod}
                   </span>
                 </div>
+                {annualBilling && plan.price > 0 && (
+                  <p className="mt-1 text-sm text-green-600">Billed annually (5% discount)</p>
+                )}
               </CardHeader>
               
               <CardContent className="flex-grow">

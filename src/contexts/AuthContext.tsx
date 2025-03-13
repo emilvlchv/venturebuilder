@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type User = {
@@ -10,15 +9,26 @@ type User = {
   businessIdea?: string;
 };
 
+type SubscriptionStatus = 'active' | 'trial' | 'expired' | 'none';
+
+type Subscription = {
+  status: SubscriptionStatus;
+  planId?: string;
+  trialEnd?: string;
+  renewalDate?: string;
+};
+
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  subscription: Subscription;
   login: (email: string, password: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<void>;
   logout: () => void;
   updateUserInfo: (data: Partial<User>) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  startFreeTrial: () => Promise<void>;
 };
 
 type SignupData = {
@@ -42,12 +52,40 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Subscription>({ status: 'none' });
 
   useEffect(() => {
     // Check if user is logged in from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+      
+      // Check for subscription info
+      const subscriptionData = localStorage.getItem('userSubscription');
+      
+      if (subscriptionData) {
+        try {
+          const parsedSubscription = JSON.parse(subscriptionData);
+          // Validate trial end date if in trial
+          if (parsedSubscription.status === 'trial' && parsedSubscription.trialEnd) {
+            const trialEnd = new Date(parsedSubscription.trialEnd);
+            if (trialEnd < new Date()) {
+              // Trial has expired
+              setSubscription({ status: 'expired' });
+              localStorage.setItem('userSubscription', JSON.stringify({ status: 'expired' }));
+            } else {
+              setSubscription(parsedSubscription);
+            }
+          } else {
+            setSubscription(parsedSubscription);
+          }
+        } catch (error) {
+          console.error('Error parsing subscription data:', error);
+          setSubscription({ status: 'none' });
+        }
+      } else {
+        setSubscription({ status: 'none' });
+      }
     }
     setIsLoading(false);
   }, []);
@@ -188,9 +226,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const startFreeTrial = async () => {
+    try {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Create a trial subscription for 7 days
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + 7);
+      
+      const trialSubscription = {
+        status: 'trial' as SubscriptionStatus,
+        planId: 'starter',
+        trialEnd: trialEnd.toISOString()
+      };
+      
+      localStorage.setItem('userSubscription', JSON.stringify(trialSubscription));
+      setSubscription(trialSubscription);
+      
+      return trialSubscription;
+    } catch (error) {
+      console.error('Error starting free trial:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    // Also clear subscription data
+    setSubscription({ status: 'none' });
   };
 
   return (
@@ -199,11 +263,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isLoading,
+        subscription,
         login,
         signup,
         logout,
         updateUserInfo,
-        updatePassword
+        updatePassword,
+        startFreeTrial
       }}
     >
       {children}

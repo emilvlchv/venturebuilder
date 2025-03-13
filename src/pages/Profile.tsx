@@ -3,12 +3,13 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { UserProfileSettings } from '@/components/profile/UserProfileSettings';
 import { BusinessIdeaForm } from '@/components/profile/BusinessIdeaForm';
+import { SubscriptionDisplay } from '@/components/profile/SubscriptionDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, subscription } = useAuth();
 
   if (!user) {
     return null;
@@ -21,9 +22,10 @@ const Profile = () => {
         <p className="text-muted-foreground mb-8">Manage your account settings and business ideas</p>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="profile">Profile Settings</TabsTrigger>
             <TabsTrigger value="business">Business Idea</TabsTrigger>
+            <TabsTrigger value="subscription">Subscription</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
@@ -36,6 +38,10 @@ const Profile = () => {
             <Card className="p-6">
               <BusinessIdeaForm />
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="subscription">
+            <SubscriptionDisplay subscription={subscription} />
           </TabsContent>
         </Tabs>
       </div>

@@ -7,27 +7,43 @@ const stripePromise = loadStripe('pk_test_51NZWEBLGBBQvbNbxNQZvxbHZB3wDMOgr62jqF
 
 export { stripePromise };
 
-// In a real application, this function would create a Stripe checkout session
+// Create a checkout session and redirect to Stripe Checkout
 export const createCheckoutSession = async (priceId: string) => {
-  // This would make a call to your backend, which would create a Stripe checkout session
-  // const response = await fetch('/api/create-checkout-session', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     priceId,
-  //   }),
-  // });
-  
-  // const { sessionId } = await response.json();
-  // const stripe = await stripePromise;
-  // stripe?.redirectToCheckout({ sessionId });
-  
-  console.log('Processing payment for price ID:', priceId);
-  
-  // For now, we'll just return true to simulate success
-  return true;
+  try {
+    // In a real application, this would call your backend API
+    // For demo purposes, we're using Stripe Checkout redirect
+    const stripe = await stripePromise;
+    
+    if (!stripe) {
+      throw new Error('Stripe failed to load');
+    }
+    
+    console.log('Creating checkout session for price ID:', priceId);
+    
+    // In a production app, this would be a server call to create a checkout session
+    // For this demo, we're using Stripe's redirect to checkout with the price ID
+    const { error } = await stripe.redirectToCheckout({
+      lineItems: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      successUrl: `${window.location.origin}/subscription?success=true`,
+      cancelUrl: `${window.location.origin}/pricing?canceled=true`,
+    });
+    
+    if (error) {
+      console.error('Stripe checkout error:', error);
+      throw new Error(error.message);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw error;
+  }
 };
 
 // Function to format currency

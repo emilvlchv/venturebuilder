@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
@@ -66,29 +67,7 @@ const Navbar = () => {
   };
 
   const goToProfile = () => {
-    console.log("Navigating to profile");
     navigate('/profile');
-  };
-
-  const NavLink = ({ path, name }: { path: string; name: string }) => {
-    const isActive = location.pathname === path;
-    
-    return (
-      <Link
-        to={path}
-        className={cn(
-          'px-4 py-2 rounded-lg transition-all duration-200 relative',
-          isActive 
-            ? 'text-primary font-medium' 
-            : 'text-foreground/80 hover:text-foreground hover:bg-accent'
-        )}
-      >
-        {name}
-        {isActive && (
-          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
-        )}
-      </Link>
-    );
   };
 
   const getUserInitials = () => {
@@ -134,19 +113,17 @@ const Navbar = () => {
           {/* CTA Button - Fixed to always show authenticated state properly */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="flex items-center">
-                {/* Make the entire profile button clickable independently of dropdown */}
-                <div 
+              <div className="flex items-center gap-2">
+                {/* Separate My Account button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
                   onClick={goToProfile}
-                  className="flex items-center mr-2 px-4 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                  icon={<User size={16} />}
+                  className="font-medium"
                 >
-                  <Avatar className="h-6 w-6 mr-2">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{user?.firstName || 'Profile'}</span>
-                </div>
+                  My Account
+                </Button>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -154,7 +131,7 @@ const Navbar = () => {
                       <Settings size={16} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
                       <p className="text-xs text-muted-foreground">@{user?.username}</p>
@@ -203,11 +180,8 @@ const Navbar = () => {
           <div className="md:hidden flex items-center space-x-2">
             {isAuthenticated && (
               <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
+                <User size={16} className="mr-1" />
+                <span>My Account</span>
               </Button>
             )}
             <button
@@ -241,7 +215,7 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <div className="px-4 py-2 border-t border-border mt-2 pt-4">
-                    <div className="flex items-center space-x-2 mb-4 cursor-pointer" onClick={goToProfile}>
+                    <div className="flex items-center space-x-2 mb-4">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <User size={20} />
                       </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, MessageSquare, CalendarDays } from 'lucide-react';
+import { User, MessageSquare, CalendarDays, ThumbsUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CommunityCardProps {
@@ -18,6 +18,9 @@ interface CommunityCardProps {
     comments?: number;
     likes?: number;
   };
+  likes?: number;
+  comments?: number;
+  image?: string;
   className?: string;
 }
 
@@ -29,6 +32,9 @@ const CommunityCard = ({
   description,
   tags = [],
   engagement,
+  likes,
+  comments,
+  image,
   className,
 }: CommunityCardProps) => {
   
@@ -109,12 +115,21 @@ const CommunityCard = ({
           {date}
         </div>
         
-        {engagement && engagement.comments !== undefined && (
-          <div className="flex items-center">
-            <MessageSquare size={14} className="mr-1" />
-            {engagement.comments} comment{engagement.comments !== 1 ? 's' : ''}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {(likes !== undefined || (engagement && engagement.likes !== undefined)) && (
+            <div className="flex items-center">
+              <ThumbsUp size={14} className="mr-1" />
+              {likes !== undefined ? likes : engagement?.likes} like{(likes !== undefined ? likes : engagement?.likes) !== 1 ? 's' : ''}
+            </div>
+          )}
+          
+          {(comments !== undefined || (engagement && engagement.comments !== undefined)) && (
+            <div className="flex items-center">
+              <MessageSquare size={14} className="mr-1" />
+              {comments !== undefined ? comments : engagement?.comments} comment{(comments !== undefined ? comments : engagement?.comments) !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

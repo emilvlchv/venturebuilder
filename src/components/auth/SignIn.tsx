@@ -20,9 +20,16 @@ const signInSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // If user is already authenticated, redirect to journey page
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/journey');
+    }
+  }, [isAuthenticated, navigate]);
   
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),

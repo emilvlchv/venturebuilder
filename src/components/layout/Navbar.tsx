@@ -23,6 +23,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,6 +31,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -64,6 +66,10 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
   };
 
   const goToProfile = () => {
@@ -148,7 +154,7 @@ const Navbar = () => {
                       Subscription
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
                       <LogOut size={16} className="mr-2" />
                       Logout
                     </DropdownMenuItem>

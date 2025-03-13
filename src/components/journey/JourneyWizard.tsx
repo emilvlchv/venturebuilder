@@ -166,13 +166,14 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
           <div className="space-y-6">
             {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Click below to view your roadmap and begin your journey.")}
             <div className="ml-11">
-              <button 
+              <Button 
                 onClick={handleViewJourney}
-                className="inline-flex items-center justify-center rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 button-hover px-4 py-2 text-base bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                variant="primary"
+                icon={<ArrowRight size={16} />}
+                iconPosition="right"
               >
                 View My Journey
-                <span className="ml-2"><ArrowRight size={16} /></span>
-              </button>
+              </Button>
             </div>
           </div>
         );
@@ -190,7 +191,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
         </div>
       </div>
       
-      {/* For testing and debugging only - uncomment to use */}
+      {/* Debug Controls - Remove in production */}
       <div className="mt-4 p-2 bg-orange-100 text-orange-800 rounded-md text-xs">
         <p>Debug Controls (Remove in production)</p>
         <div className="flex gap-2 mt-1">

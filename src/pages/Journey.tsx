@@ -6,11 +6,17 @@ import JourneyWizard, { BusinessIdeaData } from '@/components/journey/JourneyWiz
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
+import { PenLine } from 'lucide-react';
+import Button from '@/components/shared/Button';
+import { useToast } from '@/hooks/use-toast';
 
 const Journey = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [hasCompletedInitialChat, setHasCompletedInitialChat] = useState(false);
   const [businessData, setBusinessData] = useState<BusinessIdeaData | null>(null);
+  const [editingField, setEditingField] = useState<keyof BusinessIdeaData | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   // Load user data on component mount
   useEffect(() => {
@@ -50,6 +56,108 @@ const Journey = () => {
     }
   };
 
+  const handleEditClick = (field: keyof BusinessIdeaData) => {
+    if (businessData) {
+      setEditingField(field);
+      setEditValue(businessData[field] as string);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingField || !businessData) return;
+    
+    try {
+      // Create updated business data
+      const updatedBusinessData = {
+        ...businessData,
+        [editingField]: editValue
+      };
+      
+      // Update in state
+      setBusinessData(updatedBusinessData);
+      
+      // Save to localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      currentUser.businessData = updatedBusinessData;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      
+      // Update users array if needed
+      if (user?.id) {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex((u: any) => u.id === user.id);
+        if (userIndex !== -1) {
+          users[userIndex].businessData = updatedBusinessData;
+          localStorage.setItem('users', JSON.stringify(users));
+        }
+      }
+      
+      toast({
+        title: "Update Successful",
+        description: "Your business information has been updated."
+      });
+      
+      // Reset editing state
+      setEditingField(null);
+    } catch (error) {
+      console.error("Error updating business data:", error);
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating your information. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingField(null);
+  };
+
+  const renderFieldContent = (field: keyof BusinessIdeaData, label: string) => {
+    if (!businessData) return null;
+    
+    const displayValue = businessData[field] as string;
+    const isEditing = editingField === field;
+    
+    return (
+      <div>
+        <div className="flex justify-between items-center">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          {!isEditing && (
+            <Button 
+              onClick={() => handleEditClick(field)}
+              variant="ghost" 
+              size="sm"
+              icon={<PenLine size={14} />}
+              aria-label={`Edit ${label.toLowerCase()}`}
+            >
+              Edit
+            </Button>
+          )}
+        </div>
+        
+        {isEditing ? (
+          <div className="space-y-2">
+            <textarea
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              className="w-full p-2 border rounded-md min-h-[80px]"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleSaveEdit}>
+                Save
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <p>{displayValue}</p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -77,26 +185,11 @@ const Journey = () => {
                       <CardContent className="pt-6">
                         <h3 className="text-xl font-semibold mb-4">Your Business Summary</h3>
                         <div className="space-y-4">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Business Idea</p>
-                            <p>{businessData.businessIdea}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Team Composition</p>
-                            <p>{businessData.teamComposition}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Team Strengths</p>
-                            <p>{businessData.teamStrengths}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Areas for Improvement</p>
-                            <p>{businessData.teamWeaknesses}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Target Customers</p>
-                            <p>{businessData.targetCustomers}</p>
-                          </div>
+                          {renderFieldContent('businessIdea', 'Business Idea')}
+                          {renderFieldContent('teamComposition', 'Team Composition')}
+                          {renderFieldContent('teamStrengths', 'Team Strengths')}
+                          {renderFieldContent('teamWeaknesses', 'Areas for Improvement')}
+                          {renderFieldContent('targetCustomers', 'Target Customers')}
                         </div>
                       </CardContent>
                     </Card>

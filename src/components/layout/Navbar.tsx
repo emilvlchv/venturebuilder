@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
@@ -22,6 +21,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -90,6 +90,11 @@ const Navbar = () => {
     );
   };
 
+  const getUserInitials = () => {
+    if (!user) return "U";
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+  };
+
   return (
     <header
       className={cn(
@@ -131,8 +136,12 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="cursor-pointer">
-                    <User size={16} className="mr-2" />
-                    {user?.firstName || 'Profile'}
+                    <Avatar className="h-6 w-6 mr-2">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="cursor-pointer" onClick={goToProfile}>{user?.firstName || 'Profile'}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -183,7 +192,11 @@ const Navbar = () => {
           <div className="md:hidden flex items-center space-x-2">
             {isAuthenticated && (
               <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
-                <User size={16} />
+                <Avatar className="h-6 w-6">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
               </Button>
             )}
             <button

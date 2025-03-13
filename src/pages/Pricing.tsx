@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Crown, Rocket, Leaf } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { createCheckoutSession } from '@/lib/stripe';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/layout/Layout';
 
@@ -116,6 +117,7 @@ const FeatureCheckmark = ({ included }: { included: boolean }) => (
 
 const Pricing = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = React.useState<string | null>(null);
   const [annualBilling, setAnnualBilling] = React.useState<boolean>(false);
 
@@ -123,20 +125,30 @@ const Pricing = () => {
     setLoadingPlan(plan.id);
     
     try {
+      // Instead of directly calling createCheckoutSession, navigate to payment page
       const priceId = annualBilling && plan.annualPriceId ? plan.annualPriceId : plan.priceId;
-      await createCheckoutSession(priceId);
       
-      if (plan.id === 'starter') {
-        toast({
-          title: "Free plan activated",
-          description: "You now have access to our free tier. Enjoy your journey!",
-        });
-      } else {
-        toast({
-          title: "Subscription process initiated",
-          description: "You'll be redirected to complete your payment shortly.",
-        });
-      }
+      // Navigate to payment page with the selected plan info
+      navigate('/payment', {
+        state: {
+          plan: {
+            id: plan.id,
+            name: plan.name,
+            price: plan.price,
+            priceId: plan.priceId,
+            annualPrice: plan.annualPrice,
+            annualPriceId: plan.annualPriceId,
+            isAnnual: annualBilling
+          }
+        }
+      });
+      
+      // Show toast notification
+      toast({
+        title: "Preparing checkout",
+        description: "You're being redirected to complete your subscription.",
+      });
+      
     } catch (error) {
       toast({
         title: "Something went wrong",

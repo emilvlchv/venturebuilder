@@ -14,6 +14,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import Pricing from "./pages/Pricing";
+import Payment from "./pages/Payment";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
@@ -50,6 +51,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -125,7 +125,7 @@ const Navbar = () => {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {/* CTA Button */}
+          {/* CTA Button - Fixed to always show authenticated state properly */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <DropdownMenu>
@@ -182,13 +182,20 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden focus:outline-none"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden flex items-center space-x-2">
+            {isAuthenticated && (
+              <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
+                <User size={16} />
+              </Button>
+            )}
+            <button
+              onClick={toggleMenu}
+              className="focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}

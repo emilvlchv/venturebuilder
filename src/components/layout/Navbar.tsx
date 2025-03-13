@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, MessageSquare } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,16 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -83,7 +93,7 @@ const Navbar = () => {
         scrolled ? 'bg-background/80 shadow-sm' : 'bg-transparent'
       )}
     >
-      <div className="container-padding py-4">
+      <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
@@ -94,11 +104,22 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <NavLink key={link.name} path={link.path} name={link.name} />
-            ))}
-          </nav>
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+              {navLinks.map((link) => (
+                <NavigationMenuItem key={link.name}>
+                  <Link to={link.path}>
+                    <NavigationMenuLink className={cn(
+                      navigationMenuTriggerStyle(),
+                      location.pathname === link.path && "bg-accent/80 text-accent-foreground font-medium"
+                    )}>
+                      {link.name}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
@@ -168,7 +189,12 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className="px-4 py-3 rounded-lg hover:bg-accent"
+                  className={cn(
+                    "px-4 py-3 rounded-lg",
+                    location.pathname === link.path 
+                      ? "bg-accent text-accent-foreground font-medium" 
+                      : "hover:bg-accent/50"
+                  )}
                 >
                   {link.name}
                 </Link>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,8 @@ const pricingPlans: PricingPlan[] = [
     name: 'Starter',
     icon: <Leaf className="h-6 w-6 text-green-500" />,
     description: 'Perfect for exploring entrepreneurship basics',
-    price: 0,
+    price: 10,
+    annualPrice: 9.5, // 5% discount
     currency: '$',
     billingPeriod: 'month',
     features: [
@@ -50,8 +50,9 @@ const pricingPlans: PricingPlan[] = [
       { name: 'Premium courses', included: false },
       { name: 'Networking events', included: false },
     ],
-    ctaText: 'Get Started Free',
-    priceId: 'free_tier'
+    ctaText: 'Subscribe Now',
+    priceId: 'price_starter_monthly',
+    annualPriceId: 'price_starter_yearly'
   },
   {
     id: 'growth',
@@ -121,7 +122,6 @@ const Pricing = () => {
     setLoadingPlan(plan.id);
     
     try {
-      // In a real implementation, this would create a checkout session and redirect
       const priceId = annualBilling && plan.annualPriceId ? plan.annualPriceId : plan.priceId;
       await createCheckoutSession(priceId);
       

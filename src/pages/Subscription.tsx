@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,10 +29,11 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
   {
-    id: 'free',
-    name: 'Free',
+    id: 'starter',
+    name: 'Starter',
     description: 'Basic features for getting started',
-    price: 0,
+    price: 10,
+    annualPrice: 9.5, // 5% discount
     interval: 'month',
     features: [
       { name: 'Personalized journey', included: true },
@@ -44,7 +44,7 @@ const pricingPlans: PricingPlan[] = [
       { name: 'Priority support', included: false },
       { name: 'Premium courses', included: false },
     ],
-    buttonText: 'Get Started'
+    buttonText: 'Subscribe Now'
   },
   {
     id: 'premium',

@@ -31,6 +31,25 @@ const Journey = () => {
     }
   }, [user?.id]);
 
+  const handleJourneyComplete = () => {
+    console.log("Journey complete callback triggered");
+    // Mark initial chat as completed when user finishes
+    if (user?.id) {
+      localStorage.setItem(`journey_initial_chat_${user.id}`, 'completed');
+    }
+    setHasCompletedInitialChat(true);
+    
+    // Reload business data
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser.businessData) {
+        setBusinessData(currentUser.businessData);
+      }
+    } catch (error) {
+      console.error("Error loading updated business data:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -103,23 +122,7 @@ const Journey = () => {
             </SubscriptionCheck>
           ) : (
             /* This is shown to all users - the initial chat to get their business idea */
-            <JourneyWizard onComplete={() => {
-              // Mark initial chat as completed when user finishes
-              if (user?.id) {
-                localStorage.setItem(`journey_initial_chat_${user.id}`, 'completed');
-              }
-              setHasCompletedInitialChat(true);
-              
-              // Reload business data
-              try {
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                if (currentUser.businessData) {
-                  setBusinessData(currentUser.businessData);
-                }
-              } catch (error) {
-                console.error("Error loading updated business data:", error);
-              }
-            }} />
+            <JourneyWizard onComplete={handleJourneyComplete} />
           )}
         </div>
       </main>

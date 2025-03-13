@@ -15,7 +15,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-const Button = ({
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   children,
   variant = 'primary',
   size = 'md',
@@ -26,7 +26,7 @@ const Button = ({
   className,
   disabled,
   ...props
-}: ButtonProps) => {
+}, ref) => {
   // Base styles
   const baseStyles = 'inline-flex items-center justify-center rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 button-hover disabled:opacity-50 disabled:pointer-events-none';
   
@@ -52,6 +52,7 @@ const Button = ({
 
   return (
     <button
+      ref={ref}
       className={cn(
         baseStyles,
         sizeStyles[size],
@@ -75,6 +76,9 @@ const Button = ({
       ) : null}
     </button>
   );
-};
+});
+
+// Add display name for better debugging
+Button.displayName = 'Button';
 
 export default Button;

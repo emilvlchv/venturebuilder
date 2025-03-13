@@ -210,12 +210,12 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       )}
       
       {/* For testing purposes - uncomment to enable quick testing */}
-      {/* <button 
+      <button 
         onClick={handleSkipToEnd}
         className="mt-4 p-2 bg-orange-500 text-white rounded"
       >
         Skip to End (Testing Only)
-      </button> */}
+      </button>
     </div>
   );
 };

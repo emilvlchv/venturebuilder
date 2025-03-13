@@ -41,6 +41,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   }, [currentStep]);
   
   const handleStartChat = () => {
+    console.log("Starting chat...");
     setCurrentStep('chat');
   };
   
@@ -67,21 +68,25 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     try {
       // Store in local storage for demo purposes
       if (businessData.businessIdea) {
-        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-        if (userId) {
-          // Update user's business idea and other data
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const userIndex = users.findIndex((u: any) => u.id === userId);
-          if (userIndex !== -1) {
-            users[userIndex].businessIdea = businessData.businessIdea;
-            users[userIndex].businessData = businessData;
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            // Update current user
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            currentUser.businessIdea = businessData.businessIdea;
-            currentUser.businessData = businessData;
-            localStorage.setItem('user', JSON.stringify(currentUser));
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          const userId = user.id;
+          if (userId) {
+            // Update user's business idea and other data
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex((u: any) => u.id === userId);
+            if (userIndex !== -1) {
+              users[userIndex].businessIdea = businessData.businessIdea;
+              users[userIndex].businessData = businessData;
+              localStorage.setItem('users', JSON.stringify(users));
+              
+              // Update current user
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              currentUser.businessIdea = businessData.businessIdea;
+              currentUser.businessData = businessData;
+              localStorage.setItem('user', JSON.stringify(currentUser));
+            }
           }
         }
       }
@@ -161,14 +166,13 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
           <div className="space-y-6">
             {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Click below to view your roadmap and begin your journey.")}
             <div className="ml-11">
-              <Button 
-                onClick={handleViewJourney} 
-                icon={<ArrowRight size={16} />} 
-                iconPosition="right"
-                variant="primary"
+              <button 
+                onClick={handleViewJourney}
+                className="inline-flex items-center justify-center rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 button-hover px-4 py-2 text-base bg-primary text-primary-foreground shadow hover:bg-primary/90"
               >
                 View My Journey
-              </Button>
+                <span className="ml-2"><ArrowRight size={16} /></span>
+              </button>
             </div>
           </div>
         );
@@ -183,6 +187,19 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
       <div className="glass rounded-2xl p-6 md:p-8">
         <div className="space-y-10">
           {renderStepContent()}
+        </div>
+      </div>
+      
+      {/* For testing and debugging only - uncomment to use */}
+      <div className="mt-4 p-2 bg-orange-100 text-orange-800 rounded-md text-xs">
+        <p>Debug Controls (Remove in production)</p>
+        <div className="flex gap-2 mt-1">
+          <button 
+            onClick={() => setCurrentStep('complete')}
+            className="px-2 py-1 bg-orange-500 text-white rounded-md text-xs"
+          >
+            Force Complete Step
+          </button>
         </div>
       </div>
     </div>

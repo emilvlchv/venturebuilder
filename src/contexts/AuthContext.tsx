@@ -7,6 +7,7 @@ type User = {
   lastName: string;
   username: string;
   email: string;
+  businessIdea?: string;
 };
 
 type AuthContextType = {
@@ -16,6 +17,8 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<void>;
   logout: () => void;
+  updateUserInfo: (data: Partial<User>) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 };
 
 type SignupData = {
@@ -112,6 +115,79 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUserInfo = async (data: Partial<User>) => {
+    try {
+      setIsLoading(true);
+      if (!user) throw new Error('Not authenticated');
+      
+      // Update user in localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex((u: any) => u.id === user.id);
+      
+      if (userIndex === -1) throw new Error('User not found');
+      
+      // Check if username is being updated and is already taken
+      if (data.username && data.username !== user.username) {
+        const usernameExists = users.some((u: any) => 
+          u.id !== user.id && u.username === data.username
+        );
+        if (usernameExists) throw new Error('Username is already taken');
+      }
+      
+      // Check if email is being updated and is already taken
+      if (data.email && data.email !== user.email) {
+        const emailExists = users.some((u: any) => 
+          u.id !== user.id && u.email === data.email
+        );
+        if (emailExists) throw new Error('Email is already in use');
+      }
+      
+      // Update user data while preserving the password
+      const updatedUser = { ...users[userIndex], ...data };
+      users[userIndex] = updatedUser;
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Update current user state and localStorage
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      setUser({ ...user, ...data });
+      localStorage.setItem('user', JSON.stringify({ ...user, ...data }));
+      
+    } catch (error) {
+      console.error('Update user info error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      setIsLoading(true);
+      if (!user) throw new Error('Not authenticated');
+      
+      // Get users from localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex((u: any) => u.id === user.id);
+      
+      if (userIndex === -1) throw new Error('User not found');
+      
+      // Verify current password
+      if (users[userIndex].password !== currentPassword) {
+        throw new Error('Current password is incorrect');
+      }
+      
+      // Update password
+      users[userIndex].password = newPassword;
+      localStorage.setItem('users', JSON.stringify(users));
+      
+    } catch (error) {
+      console.error('Update password error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -125,7 +201,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         signup,
-        logout
+        logout,
+        updateUserInfo,
+        updatePassword
       }}
     >
       {children}

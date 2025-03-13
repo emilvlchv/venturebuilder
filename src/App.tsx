@@ -16,6 +16,7 @@ import Subscription from "./pages/Subscription";
 import Pricing from "./pages/Pricing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,11 @@ const App = () => (
             <Route path="/subscription" element={
               <ProtectedRoute>
                 <Subscription />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path="/pricing" element={<Pricing />} />

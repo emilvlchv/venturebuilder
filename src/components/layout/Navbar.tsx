@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut, MessageSquare } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -141,6 +141,12 @@ const Navbar = () => {
                     <Link to="/journey" className="cursor-pointer">My Journey</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <Settings size={16} className="mr-2" />
+                      Profile Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/subscription" className="cursor-pointer">Subscription</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -211,14 +217,25 @@ const Navbar = () => {
                         <p className="text-sm text-muted-foreground">@{user?.username}</p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      fullWidth 
-                      onClick={handleLogout}
-                      icon={<LogOut size={16} />}
-                    >
-                      Logout
-                    </Button>
+                    <div className="space-y-2">
+                      <Link to="/profile">
+                        <Button 
+                          variant="outline" 
+                          fullWidth 
+                          icon={<Settings size={16} />}
+                        >
+                          Profile Settings
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        fullWidth 
+                        onClick={handleLogout}
+                        icon={<LogOut size={16} />}
+                      >
+                        Logout
+                      </Button>
+                    </div>
                   </div>
                 </>
               ) : (

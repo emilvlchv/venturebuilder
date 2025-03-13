@@ -1,10 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import JourneyWizard from '@/components/journey/JourneyWizard';
+import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Journey = () => {
+  const { user } = useAuth();
+  const [hasCompletedInitialChat, setHasCompletedInitialChat] = useState(() => {
+    // Check localStorage to see if user has completed the initial chat
+    return localStorage.getItem(`journey_initial_chat_${user?.id}`) === 'completed';
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -17,7 +25,29 @@ const Journey = () => {
             </p>
           </div>
           
-          <JourneyWizard />
+          {hasCompletedInitialChat ? (
+            <SubscriptionCheck>
+              {/* This content is only shown to users with subscriptions */}
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl font-bold mb-6 text-center">Your Personalized Journey</h2>
+                <p className="text-center mb-8">
+                  Based on your business idea, we've created a personalized roadmap to help you succeed.
+                </p>
+                {/* Personalized journey content will go here */}
+                <div className="glass rounded-2xl p-6 md:p-8">
+                  <p className="text-center text-lg mb-4">Your personalized journey is ready!</p>
+                  {/* Additional journey content */}
+                </div>
+              </div>
+            </SubscriptionCheck>
+          ) : (
+            /* This is shown to all users - the initial chat to get their business idea */
+            <JourneyWizard onComplete={() => {
+              // Mark initial chat as completed when user finishes
+              localStorage.setItem(`journey_initial_chat_${user?.id}`, 'completed');
+              setHasCompletedInitialChat(true);
+            }} />
+          )}
         </div>
       </main>
       <Footer />

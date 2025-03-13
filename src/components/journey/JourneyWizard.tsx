@@ -3,15 +3,21 @@ import React, { useState } from 'react';
 import { ChevronRight, Send, User, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'idea' | 'strengths' | 'focus' | 'generating' | 'complete';
 
-const JourneyWizard = () => {
+interface JourneyWizardProps {
+  onComplete?: () => void;
+}
+
+const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [businessIdea, setBusinessIdea] = useState('');
   const [strengths, setStrengths] = useState('');
   const [focus, setFocus] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const navigate = useNavigate();
   
   const handleNextStep = () => {
     switch (currentStep) {
@@ -35,6 +41,38 @@ const JourneyWizard = () => {
         break;
       default:
         break;
+    }
+  };
+  
+  // Function to handle completion of the initial chat
+  const handleComplete = () => {
+    // Save business idea to user profile if available
+    try {
+      // Store in local storage for demo purposes
+      if (businessIdea) {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+        if (userId) {
+          // Update user's business idea
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const userIndex = users.findIndex((u: any) => u.id === userId);
+          if (userIndex !== -1) {
+            users[userIndex].businessIdea = businessIdea;
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Update current user
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            currentUser.businessIdea = businessIdea;
+            localStorage.setItem('user', JSON.stringify(currentUser));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error saving business idea:', error);
+    }
+    
+    // Call the onComplete callback if provided
+    if (onComplete) {
+      onComplete();
     }
   };
   
@@ -190,7 +228,7 @@ const JourneyWizard = () => {
             {renderAssistantMessage("I've created your personalized entrepreneurial journey! It focuses on your specific business idea and leverages your unique strengths. Click below to view your roadmap and begin your journey.")}
             <div className="ml-11">
               <Button 
-                onClick={() => window.location.href = '/journey/roadmap'} 
+                onClick={handleComplete} 
                 icon={<ArrowRight size={16} />} 
                 iconPosition="right"
               >

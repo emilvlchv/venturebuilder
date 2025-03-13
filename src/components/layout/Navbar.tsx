@@ -130,7 +130,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" onClick={goToProfile}>
+                  <Button variant="outline" className="cursor-pointer">
                     <User size={16} className="mr-2" />
                     {user?.firstName || 'Profile'}
                   </Button>
@@ -141,17 +141,15 @@ const Navbar = () => {
                     <p className="text-xs text-muted-foreground">@{user?.username}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/journey" className="cursor-pointer">My Journey</Link>
+                  <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
+                    My Journey
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <Settings size={16} className="mr-2" />
-                      Profile Settings
-                    </Link>
+                  <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
+                    <Settings size={16} className="mr-2" />
+                    Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/subscription" className="cursor-pointer">Subscription</Link>
+                  <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
+                    Subscription
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
@@ -229,15 +227,14 @@ const Navbar = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Link to="/profile">
-                        <Button 
-                          variant="outline" 
-                          fullWidth 
-                          icon={<Settings size={16} />}
-                        >
-                          Profile Settings
-                        </Button>
-                      </Link>
+                      <Button 
+                        variant="outline" 
+                        fullWidth 
+                        icon={<Settings size={16} />}
+                        onClick={goToProfile}
+                      >
+                        Profile Settings
+                      </Button>
                       <Button 
                         variant="outline" 
                         fullWidth 

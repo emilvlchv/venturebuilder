@@ -24,8 +24,7 @@ export const createCheckoutSession = async (priceId: string) => {
   // const stripe = await stripePromise;
   // stripe?.redirectToCheckout({ sessionId });
   
-  // Simulate a network delay for demonstration purposes
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log('Processing payment for price ID:', priceId);
   
   // For now, we'll just return true to simulate success
   return true;

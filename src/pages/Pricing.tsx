@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -125,10 +124,6 @@ const Pricing = () => {
     setLoadingPlan(plan.id);
     
     try {
-      // Instead of directly calling createCheckoutSession, navigate to payment page
-      const priceId = annualBilling && plan.annualPriceId ? plan.annualPriceId : plan.priceId;
-      
-      // Navigate to payment page with the selected plan info
       navigate('/payment', {
         state: {
           plan: {
@@ -141,12 +136,6 @@ const Pricing = () => {
             isAnnual: annualBilling
           }
         }
-      });
-      
-      // Show toast notification
-      toast({
-        title: "Preparing checkout",
-        description: "You're being redirected to complete your subscription.",
       });
       
     } catch (error) {

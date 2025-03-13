@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,24 +53,21 @@ const Payment = () => {
         : state.priceId;
         
       // Call the Stripe checkout function
-      await createCheckoutSession(priceId);
+      const result = await createCheckoutSession(priceId);
       
       toast({
-        title: "Payment initiated",
-        description: "You're being redirected to complete your payment.",
+        title: "Payment successful",
+        description: "Thank you for your subscription!",
       });
       
-      // In a real implementation, createCheckoutSession would redirect to Stripe
-      // For this demo, we'll redirect to the subscription page after a delay
-      setTimeout(() => {
-        navigate('/subscription', { 
-          state: { 
-            success: true, 
-            plan: state.name,
-            isAnnual: state.isAnnual
-          } 
-        });
-      }, 2000);
+      // Navigate to subscription page after successful payment
+      navigate('/subscription', { 
+        state: { 
+          success: true, 
+          plan: state.name,
+          isAnnual: state.isAnnual
+        } 
+      });
     } catch (error) {
       toast({
         title: "Payment failed",

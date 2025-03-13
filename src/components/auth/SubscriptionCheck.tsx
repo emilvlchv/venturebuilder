@@ -5,40 +5,33 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { LockKeyhole } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface SubscriptionCheckProps {
   children: React.ReactNode;
 }
 
 const SubscriptionCheck: React.FC<SubscriptionCheckProps> = ({ children }) => {
-  const { user, subscription, startFreeTrial } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
-  const hasAccess = React.useMemo(() => {
-    return subscription.status === 'active' || subscription.status === 'trial';
-  }, [subscription]);
-
-  const handleStartTrial = async () => {
+  // For this demo, we'll simulate subscription status with localStorage
+  // In a real app, this would come from a backend API or user object
+  const hasSubscription = React.useMemo(() => {
+    // Check if user has an active subscription or is in trial period
+    const subscriptionData = localStorage.getItem('userSubscription');
+    if (!subscriptionData) return false;
+    
     try {
-      await startFreeTrial();
-      toast({
-        title: "Free trial started",
-        description: "Your 7-day free trial has started. Enjoy all premium features!",
-      });
-      // Reload to show the journey
-      window.location.reload();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "There was an error starting your free trial. Please try again.",
-        variant: "destructive",
-      });
+      const subscription = JSON.parse(subscriptionData);
+      // Check if subscription is active or in trial period
+      return subscription.status === 'active' || 
+             (subscription.trialEnd && new Date(subscription.trialEnd) > new Date());
+    } catch (e) {
+      return false;
     }
-  };
+  }, [user?.id]);
 
-  if (!hasAccess) {
+  if (!hasSubscription) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Card className="max-w-md w-full">
@@ -64,7 +57,20 @@ const SubscriptionCheck: React.FC<SubscriptionCheckProps> = ({ children }) => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={handleStartTrial}
+              onClick={() => {
+                // Create a trial subscription for 7 days
+                const trialEnd = new Date();
+                trialEnd.setDate(trialEnd.getDate() + 7);
+                
+                localStorage.setItem('userSubscription', JSON.stringify({
+                  status: 'trial',
+                  trialEnd: trialEnd.toISOString(),
+                  planId: 'starter'
+                }));
+                
+                // Reload the page to show the journey
+                window.location.reload();
+              }}
               className="w-full"
             >
               Start 7-Day Free Trial

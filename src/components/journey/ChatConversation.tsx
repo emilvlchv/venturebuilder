@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User } from 'lucide-react';
 import { BusinessIdeaData } from './JourneyWizard';
@@ -59,7 +60,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     if (!currentInput.trim()) return;
     
     // Add user message to chat
-    const newMessages = [...messages, { sender: 'user' as const, text: currentInput }];
+    const newMessages = [...messages, { sender: 'user', text: currentInput }];
     setMessages(newMessages);
     
     // Store the response based on current question
@@ -96,11 +97,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         // Move to next question
         const nextQuestion = currentQuestion + 1;
         setCurrentQuestion(nextQuestion);
-        setMessages(prev => [...prev, { sender: 'assistant' as const, text: questions[nextQuestion] }]);
+        setMessages(prev => [...prev, { sender: 'assistant', text: questions[nextQuestion] }]);
       } else {
         // Final message before completing
         setMessages(prev => [...prev, { 
-          sender: 'assistant' as const, 
+          sender: 'assistant', 
           text: "Thank you for sharing all this information about your business idea! This will help me create a personalized journey for you. Let me analyze this information now." 
         }]);
         

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings, CreditCard } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,14 +23,13 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, subscription } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -71,26 +70,9 @@ const Navbar = () => {
     navigate('/profile');
   };
 
-  const goToSubscription = () => {
-    navigate('/subscription');
-  };
-
   const getUserInitials = () => {
     if (!user) return "U";
     return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-  };
-
-  const getSubscriptionBadge = () => {
-    switch (subscription.status) {
-      case 'active':
-        return <Badge variant="default">Active</Badge>;
-      case 'trial':
-        return <Badge variant="secondary">Trial</Badge>;
-      case 'expired':
-        return <Badge variant="destructive">Expired</Badge>;
-      default:
-        return <Badge variant="outline">No Plan</Badge>;
-    }
   };
 
   return (
@@ -132,47 +114,41 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {/* Subscription Badge */}
-                <div 
-                  className="cursor-pointer" 
-                  onClick={goToSubscription}
+                {/* Separate My Account button */}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={goToProfile}
+                  icon={<User size={16} />}
+                  className="font-medium"
                 >
-                  {getSubscriptionBadge()}
-                </div>
+                  My Account
+                </Button>
                 
-                {/* User dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="font-medium">
-                      <Avatar className="h-6 w-6 mr-2">
-                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                      </Avatar>
-                      {user?.firstName}
+                    <Button variant="outline" size="sm" className="px-2">
+                      <Settings size={16} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md w-56">
+                  <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
                       <p className="text-xs text-muted-foreground">@{user?.username}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
-                      <MessageSquare size={16} className="mr-2" />
                       My Journey
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
-                      <User size={16} className="mr-2" />
+                      <Settings size={16} className="mr-2" />
                       Profile Settings
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={goToSubscription} className="cursor-pointer">
-                      <CreditCard size={16} className="mr-2" />
+                    <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
                       Subscription
-                      {subscription.status !== 'none' && (
-                        <span className="ml-auto">{getSubscriptionBadge()}</span>
-                      )}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                       <LogOut size={16} className="mr-2" />
                       Logout
                     </DropdownMenuItem>
@@ -203,15 +179,10 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             {isAuthenticated && (
-              <div className="flex items-center gap-2">
-                {/* Mobile subscription badge */}
-                <div 
-                  className="cursor-pointer" 
-                  onClick={goToSubscription}
-                >
-                  {getSubscriptionBadge()}
-                </div>
-              </div>
+              <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
+                <User size={16} className="mr-1" />
+                <span>My Account</span>
+              </Button>
             )}
             <button
               onClick={toggleMenu}
@@ -257,18 +228,10 @@ const Navbar = () => {
                       <Button 
                         variant="outline" 
                         fullWidth 
-                        icon={<User size={16} />}
+                        icon={<Settings size={16} />}
                         onClick={goToProfile}
                       >
                         Profile Settings
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        fullWidth 
-                        icon={<CreditCard size={16} />}
-                        onClick={goToSubscription}
-                      >
-                        Subscription {subscription.status !== 'none' && getSubscriptionBadge()}
                       </Button>
                       <Button 
                         variant="outline" 

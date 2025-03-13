@@ -36,6 +36,7 @@ const Navbar = () => {
     { name: 'Journey', path: '/journey' },
     { name: 'Education', path: '/education' },
     { name: 'Community', path: '/community' },
+    { name: 'About Us', path: '/about' },
   ];
 
   const NavLink = ({ path, name }: { path: string; name: string }) => {

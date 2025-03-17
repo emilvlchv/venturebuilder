@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, AlertTriangle } from 'lucide-react';
-import Button from '../shared/Button';
-import { BusinessIdeaData } from './types';
-import { useAuth } from '@/contexts/AuthContext';
+import { Send, User } from 'lucide-react';
+import { BusinessIdeaData } from './JourneyWizard';
 import { Textarea } from '@/components/ui/textarea';
 
 interface ChatMessage {
@@ -27,23 +25,36 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     teamWeaknesses: '',
     targetCustomers: '',
     revenueModel: '',
+    marketingApproach: '',
+    challengesForeseen: '',
+    startupCosts: '',
+    timelineMilestones: '',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Define the questions to be asked by the AI
   const questions = [
-    "What's your business idea? Please describe it in detail.",
-    "Who is on your team for this business?",
-    "What are the key strengths of you and your team?",
-    "What areas might you need help with?",
-    "Who are your target customers or clients?"
+    "What's your business idea? Please describe it in as much detail as possible, including what product or service you plan to offer.",
+    "Are you working on this idea alone or with a team? If you have a team, how many people are involved and what are their roles?",
+    "What are the key strengths of you and your team members? What skills, experience, or expertise do you bring to this venture?",
+    "What areas do you or your team feel less confident in? Understanding these gaps will help me suggest resources or strategies to address them.",
+    "Who are your target customers or clients? Please describe your ideal customer profile, including demographics, needs, and pain points.",
+    "How do you plan to make money with this business? What pricing model or revenue streams are you considering?",
+    "What marketing channels or approaches do you think would be most effective for reaching your target audience?",
+    "What are the biggest challenges or obstacles you anticipate facing in launching this business?",
+    "Have you estimated your startup costs? What financial resources do you currently have available?",
+    "What's your timeline for launching this business? Do you have any specific milestones or deadlines in mind?",
+    "Is there anything else you'd like to share about your business idea or requirements that might help me create a better personalized journey for you?"
   ];
 
+  // Scroll to bottom of chat whenever new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
+  // Initialize the chat with the first question
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessages([
@@ -54,12 +65,15 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Function to handle sending a user message
   const handleSendMessage = () => {
     if (!currentInput.trim()) return;
     
+    // Add user message to chat
     const newMessages = [...messages, { sender: 'user' as const, text: currentInput }];
     setMessages(newMessages);
     
+    // Store the response based on current question
     const updatedBusinessData = { ...businessData };
     switch (currentQuestion) {
       case 0:
@@ -77,25 +91,49 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       case 4:
         updatedBusinessData.targetCustomers = currentInput;
         break;
+      case 5:
+        updatedBusinessData.revenueModel = currentInput;
+        break;
+      case 6:
+        updatedBusinessData.marketingApproach = currentInput;
+        break;
+      case 7:
+        updatedBusinessData.challengesForeseen = currentInput;
+        break;
+      case 8:
+        updatedBusinessData.startupCosts = currentInput;
+        break;
+      case 9:
+        updatedBusinessData.timelineMilestones = currentInput;
+        break;
+      case 10:
+        updatedBusinessData.additionalInfo = currentInput;
+        break;
     }
     
     setBusinessData(updatedBusinessData);
     setCurrentInput('');
     setIsTyping(true);
     
+    // Add thinking delay to simulate AI response
     setTimeout(() => {
+      // Check if we have more questions
       if (currentQuestion < questions.length - 1) {
+        // Move to next question
         const nextQuestion = currentQuestion + 1;
         setCurrentQuestion(nextQuestion);
         setMessages(prev => [...prev, { sender: 'assistant' as const, text: questions[nextQuestion] }]);
       } else {
+        // Final message before completing
         setMessages(prev => [...prev, { 
           sender: 'assistant' as const, 
-          text: "Thank you for sharing this information about your business idea! I'll create a personalized journey with tasks tailored to your needs." 
+          text: "Thank you for sharing all this information about your business idea! This will help me create a personalized journey with detailed tasks tailored to your specific needs. Let me analyze this information now." 
         }]);
         
+        // Complete the chat after a brief delay
         setTimeout(() => {
           console.log("Chat completed, sending data to parent:", updatedBusinessData);
+          // Make sure to call onComplete with the updated data
           onComplete(updatedBusinessData);
         }, 2000);
       }
@@ -104,7 +142,9 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     }, 1500);
   };
 
+  // For testing: allow skipping to the end
   const handleSkipToEnd = () => {
+    // Only for development/testing to quickly reach the end
     const updatedBusinessData = {
       businessIdea: 'Test business idea',
       teamComposition: 'Solo founder with 2 employees',
@@ -112,12 +152,18 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       teamWeaknesses: 'Finance, legal',
       targetCustomers: 'Small businesses',
       revenueModel: 'SaaS subscription model',
+      marketingApproach: 'Content marketing and social media',
+      challengesForeseen: 'Funding and market competition',
+      startupCosts: '$50,000 initial investment',
+      timelineMilestones: '3 months to MVP, 6 months to market',
+      additionalInfo: 'Need help with initial funding',
     };
     
     console.log("Skipping to end, sending data:", updatedBusinessData);
     onComplete(updatedBusinessData);
   };
 
+  // Handle pressing Enter to send message
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -193,6 +239,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         </div>
       )}
       
+      {/* For testing purposes - uncomment to enable quick testing */}
       <button 
         onClick={handleSkipToEnd}
         className="mt-4 p-2 bg-orange-500 text-white rounded"

@@ -1,21 +1,33 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, Send, User, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
-import { BusinessIdeaData, Journey, JourneyTask } from './types';
-import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
 
-interface JourneyWizardProps {
-  onComplete?: (data: BusinessIdeaData) => void;
-  journeyId?: string;
+// Define the structure for storing conversation data
+export interface BusinessIdeaData {
+  businessIdea: string;
+  teamComposition: string;
+  teamStrengths: string;
+  teamWeaknesses: string;
+  targetCustomers: string;
+  revenueModel?: string;
+  marketingApproach?: string;
+  challengesForeseen?: string;
+  startupCosts?: string;
+  timelineMilestones?: string;
+  additionalInfo?: string;
 }
 
-const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) => {
+interface JourneyWizardProps {
+  onComplete?: () => void;
+}
+
+const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [businessData, setBusinessData] = useState<BusinessIdeaData>({
     businessIdea: '',
@@ -25,7 +37,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     targetCustomers: '',
   });
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   // Debug: Monitor step changes
   useEffect(() => {
@@ -53,139 +64,10 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     }, 3000);
   };
   
-  // Create default tasks for a journey
-  const createDefaultTasks = (userId: string, journeyId: string) => {
-    const tasksKey = `journey_tasks_${userId}_${journeyId}`;
-    const defaultTasks = {
-      ideation: [
-        { id: 'task1', title: 'Research market', completed: false, description: 'Conduct thorough market research to validate your business idea.' },
-        { id: 'task2', title: 'Define target audience', completed: false, description: 'Create detailed customer personas for your target audience.' },
-        { id: 'task3', title: 'Analyze competitors', completed: false, description: 'Identify key competitors and analyze their strengths and weaknesses.' }
-      ],
-      planning: [
-        { id: 'task4', title: 'Create business plan', completed: false, description: 'Develop a comprehensive business plan including financial projections.' },
-        { id: 'task5', title: 'Define pricing model', completed: false, description: 'Establish a pricing strategy that aligns with your target market and business goals.' }
-      ],
-      execution: [
-        { id: 'task6', title: 'Design MVP', completed: false, description: 'Create a minimum viable product to test with early customers.' },
-        { id: 'task7', title: 'Create branding', completed: false, description: 'Develop your brand identity including logo, colors, and messaging.' }
-      ]
-    };
-    
-    // Convert to the expected format with categories for each task
-    const formattedTasks = [
-      {
-        id: 'task1',
-        title: 'Research Market and Validate Business Idea',
-        description: 'Conduct thorough market research to validate your business concept.',
-        status: 'pending',
-        resources: [
-          'Use online surveys to gather customer feedback',
-          'Analyze industry reports for market trends',
-          'Conduct interviews with potential customers'
-        ],
-        categories: [
-          {
-            id: 'cat1',
-            title: 'Market Research',
-            subtasks: [
-              { id: 'subtask1', title: 'Define your target market', completed: false },
-              { id: 'subtask2', title: 'Research competitors', completed: false },
-              { id: 'subtask3', title: 'Identify market gaps', completed: false }
-            ],
-            collapsed: false
-          },
-          {
-            id: 'cat2',
-            title: 'Validation Methods',
-            subtasks: [
-              { id: 'subtask4', title: 'Create customer surveys', completed: false },
-              { id: 'subtask5', title: 'Conduct customer interviews', completed: false },
-              { id: 'subtask6', title: 'Test concept with focus groups', completed: false }
-            ],
-            collapsed: false
-          }
-        ],
-        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
-      },
-      {
-        id: 'task2',
-        title: 'Develop Business Plan',
-        description: 'Create a comprehensive business plan that outlines your strategy, operations, and financials.',
-        status: 'pending',
-        resources: [
-          'Business plan templates',
-          'Financial forecasting tools',
-          'Industry benchmark data'
-        ],
-        categories: [
-          {
-            id: 'cat3',
-            title: 'Strategic Planning',
-            subtasks: [
-              { id: 'subtask7', title: 'Define vision and mission', completed: false },
-              { id: 'subtask8', title: 'Set goals and objectives', completed: false },
-              { id: 'subtask9', title: 'Outline growth strategy', completed: false }
-            ],
-            collapsed: false
-          },
-          {
-            id: 'cat4',
-            title: 'Financial Projections',
-            subtasks: [
-              { id: 'subtask10', title: 'Create sales forecast', completed: false },
-              { id: 'subtask11', title: 'Determine startup costs', completed: false },
-              { id: 'subtask12', title: 'Project cash flow', completed: false }
-            ],
-            collapsed: false
-          }
-        ],
-        deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) // 3 weeks from now
-      },
-      {
-        id: 'task3',
-        title: 'Create Branding and Marketing Strategy',
-        description: 'Develop your brand identity and marketing approach to reach your target audience.',
-        status: 'pending',
-        resources: [
-          'Brand identity guidelines',
-          'Marketing channel comparison',
-          'Content strategy templates'
-        ],
-        categories: [
-          {
-            id: 'cat5',
-            title: 'Brand Development',
-            subtasks: [
-              { id: 'subtask13', title: 'Design logo and visual elements', completed: false },
-              { id: 'subtask14', title: 'Create brand messaging', completed: false },
-              { id: 'subtask15', title: 'Develop brand guidelines', completed: false }
-            ],
-            collapsed: false
-          },
-          {
-            id: 'cat6',
-            title: 'Marketing Channels',
-            subtasks: [
-              { id: 'subtask16', title: 'Identify primary marketing channels', completed: false },
-              { id: 'subtask17', title: 'Create content calendar', completed: false },
-              { id: 'subtask18', title: 'Set marketing budget', completed: false }
-            ],
-            collapsed: false
-          }
-        ],
-        deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000) // 4 weeks from now
-      }
-    ];
-    
-    localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
-    return formattedTasks;
-  };
-  
   // Function to handle completion of the initial chat
   const handleComplete = () => {
     console.log("handleComplete called");
-    
+    // Save business idea to user profile if available
     try {
       // Store in local storage for demo purposes
       if (businessData.businessIdea) {
@@ -210,35 +92,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
             }
           }
         }
-        
-        // If we have a journeyId, update the journey with the business data
-        if (journeyId) {
-          const userData = localStorage.getItem('user');
-          if (userData) {
-            const user = JSON.parse(userData);
-            const userId = user.id;
-            if (userId) {
-              const journeysKey = `journeys_${userId}`;
-              const journeysData = localStorage.getItem(journeysKey);
-              if (journeysData) {
-                const journeys = JSON.parse(journeysData);
-                const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
-                if (journeyIndex !== -1) {
-                  journeys[journeyIndex].businessIdeaData = businessData;
-                  journeys[journeyIndex].progress = 15; // Update progress
-                  journeys[journeyIndex].updatedAt = new Date().toISOString();
-                  localStorage.setItem(journeysKey, JSON.stringify(journeys));
-                  
-                  // Create default tasks for this journey
-                  createDefaultTasks(userId, journeyId);
-                  
-                  // Navigate to journey details page
-                  navigate(`/journey-details/${journeyId}`);
-                }
-              }
-            }
-          }
-        }
       }
     } catch (error) {
       console.error('Error saving business idea:', error);
@@ -246,7 +99,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     
     // Call the onComplete callback if provided
     if (onComplete) {
-      onComplete(businessData);
+      onComplete();
     }
   };
 
@@ -277,7 +130,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       case 'welcome':
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. Ready to begin?")}
+            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. I'll ask you a series of detailed questions to understand your business better and create specific tasks for your needs. Ready to begin?")}
             <div className="ml-11">
               <Button 
                 onClick={handleStartChat} 
@@ -333,6 +186,19 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       <div className="glass rounded-2xl p-6 md:p-8">
         <div className="space-y-10">
           {renderStepContent()}
+        </div>
+      </div>
+      
+      {/* Debug Controls - Remove in production */}
+      <div className="mt-4 p-2 bg-orange-100 text-orange-800 rounded-md text-xs">
+        <p>Debug Controls (Remove in production)</p>
+        <div className="flex gap-2 mt-1">
+          <button 
+            onClick={() => setCurrentStep('complete')}
+            className="px-2 py-1 bg-orange-500 text-white rounded-md text-xs"
+          >
+            Force Complete Step
+          </button>
         </div>
       </div>
     </div>

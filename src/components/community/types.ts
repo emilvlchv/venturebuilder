@@ -1,6 +1,6 @@
 
 export interface CommunityPost {
-  id: number | string;
+  id: number;
   title: string;
   description: string;
   author: {
@@ -13,6 +13,4 @@ export interface CommunityPost {
   comments: number;
   tags: string[];
   image?: string;
-  content?: string;
-  featured?: boolean;
 }

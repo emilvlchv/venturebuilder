@@ -8,7 +8,6 @@ type User = {
   username: string;
   email: string;
   businessIdea?: string;
-  role?: 'admin' | 'user';
 };
 
 type AuthContextType = {
@@ -28,7 +27,6 @@ type SignupData = {
   username: string;
   email: string;
   password: string;
-  role?: 'admin' | 'user';
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,89 +43,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize admin user and regular user
-  const initializeUsers = () => {
-    console.log('Initializing users');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    // Check if admin user already exists
-    const adminExists = users.some((u: any) => u.email === 'admin@example.com');
-    
-    if (!adminExists) {
-      console.log('Admin user does not exist, creating...');
-      const adminUser = {
-        id: 'user_admin',
-        firstName: 'Admin',
-        lastName: 'User',
-        username: 'admin',
-        email: 'admin@example.com',
-        password: 'admin123',
-        role: 'admin'
-      };
-      
-      users.push(adminUser);
-      console.log('Admin user created');
-    } else {
-      console.log('Admin user already exists');
-    }
-    
-    // Check if regular user exists
-    const regularUserExists = users.some((u: any) => u.email === 'user@example.com');
-    
-    if (!regularUserExists) {
-      console.log('Regular user does not exist, creating...');
-      const regularUser = {
-        id: 'user_regular',
-        firstName: 'Regular',
-        lastName: 'User',
-        username: 'user',
-        email: 'user@example.com',
-        password: 'user123',
-        role: 'user',
-        businessIdea: 'E-commerce platform for handmade crafts'
-      };
-      
-      users.push(regularUser);
-      console.log('Regular user created');
-    } else {
-      console.log('Regular user already exists');
-    }
-    
-    localStorage.setItem('users', JSON.stringify(users));
-  };
-
   useEffect(() => {
     // Check if user is logged in from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-    
-    // Initialize users for demo purposes
-    initializeUsers();
-    
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      console.log(`Attempting to login with email: ${email}`);
-      
       // This is a mock login - in a real app, you would call an API
+      // For demo purposes, we'll check if the user exists in localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
-      console.log(`Found ${users.length} users in localStorage`);
-      
       const foundUser = users.find((u: any) => 
         u.email === email && u.password === password
       );
       
       if (!foundUser) {
-        console.error('No matching user found');
         throw new Error('Invalid email or password');
       }
-      
-      console.log('Login successful for user:', foundUser.email);
       
       const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
@@ -156,11 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Username is already taken');
       }
       
-      // Create new user with ID and default role
+      // Create new user with ID
       const newUser = {
         ...userData,
-        id: `user_${Date.now()}`,
-        role: userData.role || 'user' // Default to 'user' role if not specified
+        id: `user_${Date.now()}`
       };
       
       users.push(newUser);
@@ -274,3 +210,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+

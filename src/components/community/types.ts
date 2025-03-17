@@ -16,4 +16,3 @@ export interface CommunityPost {
   content?: string;
   featured?: boolean;
 }
-

@@ -86,9 +86,9 @@ const CommunityManagement: React.FC = () => {
           likes: Number(post.likes || 0),
           comments: Number(post.comments || 0),
           featured: Boolean(post.featured || false),
-          author: typeof post.author === 'string' 
-            ? { name: post.author, role: '' } 
-            : post.author || { name: 'Anonymous', role: '' }
+          author: typeof post.author === 'object' 
+            ? { ...post.author, name: post.author.name || 'Anonymous' } 
+            : { name: String(post.author || 'Anonymous'), role: '' }
         }));
         setPosts(validatedPosts);
       } catch (error) {
@@ -140,7 +140,10 @@ const CommunityManagement: React.FC = () => {
         title: newPost.title || '',
         description: newPost.description || '',
         content: newPost.content || '',
-        author: newPost.author,
+        author: {
+          name: newPost.author?.name || 'Anonymous',
+          role: newPost.author?.role
+        },
         date: new Date().toISOString(),
         tags: tags,
         comments: 0,
@@ -260,8 +263,8 @@ const CommunityManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">Community Management</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Community Management</h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -272,7 +275,7 @@ const CommunityManagement: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-2" />
             Add Post
           </Button>
@@ -283,115 +286,117 @@ const CommunityManagement: React.FC = () => {
       </div>
 
       {/* Community Posts Table */}
-      <Table>
-        <TableCaption>A list of all community posts.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Author</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Featured</TableHead>
-            <TableHead>Tags</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map((post) => (
-              <TableRow key={post.id.toString()}>
-                <TableCell className="font-medium max-w-xs truncate">
-                  {post.title}
-                  <p className="text-xs text-muted-foreground truncate">{post.description}</p>
-                </TableCell>
-                <TableCell>{post.author.name}</TableCell>
-                <TableCell>{new Date(post.date).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  {post.featured ? (
-                    <Badge className="bg-green-500">Featured</Badge>
-                  ) : (
-                    <Badge variant="outline">Regular</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1 max-w-xs">
-                    {post.tags.slice(0, 3).map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">{tag}</Badge>
-                    ))}
-                    {post.tags.length > 3 && (
-                      <Badge variant="outline" className="text-xs">+{post.tags.length - 3}</Badge>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <Table>
+          <TableCaption>A list of all community posts.</TableCaption>
+          <TableHeader>
+            <TableRow className="bg-gray-50 hover:bg-gray-50">
+              <TableHead className="font-semibold">Title</TableHead>
+              <TableHead className="font-semibold">Author</TableHead>
+              <TableHead className="font-semibold">Date</TableHead>
+              <TableHead className="font-semibold">Featured</TableHead>
+              <TableHead className="font-semibold">Tags</TableHead>
+              <TableHead className="text-right font-semibold">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => (
+                <TableRow key={String(post.id)} className="hover:bg-gray-50">
+                  <TableCell className="font-medium max-w-xs truncate">
+                    {post.title}
+                    <p className="text-xs text-muted-foreground truncate">{post.description}</p>
+                  </TableCell>
+                  <TableCell>{post.author.name}</TableCell>
+                  <TableCell>{new Date(post.date).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {post.featured ? (
+                      <Badge className="bg-green-500 hover:bg-green-600">Featured</Badge>
+                    ) : (
+                      <Badge variant="outline">Regular</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1 max-w-xs">
+                      {post.tags.slice(0, 3).map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">{tag}</Badge>
+                      ))}
+                      {post.tags.length > 3 && (
+                        <Badge variant="outline" className="text-xs">+{post.tags.length - 3}</Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedPost(post);
+                          setIsEditDialogOpen(true);
+                        }} className="cursor-pointer">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toggleFeaturedStatus(post.id)} className="cursor-pointer">
+                          {post.featured ? (
+                            <>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Unfeature
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Make Featured
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive cursor-pointer"
+                          onClick={() => {
+                            setSelectedPost(post);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-4">
+                  <div className="flex flex-col items-center text-muted-foreground">
+                    <AlertTriangle className="h-10 w-10 mb-2" />
+                    <p>No posts found</p>
+                    {searchQuery ? (
+                      <p className="text-sm">Try adjusting your search query</p>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => setIsCreateDialogOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add a post
+                      </Button>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => {
-                        setSelectedPost(post);
-                        setIsEditDialogOpen(true);
-                      }}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toggleFeaturedStatus(post.id)}>
-                        {post.featured ? (
-                          <>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Unfeature
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Make Featured
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => {
-                          setSelectedPost(post);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                <div className="flex flex-col items-center text-muted-foreground">
-                  <AlertTriangle className="h-10 w-10 mb-2" />
-                  <p>No posts found</p>
-                  {searchQuery ? (
-                    <p className="text-sm">Try adjusting your search query</p>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setIsCreateDialogOpen(true)}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add a post
-                    </Button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Edit Post Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -483,7 +488,7 @@ const CommunityManagement: React.FC = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleUpdatePost}>
+            <Button onClick={handleUpdatePost} className="bg-primary hover:bg-primary/90">
               Save Changes
             </Button>
           </DialogFooter>
@@ -575,7 +580,7 @@ const CommunityManagement: React.FC = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleCreatePost}>
+            <Button onClick={handleCreatePost} className="bg-primary hover:bg-primary/90">
               Create Post
             </Button>
           </DialogFooter>
@@ -616,4 +621,3 @@ const CommunityManagement: React.FC = () => {
 };
 
 export default CommunityManagement;
-

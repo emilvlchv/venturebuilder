@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,8 @@ import {
   ChevronUp, 
   Calendar,
   Edit,
-  Plus 
+  Plus,
+  ArrowRight 
 } from 'lucide-react';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -40,7 +40,7 @@ export interface Task {
   resources: string[];
   categories: TaskCategory[];
   deadline?: Date;
-  stepId?: string; // Add this field to link tasks to steps
+  stepId?: string;
 }
 
 interface TaskCardProps {
@@ -51,7 +51,7 @@ interface TaskCardProps {
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
   onCategoryToggle: (taskId: string, categoryId: string) => void;
   onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
-  onViewStep?: (stepId: string) => void; // Add this prop to view the related step
+  onViewStep?: (stepId: string) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ 
@@ -93,7 +93,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  // Helper function for handling subtask addition from the edit sheet
   const handleAddSubtask = (categoryId: string, title: string) => {
     const updatedTask = {...task};
     const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
@@ -105,7 +104,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
         completed: false
       });
       
-      // If the task was in pending state, move it to in-progress
       if (updatedTask.status === 'pending') {
         onTaskStatusChange(updatedTask, 'in-progress');
       } else {
@@ -114,7 +112,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  // Helper function for handling subtask removal from the edit sheet
   const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
     const updatedTask = {...task};
     const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
@@ -127,7 +124,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  // Helper function to determine deadline status
   const getDeadlineStatus = () => {
     if (!task.deadline) return null;
     
@@ -146,7 +142,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
   
-  // Get deadline status and styling
   const deadlineStatus = getDeadlineStatus();
   const deadlineBadgeStyle = () => {
     if (!deadlineStatus) return "";
@@ -178,7 +173,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 <h3 className="text-xl font-semibold">{task.title}</h3>
                 <div className="ml-2">{renderStatusBadge(task.status)}</div>
                 
-                {/* Discrete deadline badge */}
                 {task.deadline && (
                   <div className={`ml-auto text-xs flex items-center px-2 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
                     <Calendar className="h-3 w-3 mr-1" /> 
@@ -208,7 +202,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
                   </Button>
                   
-                  {/* Add button to view related step */}
                   {task.stepId && onViewStep && (
                     <Button
                       variant="ghost"
@@ -231,7 +224,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 </Button>
               </div>
               
-              {/* Progress bar */}
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full" 
@@ -313,7 +305,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
       </CardContent>
       
-      {/* Task Edit Sheet */}
       <TaskDetailSheet
         isOpen={isEditSheetOpen}
         onOpenChange={setIsEditSheetOpen}

@@ -762,25 +762,6 @@ const JourneyDetails = () => {
                 </CardContent>
               </Card>
 
-              {/* Tasks Section */}
-              <div className="mb-10">
-                <h2 className="text-2xl font-bold mb-6">Your Current Tasks</h2>
-                <div className="space-y-6">
-                  {tasks.map((task, index) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      onOpenDetails={() => handleOpenTaskDetails(task)}
-                      onTaskStatusChange={handleTaskStatusChange}
-                      onSubtaskToggle={handleSubtaskToggle}
-                      onCategoryToggle={handleCategoryToggle}
-                      onDeadlineChange={handleDeadlineChange}
-                    />
-                  ))}
-                </div>
-              </div>
-
               <div className="tabs-section">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
@@ -834,6 +815,27 @@ const JourneyDetails = () => {
                                   <Button size="sm">Start This Step</Button>
                                 </div>
                               </div>
+                              
+                              {getTasksByStepId(step.id).length > 0 && (
+                                <div className="mt-6 border-t pt-4">
+                                  <h4 className="font-medium mb-3">Related Tasks:</h4>
+                                  <div className="space-y-4">
+                                    {getTasksByStepId(step.id).map((task, taskIndex) => (
+                                      <TaskCard
+                                        key={task.id}
+                                        task={task}
+                                        index={taskIndex}
+                                        onOpenDetails={() => handleOpenTaskDetails(task)}
+                                        onTaskStatusChange={handleTaskStatusChange}
+                                        onSubtaskToggle={handleSubtaskToggle}
+                                        onCategoryToggle={handleCategoryToggle}
+                                        onDeadlineChange={handleDeadlineChange}
+                                        onViewStep={(stepId) => handleOpenStepDetails(stepId)}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         ))}

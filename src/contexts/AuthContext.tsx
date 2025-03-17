@@ -45,9 +45,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize admin user
-  const initializeAdminUser = () => {
-    console.log('Initializing admin user');
+  // Initialize admin user and regular user
+  const initializeUsers = () => {
+    console.log('Initializing users');
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     
     // Check if admin user already exists
@@ -66,11 +66,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       
       users.push(adminUser);
-      localStorage.setItem('users', JSON.stringify(users));
       console.log('Admin user created');
     } else {
       console.log('Admin user already exists');
     }
+    
+    // Check if regular user exists
+    const regularUserExists = users.some((u: any) => u.email === 'user@example.com');
+    
+    if (!regularUserExists) {
+      console.log('Regular user does not exist, creating...');
+      const regularUser = {
+        id: 'user_regular',
+        firstName: 'Regular',
+        lastName: 'User',
+        username: 'user',
+        email: 'user@example.com',
+        password: 'user123',
+        role: 'user',
+        businessIdea: 'E-commerce platform for handmade crafts'
+      };
+      
+      users.push(regularUser);
+      console.log('Regular user created');
+    } else {
+      console.log('Regular user already exists');
+    }
+    
+    localStorage.setItem('users', JSON.stringify(users));
   };
 
   useEffect(() => {
@@ -80,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(JSON.parse(storedUser));
     }
     
-    // Initialize admin user for demo purposes
-    initializeAdminUser();
+    // Initialize users for demo purposes
+    initializeUsers();
     
     setIsLoading(false);
   }, []);

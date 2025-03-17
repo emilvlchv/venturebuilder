@@ -38,9 +38,8 @@ import {
   Trash2,
   Plus,
   Search,
-  RefreshCw,
-  Tags,
   Eye,
+  Tags,
   AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -61,10 +60,12 @@ const CommunityManagement: React.FC = () => {
     title: '',
     description: '',
     content: '',
-    author: '',
+    author: {
+      name: '',
+      role: ''
+    },
     tags: [],
-    featured: false,
-    date: new Date().toISOString().slice(0, 10)
+    featured: false
   });
 
   // Load posts on component mount
@@ -77,7 +78,19 @@ const CommunityManagement: React.FC = () => {
     const storedPosts = localStorage.getItem('community_posts');
     if (storedPosts) {
       try {
-        setPosts(JSON.parse(storedPosts));
+        const parsedPosts = JSON.parse(storedPosts);
+        // Ensure each post has the required structure
+        const validatedPosts = parsedPosts.map((post: any) => ({
+          ...post,
+          id: post.id || Math.floor(Math.random() * 1000),
+          likes: Number(post.likes || 0),
+          comments: Number(post.comments || 0),
+          featured: Boolean(post.featured || false),
+          author: typeof post.author === 'string' 
+            ? { name: post.author, role: '' } 
+            : post.author || { name: 'Anonymous', role: '' }
+        }));
+        setPosts(validatedPosts);
       } catch (error) {
         console.error('Error loading community posts:', error);
         setPosts(SAMPLE_POSTS);
@@ -94,7 +107,7 @@ const CommunityManagement: React.FC = () => {
     return (
       post.title.toLowerCase().includes(query) ||
       post.description.toLowerCase().includes(query) ||
-      post.author.toLowerCase().includes(query) ||
+      post.author.name.toLowerCase().includes(query) ||
       post.tags.some(tag => tag.toLowerCase().includes(query))
     );
   });
@@ -109,7 +122,7 @@ const CommunityManagement: React.FC = () => {
   const handleCreatePost = () => {
     try {
       // Validate required fields
-      if (!newPost.title || !newPost.description || !newPost.author) {
+      if (!newPost.title || !newPost.description || !newPost.author?.name) {
         toast({
           variant: "destructive",
           title: "Validation Error",
@@ -123,17 +136,16 @@ const CommunityManagement: React.FC = () => {
 
       // Create a new post object
       const post: CommunityPost = {
-        id: `post_${Date.now()}`,
+        id: Date.now(),
         title: newPost.title || '',
         description: newPost.description || '',
         content: newPost.content || '',
-        author: newPost.author || '',
-        authorAvatar: '/placeholder.svg', // Default avatar
+        author: newPost.author,
         date: new Date().toISOString(),
         tags: tags,
         comments: 0,
         likes: 0,
-        featured: false,
+        featured: newPost.featured || false,
       };
 
       // Add to post list
@@ -145,10 +157,12 @@ const CommunityManagement: React.FC = () => {
         title: '',
         description: '',
         content: '',
-        author: '',
+        author: {
+          name: '',
+          role: ''
+        },
         tags: [],
-        featured: false,
-        date: new Date().toISOString().slice(0, 10)
+        featured: false
       });
       setNewTags('');
       setIsCreateDialogOpen(false);
@@ -173,7 +187,7 @@ const CommunityManagement: React.FC = () => {
       if (!selectedPost) return;
 
       // Validate required fields
-      if (!selectedPost.title || !selectedPost.description || !selectedPost.author) {
+      if (!selectedPost.title || !selectedPost.description || !selectedPost.author.name) {
         toast({
           variant: "destructive",
           title: "Validation Error",
@@ -229,7 +243,7 @@ const CommunityManagement: React.FC = () => {
   };
 
   // Toggle the featured status of a post
-  const toggleFeaturedStatus = (postId: string) => {
+  const toggleFeaturedStatus = (postId: number | string) => {
     const updatedPosts = posts.map(post => {
       if (post.id === postId) {
         return { ...post, featured: !post.featured };
@@ -284,12 +298,12 @@ const CommunityManagement: React.FC = () => {
         <TableBody>
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
-              <TableRow key={post.id}>
+              <TableRow key={post.id.toString()}>
                 <TableCell className="font-medium max-w-xs truncate">
                   {post.title}
                   <p className="text-xs text-muted-foreground truncate">{post.description}</p>
                 </TableCell>
-                <TableCell>{post.author}</TableCell>
+                <TableCell>{post.author.name}</TableCell>
                 <TableCell>{new Date(post.date).toLocaleDateString()}</TableCell>
                 <TableCell>
                   {post.featured ? (
@@ -411,7 +425,7 @@ const CommunityManagement: React.FC = () => {
                 <Label htmlFor="content">Content*</Label>
                 <Textarea 
                   id="content" 
-                  value={selectedPost.content}
+                  value={selectedPost.content || ''}
                   onChange={(e) => setSelectedPost({...selectedPost, content: e.target.value})}
                   rows={5}
                 />
@@ -420,8 +434,22 @@ const CommunityManagement: React.FC = () => {
                 <Label htmlFor="author">Author*</Label>
                 <Input 
                   id="author" 
-                  value={selectedPost.author}
-                  onChange={(e) => setSelectedPost({...selectedPost, author: e.target.value})}
+                  value={selectedPost.author.name}
+                  onChange={(e) => setSelectedPost({
+                    ...selectedPost, 
+                    author: {...selectedPost.author, name: e.target.value}
+                  })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="author-role">Author Role</Label>
+                <Input 
+                  id="author-role" 
+                  value={selectedPost.author.role || ''}
+                  onChange={(e) => setSelectedPost({
+                    ...selectedPost, 
+                    author: {...selectedPost.author, role: e.target.value}
+                  })}
                 />
               </div>
               <div className="space-y-2">
@@ -443,7 +471,7 @@ const CommunityManagement: React.FC = () => {
                 <input 
                   type="checkbox" 
                   id="featured"
-                  checked={selectedPost.featured}
+                  checked={selectedPost.featured || false}
                   onChange={(e) => setSelectedPost({...selectedPost, featured: e.target.checked})}
                   className="h-4 w-4"
                 />
@@ -476,7 +504,7 @@ const CommunityManagement: React.FC = () => {
               <Label htmlFor="new-title">Title*</Label>
               <Input 
                 id="new-title" 
-                value={newPost.title}
+                value={newPost.title || ''}
                 onChange={(e) => setNewPost({...newPost, title: e.target.value})}
               />
             </div>
@@ -484,7 +512,7 @@ const CommunityManagement: React.FC = () => {
               <Label htmlFor="new-description">Short Description*</Label>
               <Textarea 
                 id="new-description" 
-                value={newPost.description}
+                value={newPost.description || ''}
                 onChange={(e) => setNewPost({...newPost, description: e.target.value})}
                 rows={2}
               />
@@ -493,17 +521,31 @@ const CommunityManagement: React.FC = () => {
               <Label htmlFor="new-content">Content*</Label>
               <Textarea 
                 id="new-content" 
-                value={newPost.content}
+                value={newPost.content || ''}
                 onChange={(e) => setNewPost({...newPost, content: e.target.value})}
                 rows={5}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new-author">Author*</Label>
+              <Label htmlFor="new-author">Author Name*</Label>
               <Input 
                 id="new-author" 
-                value={newPost.author}
-                onChange={(e) => setNewPost({...newPost, author: e.target.value})}
+                value={newPost.author?.name || ''}
+                onChange={(e) => setNewPost({
+                  ...newPost, 
+                  author: {...(newPost.author || {}), name: e.target.value}
+                })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-author-role">Author Role</Label>
+              <Input 
+                id="new-author-role" 
+                value={newPost.author?.role || ''}
+                onChange={(e) => setNewPost({
+                  ...newPost, 
+                  author: {...(newPost.author || {}), role: e.target.value}
+                })}
               />
             </div>
             <div className="space-y-2">
@@ -574,3 +616,4 @@ const CommunityManagement: React.FC = () => {
 };
 
 export default CommunityManagement;
+

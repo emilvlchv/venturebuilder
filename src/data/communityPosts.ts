@@ -14,7 +14,8 @@ export const SAMPLE_POSTS: CommunityPost[] = [
     likes: 48,
     comments: 12,
     tags: ['Fundraising', 'Pitch Deck'],
-    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop',
+    featured: false
   },
   {
     id: 2,
@@ -28,6 +29,7 @@ export const SAMPLE_POSTS: CommunityPost[] = [
     likes: 124,
     comments: 35,
     tags: ['Marketing', 'Bootstrapping'],
+    featured: false
   },
   {
     id: 3,
@@ -41,7 +43,8 @@ export const SAMPLE_POSTS: CommunityPost[] = [
     likes: 87,
     comments: 19,
     tags: ['Product Development', 'MVP'],
-    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2940&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2940&auto=format&fit=crop',
+    featured: true
   },
   {
     id: 4,
@@ -55,6 +58,7 @@ export const SAMPLE_POSTS: CommunityPost[] = [
     likes: 63,
     comments: 22,
     tags: ['Team Building', 'Co-Founders'],
+    featured: false
   },
   {
     id: 5,
@@ -68,6 +72,8 @@ export const SAMPLE_POSTS: CommunityPost[] = [
     likes: 105,
     comments: 41,
     tags: ['Legal', 'Business Formation'],
-    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2940&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2940&auto=format&fit=crop',
+    featured: false
   },
 ];
+

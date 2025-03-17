@@ -28,6 +28,7 @@ const JourneyDetails = () => {
   const [journey, setJourney] = useState<Journey | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.id && journeyId) {
@@ -95,6 +96,7 @@ const JourneyDetails = () => {
         description: "Research your target market and competitors",
         status: "in-progress",
         resources: ["Market Research Template", "Competitive Analysis Guide"],
+        stepId: "market-research",
         categories: [
           {
             id: uuidv4(),
@@ -139,7 +141,7 @@ const JourneyDetails = () => {
             ]
           }
         ],
-        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days from now
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
       },
       {
         id: uuidv4(),
@@ -147,6 +149,7 @@ const JourneyDetails = () => {
         description: "Define your unique value proposition",
         status: "pending",
         resources: ["Value Proposition Canvas", "Customer Value Template"],
+        stepId: "value-proposition",
         categories: [
           {
             id: uuidv4(),
@@ -335,6 +338,38 @@ const JourneyDetails = () => {
     if (updatedSelectedTask) {
       setSelectedTask(updatedSelectedTask);
     }
+  };
+
+  const handleCreateTaskFromStep = (stepId: string, title: string, description: string) => {
+    const newTask: Task = {
+      id: uuidv4(),
+      title,
+      description,
+      status: "pending",
+      resources: [],
+      stepId,
+      categories: [
+        {
+          id: uuidv4(),
+          title: "Action Items",
+          subtasks: []
+        }
+      ]
+    };
+    
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: "Task Created",
+      description: `A new task "${title}" has been created.`,
+      variant: "default",
+    });
+  };
+
+  const getTasksByStepId = (stepId: string) => {
+    return tasks.filter(task => task.stepId === stepId);
   };
 
   const stepsDetailsMap: Record<string, StepDetail> = {
@@ -629,7 +664,11 @@ const JourneyDetails = () => {
   const handleOpenStepDetails = (stepId: string) => {
     const stepDetails = stepsDetailsMap[stepId];
     if (stepDetails) {
-      setSelectedStep(stepDetails);
+      setSelectedStep({
+        ...stepDetails,
+        stepId
+      });
+      setSelectedStepId(stepId);
       setIsDialogOpen(true);
     }
   };
@@ -768,6 +807,12 @@ const JourneyDetails = () => {
                                   </div>
                                   <p className="text-muted-foreground mb-4">{step.description}</p>
                                   
+                                  {getTasksByStepId(step.id).length > 0 && (
+                                    <Badge variant="outline" className="mb-3">
+                                      {getTasksByStepId(step.id).length} task{getTasksByStepId(step.id).length !== 1 ? 's' : ''}
+                                    </Badge>
+                                  )}
+                                  
                                   <div className="space-y-2">
                                     <h4 className="text-sm font-medium">Resources:</h4>
                                     <ul className="list-disc list-inside text-sm text-muted-foreground">
@@ -806,7 +851,13 @@ const JourneyDetails = () => {
       <StepDetailsDialog 
         isOpen={isDialogOpen} 
         onClose={handleCloseDialog} 
-        stepDetails={selectedStep} 
+        stepDetails={selectedStep}
+        relatedTasks={selectedStepId ? getTasksByStepId(selectedStepId) : []}
+        onTaskToggle={handleSubtaskToggle}
+        onTaskStatusChange={handleTaskStatusChange}
+        onCategoryToggle={handleCategoryToggle}
+        onDeadlineChange={handleDeadlineChange}
+        onCreateTask={handleCreateTaskFromStep}
       />
       
       {selectedTask && (

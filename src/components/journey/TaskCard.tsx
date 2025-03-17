@@ -40,6 +40,7 @@ export interface Task {
   resources: string[];
   categories: TaskCategory[];
   deadline?: Date;
+  stepId?: string; // Add this field to link tasks to steps
 }
 
 interface TaskCardProps {
@@ -50,6 +51,7 @@ interface TaskCardProps {
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
   onCategoryToggle: (taskId: string, categoryId: string) => void;
   onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
+  onViewStep?: (stepId: string) => void; // Add this prop to view the related step
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ 
@@ -59,7 +61,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onTaskStatusChange,
   onSubtaskToggle,
   onCategoryToggle,
-  onDeadlineChange
+  onDeadlineChange,
+  onViewStep
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
@@ -204,6 +207,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     <CheckCircle2 className="h-4 w-4 mr-1" />
                     {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
                   </Button>
+                  
+                  {/* Add button to view related step */}
+                  {task.stepId && onViewStep && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewStep(task.stepId!)}
+                    >
+                      <ArrowRight className="h-4 w-4 mr-1" />
+                      View Related Step
+                    </Button>
+                  )}
                 </div>
                 
                 <Button 

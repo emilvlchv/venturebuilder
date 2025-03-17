@@ -9,6 +9,19 @@ interface TaskProgressDisplayProps {
   task: Task;
 }
 
+// Export the renderStatusBadge function separately so it can be used by other components
+export const renderStatusBadge = (status: string) => {
+  switch (status) {
+    case 'completed':
+      return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+    case 'in-progress':
+      return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
+    case 'pending':
+    default:
+      return <Badge className="bg-muted text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
+  }
+};
+
 const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
   const calculateProgress = (task: Task): number => {
     if (!task.categories) return 0;
@@ -36,19 +49,6 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
       case 'pending':
       default:
         return 'bg-muted';
-    }
-  };
-
-  // Render status badge
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
-      case 'in-progress':
-        return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
-      case 'pending':
-      default:
-        return <Badge className="bg-muted text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
     }
   };
 

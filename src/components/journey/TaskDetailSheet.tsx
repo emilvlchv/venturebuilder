@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Save } from 'lucide-react';
 import { Task } from './TaskCard';
-import { renderStatusBadge, TaskProgressDisplay } from './task-details/TaskProgressDisplay';
+import TaskProgressDisplay, { renderStatusBadge } from './task-details/TaskProgressDisplay';
 import TaskStatusSelector from './task-details/TaskStatusSelector';
 import DeadlineSelector from './task-details/DeadlineSelector';
 import SubtaskCategory from './task-details/SubtaskCategory';

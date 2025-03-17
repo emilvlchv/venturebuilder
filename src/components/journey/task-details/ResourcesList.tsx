@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Link as LinkIcon } from 'lucide-react';
 
 interface ResourcesListProps {
   resources: string[];
@@ -18,7 +18,8 @@ const ResourcesList: React.FC<ResourcesListProps> = ({ resources }) => {
         {resources.map((resource, i) => (
           <li key={i} className="text-base text-muted-foreground flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary/70 flex-shrink-0"></div>
-            {resource}
+            <span className="flex-1">{resource}</span>
+            <LinkIcon className="h-4 w-4 text-primary cursor-pointer hover:text-primary/80" />
           </li>
         ))}
       </ul>

@@ -1,62 +1,74 @@
 
 import React from 'react';
-import { Task } from '../TaskCard';
+import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Task } from '../TaskCard';
 
 interface TaskProgressDisplayProps {
   task: Task;
 }
 
 const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
-  const getTotalSubtasks = () => {
-    return task.categories.reduce((total, category) => total + category.subtasks.length, 0);
-  };
-
-  const getCompletedSubtasks = () => {
-    return task.categories.reduce((total, category) => 
-      total + category.subtasks.filter(subtask => subtask.completed).length, 0);
-  };
-
-  const completionPercentage = getTotalSubtasks() > 0 
-    ? Math.round((getCompletedSubtasks() / getTotalSubtasks()) * 100) 
-    : 0;
+  const calculateProgress = (task: Task): number => {
+    if (!task.categories) return 0;
     
+    let totalSubtasks = 0;
+    let completedSubtasks = 0;
+    
+    task.categories.forEach(category => {
+      totalSubtasks += category.subtasks.length;
+      completedSubtasks += category.subtasks.filter(subtask => subtask.completed).length;
+    });
+    
+    return totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+  };
+
+  const progress = calculateProgress(task);
+
+  // Get color based on task status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500';
+      case 'in-progress':
+        return 'bg-blue-500';
+      case 'pending':
+      default:
+        return 'bg-muted';
+    }
+  };
+
+  // Render status badge
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500 shadow-sm text-base"><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</Badge>;
+        return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
       case 'in-progress':
-        return <Badge className="bg-blue-500 shadow-sm text-base"><Clock className="h-4 w-4 mr-1" /> In Progress</Badge>;
+        return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="shadow-sm text-base"><AlertCircle className="h-4 w-4 mr-1" /> Not Started</Badge>;
       default:
-        return null;
+        return <Badge className="bg-muted text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
     }
   };
 
   return (
-    <div className="bg-muted/20 p-5 rounded-xl">
-      <h3 className="text-base font-medium mb-3">Task Progress</h3>
-      
-      <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-        <div 
-          className={`h-3 rounded-full ${completionPercentage >= 100 ? 'bg-green-500' : 'bg-primary'} transition-all duration-500`} 
-          style={{ width: `${completionPercentage}%` }}
-          role="progressbar"
-          aria-valuenow={completionPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        ></div>
+    <div className="space-y-2 mb-3">
+      <div className="flex justify-between items-center">
+        <div>
+          {task.categories && 
+            <span className="text-sm text-muted-foreground">
+              {progress}% Complete
+            </span>
+          }
+        </div>
+        <div>
+          {renderStatusBadge(task.status)}
+        </div>
       </div>
-      <div className="flex justify-between items-center text-sm">
-        <p className="text-muted-foreground font-medium">{completionPercentage}% complete</p>
-        <p className="text-muted-foreground">
-          {getCompletedSubtasks()} / {getTotalSubtasks()} subtasks
-        </p>
-      </div>
+      <Progress value={progress} className={`h-2 ${getStatusColor(task.status)}`} />
     </div>
   );
 };
 
-export { renderStatusBadge, TaskProgressDisplay };
+export default TaskProgressDisplay;

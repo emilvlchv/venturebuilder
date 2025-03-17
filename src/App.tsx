@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -88,7 +87,6 @@ const App = () => (
               </ProtectedRoute>
             } />
             
-            {/* Redirect any malformed journey-details URL to journey page */}
             <Route path="/journey-details" element={
               <Navigate to="/journey" replace />
             } />
@@ -114,7 +112,6 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/dashboard" element={<RoleBasedRedirect />} />
             
-            {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<UserManagement />} />
@@ -124,7 +121,6 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
             </Route>
             
-            {/* Redirect any other unmatched routes to the 404 page */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

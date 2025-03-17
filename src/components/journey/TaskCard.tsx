@@ -14,7 +14,10 @@ import {
   Calendar,
   Edit,
   Plus,
-  ArrowRight 
+  ArrowRight,
+  List,
+  Bookmark,
+  FileText
 } from 'lucide-react';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -84,11 +87,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+        return <Badge className="bg-green-500 shadow-sm"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
       case 'in-progress':
-        return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
+        return <Badge className="bg-blue-500 shadow-sm"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
       case 'pending':
-        return <Badge variant="outline"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
+        return <Badge variant="outline" className="shadow-sm"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
       default:
         return null;
     }
@@ -159,110 +162,146 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
+  const deadlineLabel = () => {
+    if (!deadlineStatus) return "";
+    
+    switch (deadlineStatus) {
+      case "overdue":
+        return "Overdue";
+      case "due-today":
+        return "Due Today";
+      case "upcoming":
+        return "Upcoming";
+      default:
+        return "Scheduled";
+    }
+  };
+
   const completionPercentage = getCompletionPercentage();
   
   return (
-    <Card className="transition-all hover:shadow-md">
+    <Card className="transition-all duration-300 hover:shadow-md border-l-4 border-l-primary">
       <CardContent className="p-6">
+        {/* Header Section */}
         <div className="flex flex-col space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                  {index + 1}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold shadow-sm">
+                {index + 1}
+              </div>
+              <h3 className="text-xl font-semibold">{task.title}</h3>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {renderStatusBadge(task.status)}
+              
+              {task.deadline && (
+                <div className={`text-xs flex items-center gap-1 px-2.5 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
+                  <Calendar className="h-3 w-3" /> 
+                  <span>{deadlineLabel()}: {format(task.deadline, 'MMM d')}</span>
                 </div>
-                <h3 className="text-xl font-semibold">{task.title}</h3>
-                <div className="ml-2">{renderStatusBadge(task.status)}</div>
-                
-                {task.deadline && (
-                  <div className={`ml-auto text-xs flex items-center px-2 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
-                    <Calendar className="h-3 w-3 mr-1" /> 
-                    {format(task.deadline, 'MMM d')}
-                  </div>
-                )}
-              </div>
-              <p className="text-muted-foreground mb-4">{task.description}</p>
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-4 items-center">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={onOpenDetails}
-                    className="mr-2"
-                  >
-                    <Info className="h-4 w-4 mr-1" /> Details
-                  </Button>
-                  
-                  <Button
-                    variant={task.status === 'completed' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={handleStatusChange}
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                    {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
-                  </Button>
-                  
-                  {task.stepId && onViewStep && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewStep(task.stepId!)}
-                    >
-                      <ArrowRight className="h-4 w-4 mr-1" />
-                      View Related Step
-                    </Button>
-                  )}
-                </div>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setIsEditSheetOpen(true)}
-                  className="flex items-center"
-                >
-                  <Edit className="h-4 w-4 mr-1" /> Edit
-                </Button>
-              </div>
-              
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full" 
-                  style={{ width: `${completionPercentage}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-xs text-muted-foreground">{completionPercentage}% complete</p>
-              </div>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center mb-2"
-              >
-                {isOpen ? (
-                  <>
-                    <ChevronUp className="h-4 w-4 mr-1" /> Hide Subtasks
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4 mr-1" /> Show Subtasks ({task.categories.flatMap(c => c.subtasks).length})
-                  </>
-                )}
-              </Button>
+              )}
             </div>
           </div>
           
+          {/* Description & Progress Section */}
+          <div className="bg-muted/30 p-3 rounded-lg">
+            <p className="text-muted-foreground mb-3">{task.description}</p>
+            
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1.5">
+              <div 
+                className={`h-2.5 rounded-full ${completionPercentage >= 100 ? 'bg-green-500' : 'bg-primary'} transition-all duration-500`} 
+                style={{ width: `${completionPercentage}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <p className="text-muted-foreground">{completionPercentage}% complete</p>
+              <p className="text-muted-foreground">
+                {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length} / 
+                {task.categories.flatMap(c => c.subtasks).length} subtasks
+              </p>
+            </div>
+          </div>
+          
+          {/* Actions Section */}
+          <div className="flex flex-wrap gap-2 justify-between items-center">
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onOpenDetails}
+                className="flex items-center shadow-sm hover:shadow transition-all"
+              >
+                <Info className="h-4 w-4 mr-1" /> Details
+              </Button>
+              
+              <Button
+                variant={task.status === 'completed' ? 'default' : 'outline'}
+                size="sm"
+                onClick={handleStatusChange}
+                className={`flex items-center shadow-sm hover:shadow transition-all ${task.status === 'completed' ? 'bg-green-500 hover:bg-green-600' : ''}`}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
+              </Button>
+              
+              {task.stepId && onViewStep && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onViewStep(task.stepId!)}
+                  className="flex items-center hover:bg-primary/10"
+                >
+                  <ArrowRight className="h-4 w-4 mr-1" />
+                  View Related Step
+                </Button>
+              )}
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setIsEditSheetOpen(true)}
+              className="flex items-center hover:bg-primary/10"
+            >
+              <Edit className="h-4 w-4 mr-1" /> Edit
+            </Button>
+          </div>
+          
+          {/* Subtasks Toggle Button */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setIsOpen(!isOpen)}
+            className={`flex items-center justify-center w-full border border-muted transition-colors ${isOpen ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
+          >
+            {isOpen ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-1" /> Hide Subtasks
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-1" /> Show Subtasks ({task.categories.flatMap(c => c.subtasks).length})
+              </>
+            )}
+          </Button>
+          
+          {/* Subtasks Expanded Section */}
           {isOpen && (
-            <div className="mt-4 space-y-6">
+            <div className="mt-2 space-y-4 animate-accordion-down">
               {task.categories.map((category) => (
-                <div key={category.id} className="border rounded-md p-4">
+                <div key={category.id} className="border rounded-md overflow-hidden">
                   <div 
-                    className="flex justify-between items-center cursor-pointer"
+                    className="flex justify-between items-center p-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => onCategoryToggle(task.id, category.id)}
                   >
-                    <h4 className="font-medium text-lg">{category.title}</h4>
+                    <div className="flex items-center gap-2">
+                      <Bookmark className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium">{category.title}</h4>
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
+                      </Badge>
+                    </div>
                     {category.collapsed ? 
                       <ChevronDown className="h-4 w-4" /> : 
                       <ChevronUp className="h-4 w-4" />
@@ -270,19 +309,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   </div>
                   
                   {!category.collapsed && (
-                    <div className="mt-3 space-y-2">
+                    <div className="p-3 space-y-1.5 bg-white">
                       {category.subtasks.map((subtask) => (
-                        <div key={subtask.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/40 transition-colors">
+                        <div key={subtask.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/20 transition-colors">
                           <Checkbox 
                             id={`subtask-${subtask.id}`}
                             checked={subtask.completed}
                             onCheckedChange={(checked) => {
                               onSubtaskToggle(task.id, category.id, subtask.id, checked === true);
                             }}
+                            className="mt-0.5"
                           />
                           <label 
                             htmlFor={`subtask-${subtask.id}`}
-                            className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
+                            className={`text-sm cursor-pointer flex-1 ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
                           >
                             {subtask.title}
                           </label>
@@ -295,14 +335,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           )}
           
-          <div className="mt-4">
-            <h4 className="text-sm font-medium">Resources:</h4>
-            <ul className="list-disc list-inside text-sm text-muted-foreground mt-1">
-              {task.resources.map((resource, i) => (
-                <li key={i}>{resource}</li>
-              ))}
-            </ul>
-          </div>
+          {/* Resources Section */}
+          {task.resources.length > 0 && (
+            <div className="mt-4 p-3 bg-accent/40 rounded-lg">
+              <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
+                <FileText className="h-4 w-4" /> Resources
+              </h4>
+              <ul className="list-none space-y-1.5">
+                {task.resources.map((resource, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary/70 flex-shrink-0"></div>
+                    {resource}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </CardContent>
       

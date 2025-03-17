@@ -15,6 +15,7 @@ import { Task } from './TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import TaskDetailSheet from './TaskDetailSheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 export interface StepDetail {
   title: string;

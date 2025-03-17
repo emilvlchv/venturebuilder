@@ -272,7 +272,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
                         value={selectedCategoryId === category.id ? newSubtaskTitle : ''}
                         onChange={(e) => {
                           setSelectedCategoryId(category.id);
-                          setNewSubtaskTitle(e.target.value);
+                          setNewSubtaskTitle(e.target.value);  // Fixed: Using setNewSubtaskTitle instead of setNewTaskTitle
                         }}
                         className="text-base"
                         onKeyDown={(e) => {

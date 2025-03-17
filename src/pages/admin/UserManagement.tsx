@@ -87,11 +87,15 @@ const UserManagement: React.FC = () => {
         const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
         
         // Map to ensure consistent structure and add missing properties
+        // Also ensure proper type casting for role and status
         const formattedUsers = storedUsers.map((user: any) => ({
           ...user,
-          status: user.status || 'active',
+          // Ensure role is either 'admin' or 'user'
+          role: user.role === 'admin' ? 'admin' : 'user',
+          // Ensure status is one of the allowed values
+          status: ['active', 'inactive', 'pending'].includes(user.status) ? user.status : 'active',
           createdAt: user.createdAt || new Date().toISOString().split('T')[0]
-        }));
+        })) as AdminUser[];
         
         setUsers(formattedUsers);
       } catch (error) {
@@ -277,11 +281,12 @@ const UserManagement: React.FC = () => {
 
   const toggleUserStatus = (userId: string) => {
     try {
-      // Update state
+      // Update state with proper type casting
       const updatedUsers = users.map(user => {
         if (user.id === userId) {
+          // Ensure status is a valid option
           const newStatus = user.status === 'active' ? 'inactive' : 'active';
-          return { ...user, status: newStatus };
+          return { ...user, status: newStatus as 'active' | 'inactive' | 'pending' };
         }
         return user;
       });
@@ -308,7 +313,16 @@ const UserManagement: React.FC = () => {
   const refreshUserList = () => {
     try {
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      setUsers(storedUsers);
+      
+      // Ensure proper typing when refreshing users
+      const typedUsers = storedUsers.map((user: any) => ({
+        ...user,
+        role: user.role === 'admin' ? 'admin' : 'user',
+        status: ['active', 'inactive', 'pending'].includes(user.status) ? user.status : 'active'
+      })) as AdminUser[];
+      
+      setUsers(typedUsers);
+      
       toast({
         title: "User list refreshed",
         description: "The user list has been successfully refreshed.",

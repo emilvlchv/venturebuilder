@@ -97,13 +97,17 @@ const StepDetailsPage = () => {
 
   const handleCreateTask = () => {
     if (handleCreateTaskFromStep && stepId && newTaskTitle.trim()) {
-      handleCreateTaskFromStep(stepId, newTaskTitle, stepDetails?.description || '');
+      // Create a deadline 2 weeks from now for the new task
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 14); // Add 14 days
+
+      handleCreateTaskFromStep(stepId, newTaskTitle, stepDetails?.description || '', deadline);
       setNewTaskTitle('');
       setShowTaskForm(false);
       
       toast({
         title: "Task created",
-        description: "Your new task has been created successfully.",
+        description: "Your new task has been created successfully with a deadline in 2 weeks.",
       });
     }
   };
@@ -137,6 +141,21 @@ const StepDetailsPage = () => {
   // Handle closing task details
   const closeTaskDetails = () => {
     setIsTaskDetailOpen(false);
+  };
+
+  // Format date safely
+  const formatDate = (date: Date | undefined | string) => {
+    if (!date) return 'No deadline';
+    
+    try {
+      if (typeof date === 'string') {
+        return new Date(date).toLocaleDateString();
+      }
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting date:', error, date);
+      return 'Invalid date';
+    }
   };
 
   if (!stepDetails) {
@@ -176,224 +195,227 @@ const StepDetailsPage = () => {
             </p>
           </div>
 
-          {/* Main Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Tasks Section (Made primary focus - now 2 columns wide) */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <ListChecks className="h-5 w-5 text-primary" /> Tasks
+          {/* Main Grid Layout - Now Step Info is first, Tasks second */}
+          <div className="space-y-8">
+            {/* Step Information Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Primary Step Info Column */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" /> Step Information
                   </h2>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    onClick={() => setShowTaskForm(!showTaskForm)}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Task
-                  </Button>
+                  <div className="bg-muted/10 p-5 rounded-xl flex items-center gap-4 mb-4">
+                    <CalendarClock className="h-6 w-6 text-primary" />
+                    <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
+                  </div>
+                  <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
                 </div>
-                
-                {showTaskForm && (
-                  <div className="mb-6 p-5 border rounded-lg bg-muted/10">
-                    <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
-                        <input
-                          id="newTaskTitle"
-                          className="w-full p-3 border rounded-lg text-base"
-                          value={newTaskTitle}
-                          onChange={(e) => setNewTaskTitle(e.target.value)}
-                          placeholder="Enter task title..."
-                          aria-label="New task title"
-                        />
-                      </div>
-                      <div className="flex justify-end gap-3">
-                        <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
-                        <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
-                      </div>
+
+                {stepDetails.examples && stepDetails.examples.length > 0 && (
+                  <div className="bg-white p-6 rounded-xl shadow-sm border">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-primary" /> Examples
+                    </h2>
+                    <div className="bg-muted/20 p-5 rounded-lg space-y-4">
+                      {stepDetails.examples.map((example, index) => (
+                        <p key={index} className="text-base italic">{example}</p>
+                      ))}
                     </div>
                   </div>
                 )}
-                
-                {relatedTasks.length > 0 ? (
-                  <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2">
-                    {relatedTasks.map((task) => (
-                      <div key={task.id} className="border rounded-xl p-6 hover:shadow-md transition-shadow bg-card">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-semibold text-xl mb-2">{task.title}</h3>
-                            <p className="text-muted-foreground mb-4">{task.description}</p>
-                          </div>
-                          <div className="flex flex-col gap-2 items-end">
-                            {renderStatusBadge(task.status)}
-                            {task.deadline && (
-                              <span className="text-sm flex items-center gap-1 bg-muted/30 px-3 py-1 rounded-full">
-                                <Calendar className="h-4 w-4 text-primary" /> 
-                                Due: {task.deadline.toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Progress bar */}
-                        <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                          <div 
-                            className="bg-green-500 h-3 rounded-full" 
-                            style={{ width: `${getCompletionPercentage(task)}%` }}
-                            role="progressbar"
-                            aria-valuenow={getCompletionPercentage(task)}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          ></div>
-                        </div>
-                        <div className="text-sm text-muted-foreground mb-4">
-                          {getCompletionPercentage(task)}% complete
-                        </div>
-                        
-                        {/* Subtasks preview */}
-                        {task.categories.length > 0 && (
-                          <div className="mt-4 border-t pt-4">
-                            <h4 className="font-medium text-sm mb-3">Subtasks</h4>
-                            <div className="space-y-2">
-                              {task.categories.flatMap(cat => 
-                                cat.subtasks.slice(0, 2).map(subtask => (
-                                  <div key={subtask.id} className="flex items-center gap-2 text-sm">
-                                    <span className={`w-2 h-2 rounded-full ${subtask.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                                    <span className={subtask.completed ? 'line-through text-muted-foreground' : ''}>
-                                      {subtask.title}
-                                    </span>
-                                  </div>
-                                ))
-                              ).slice(0, 3)}
-                              {task.categories.flatMap(cat => cat.subtasks).length > 3 && (
-                                <div className="text-sm text-muted-foreground">
-                                  +{task.categories.flatMap(cat => cat.subtasks).length - 3} more subtasks
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="mt-5 flex justify-end">
-                          <Button 
-                            variant="default" 
-                            size="lg" 
-                            onClick={() => openTaskDetails(task)}
-                            className="flex items-center gap-2"
-                            aria-label={`Edit task: ${task.title}`}
-                          >
-                            <Edit className="h-4 w-4" /> Edit Task
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 bg-muted/10 rounded-lg">
-                    <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
-                    <Button 
-                      onClick={() => setShowTaskForm(true)}
-                      className="flex items-center mx-auto"
-                    >
-                      <Plus className="h-4 w-4 mr-2" /> Create Your First Task
-                    </Button>
-                  </div>
-                )}
+              </div>
+              
+              {/* Document Upload Section */}
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-primary" /> Documents
+                  </h2>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-4"
+                    onClick={() => setShowUploadForm(!showUploadForm)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" /> Upload Documents
+                  </Button>
+                  
+                  {showUploadForm && (
+                    <div className="mb-5 p-4 border rounded-lg">
+                      <label 
+                        htmlFor="file-upload" 
+                        className="block w-full cursor-pointer text-center py-4 px-4 border-2 border-dashed rounded-lg hover:bg-muted/20 transition-colors"
+                      >
+                        <span className="flex flex-col items-center">
+                          <Upload className="h-6 w-6 mb-2" />
+                          <span className="text-sm font-medium">Click to upload files</span>
+                          <span className="text-xs text-muted-foreground mt-1">PDF, DOC, DOCX, XLS, XLSX up to 10MB</span>
+                        </span>
+                        <input 
+                          id="file-upload" 
+                          type="file" 
+                          multiple 
+                          className="hidden" 
+                          onChange={handleFileUpload}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx"
+                        />
+                      </label>
+                    </div>
+                  )}
+                  
+                  {uploadedFiles.length > 0 ? (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium mb-2">Uploaded Files</h3>
+                      <ul className="space-y-2">
+                        {uploadedFiles.map((file, index) => (
+                          <li key={index} className="flex justify-between items-center p-2 bg-muted/10 rounded">
+                            <span className="text-sm truncate">{file.name}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => removeFile(file.name)}
+                              aria-label={`Remove file ${file.name}`}
+                            >
+                              Remove
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No documents uploaded yet
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             
-            {/* Sidebar with Step Info */}
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Info className="h-5 w-5 text-primary" /> Step Information
+            {/* Tasks Section - Now after step info */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <ListChecks className="h-5 w-5 text-primary" /> Tasks
                 </h2>
-                <div className="bg-muted/10 p-5 rounded-xl flex items-center gap-4 mb-4">
-                  <CalendarClock className="h-6 w-6 text-primary" />
-                  <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
-                </div>
-                <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => setShowTaskForm(!showTaskForm)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Task
+                </Button>
               </div>
-
-              {stepDetails.examples && stepDetails.examples.length > 0 && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5 text-primary" /> Examples
-                  </h2>
-                  <div className="bg-muted/20 p-5 rounded-lg space-y-4">
-                    {stepDetails.examples.map((example, index) => (
-                      <p key={index} className="text-base italic">{example}</p>
-                    ))}
+              
+              {showTaskForm && (
+                <div className="mb-6 p-5 border rounded-lg bg-muted/10">
+                  <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+                      <input
+                        id="newTaskTitle"
+                        className="w-full p-3 border rounded-lg text-base"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        placeholder="Enter task title..."
+                        aria-label="New task title"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
+                      <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
+                    </div>
                   </div>
                 </div>
               )}
               
-              {/* Document Upload Section */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Upload className="h-5 w-5 text-primary" /> Documents
-                </h2>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full mb-4"
-                  onClick={() => setShowUploadForm(!showUploadForm)}
-                >
-                  <Upload className="h-4 w-4 mr-2" /> Upload Documents
-                </Button>
-                
-                {showUploadForm && (
-                  <div className="mb-5 p-4 border rounded-lg">
-                    <label 
-                      htmlFor="file-upload" 
-                      className="block w-full cursor-pointer text-center py-4 px-4 border-2 border-dashed rounded-lg hover:bg-muted/20 transition-colors"
-                    >
-                      <span className="flex flex-col items-center">
-                        <Upload className="h-6 w-6 mb-2" />
-                        <span className="text-sm font-medium">Click to upload files</span>
-                        <span className="text-xs text-muted-foreground mt-1">PDF, DOC, DOCX, XLS, XLSX up to 10MB</span>
-                      </span>
-                      <input 
-                        id="file-upload" 
-                        type="file" 
-                        multiple 
-                        className="hidden" 
-                        onChange={handleFileUpload}
-                        accept=".pdf,.doc,.docx,.xls,.xlsx"
-                      />
-                    </label>
-                  </div>
-                )}
-                
-                {uploadedFiles.length > 0 ? (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium mb-2">Uploaded Files</h3>
-                    <ul className="space-y-2">
-                      {uploadedFiles.map((file, index) => (
-                        <li key={index} className="flex justify-between items-center p-2 bg-muted/10 rounded">
-                          <span className="text-sm truncate">{file.name}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => removeFile(file.name)}
-                            aria-label={`Remove file ${file.name}`}
-                          >
-                            Remove
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No documents uploaded yet
-                  </p>
-                )}
-              </div>
+              {relatedTasks.length > 0 ? (
+                <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2">
+                  {relatedTasks.map((task) => (
+                    <div key={task.id} className="border rounded-xl p-6 hover:shadow-md transition-shadow bg-card">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-semibold text-xl mb-2">{task.title}</h3>
+                          <p className="text-muted-foreground mb-4">{task.description}</p>
+                        </div>
+                        <div className="flex flex-col gap-2 items-end">
+                          {renderStatusBadge(task.status)}
+                          {task.deadline && (
+                            <span className="text-sm flex items-center gap-1 bg-muted/30 px-3 py-1 rounded-full">
+                              <Calendar className="h-4 w-4 text-primary" /> 
+                              Due: {formatDate(task.deadline)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                        <div 
+                          className="bg-green-500 h-3 rounded-full" 
+                          style={{ width: `${getCompletionPercentage(task)}%` }}
+                          role="progressbar"
+                          aria-valuenow={getCompletionPercentage(task)}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        ></div>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-4">
+                        {getCompletionPercentage(task)}% complete
+                      </div>
+                      
+                      {/* Subtasks preview */}
+                      {task.categories.length > 0 && (
+                        <div className="mt-4 border-t pt-4">
+                          <h4 className="font-medium text-sm mb-3">Subtasks</h4>
+                          <div className="space-y-2">
+                            {task.categories.flatMap(cat => 
+                              cat.subtasks.slice(0, 2).map(subtask => (
+                                <div key={subtask.id} className="flex items-center gap-2 text-sm">
+                                  <span className={`w-2 h-2 rounded-full ${subtask.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                  <span className={subtask.completed ? 'line-through text-muted-foreground' : ''}>
+                                    {subtask.title}
+                                  </span>
+                                </div>
+                              ))
+                            ).slice(0, 3)}
+                            {task.categories.flatMap(cat => cat.subtasks).length > 3 && (
+                              <div className="text-sm text-muted-foreground">
+                                +{task.categories.flatMap(cat => cat.subtasks).length - 3} more subtasks
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-5 flex justify-end">
+                        <Button 
+                          variant="default" 
+                          size="lg" 
+                          onClick={() => openTaskDetails(task)}
+                          className="flex items-center gap-2"
+                          aria-label={`Edit task: ${task.title}`}
+                        >
+                          <Edit className="h-4 w-4" /> Edit Task
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-8 bg-muted/10 rounded-lg">
+                  <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
+                  <Button 
+                    onClick={() => setShowTaskForm(true)}
+                    className="flex items-center mx-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Create Your First Task
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

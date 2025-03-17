@@ -29,6 +29,17 @@ const TaskDetailMainSection: React.FC<TaskDetailMainSectionProps> = ({
   onNewSubtaskChange,
   newSubtasks
 }) => {
+  // Convert deadline string to Date object if needed
+  const getDeadlineDate = (deadline: Date | string | undefined): Date | undefined => {
+    if (!deadline) return undefined;
+    
+    if (typeof deadline === 'string') {
+      return new Date(deadline);
+    }
+    
+    return deadline;
+  };
+
   return (
     <div className="lg:col-span-2 space-y-8">
       <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -38,16 +49,16 @@ const TaskDetailMainSection: React.FC<TaskDetailMainSectionProps> = ({
         <TaskProgressDisplay task={task} />
         
         <div className="mt-6">
-          <h3 className="text-base font-medium mb-3">Task Status</h3>
           <TaskStatusSelector 
             status={task.status} 
-            onStatusChange={onStatusChange} 
+            onStatusChange={onStatusChange}
+            taskId={task.id}
           />
         </div>
         
         <div className="mt-6">
           <DeadlineSelector 
-            deadline={task.deadline} 
+            deadline={getDeadlineDate(task.deadline)}
             onDeadlineChange={onDeadlineChange}
             taskId={task.id}
           />

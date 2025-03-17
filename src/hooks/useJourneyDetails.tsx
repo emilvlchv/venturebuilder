@@ -80,7 +80,6 @@ export const useJourneyDetails = () => {
   };
 
   const getSampleTasks = (): Task[] => {
-    
     return [
       {
         id: uuidv4(),
@@ -606,7 +605,9 @@ export const useJourneyDetails = () => {
     }
   };
 
-  const handleCreateTaskFromStep = (stepId: string, title: string, description: string) => {
+  const handleCreateTaskFromStep = (stepId: string, title: string, description: string, deadline?: Date) => {
+    const taskDeadline = deadline || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    
     const newTask: Task = {
       id: uuidv4(),
       title,
@@ -620,7 +621,8 @@ export const useJourneyDetails = () => {
           title: "Action Items",
           subtasks: []
         }
-      ]
+      ],
+      deadline: taskDeadline
     };
     
     const updatedTasks = [...tasks, newTask];
@@ -629,7 +631,7 @@ export const useJourneyDetails = () => {
     
     toast({
       title: "Task Created",
-      description: `A new task "${title}" has been created.`,
+      description: `A new task "${title}" has been created with a deadline on ${taskDeadline.toLocaleDateString()}.`,
       variant: "default",
     });
   };

@@ -6,16 +6,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BusinessIdeaData } from '@/components/journey/JourneyWizard';
-import { AlertCircle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, ArrowRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
+import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { Link } from 'react-router-dom';
 
 const JourneyDetails = () => {
   const { user } = useAuth();
   const [businessData, setBusinessData] = useState<BusinessIdeaData | null>(null);
   const [activeTab, setActiveTab] = useState('ideation');
+  const [selectedStep, setSelectedStep] = useState<StepDetail | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     // Load business data from localStorage
@@ -30,6 +33,170 @@ const JourneyDetails = () => {
       }
     }
   }, [user?.id]);
+
+  // Define step details that will appear in the dialog
+  const stepsDetailsMap: Record<string, StepDetail> = {
+    'market-research': {
+      title: 'Market Research',
+      description: 'Research your target market and competitors',
+      timeEstimate: '2-3 weeks',
+      detailedDescription: 'Market research is crucial for understanding your customers, competitors, and industry trends. This foundational step helps you validate your business idea and identify potential gaps in the market.',
+      tasks: [
+        'Identify your target audience and create customer personas',
+        'Analyze at least 3-5 direct competitors',
+        'Research market size and growth potential',
+        'Identify key industry trends and challenges',
+        'Conduct customer interviews or surveys (aim for 10-15 responses)'
+      ],
+      examples: [
+        'Example: A meal-prep startup might research busy professionals aged 25-45, analyze competitors like HelloFresh and Blue Apron, and survey potential customers about their meal preparation pain points.'
+      ]
+    },
+    'value-proposition': {
+      title: 'Value Proposition',
+      description: 'Define your unique value proposition',
+      timeEstimate: '1-2 weeks',
+      detailedDescription: 'Your value proposition clearly articulates why customers should choose your product or service over competitors. It focuses on the specific benefits and solutions you provide to your target market.',
+      tasks: [
+        'Identify your product/service's key benefits',
+        'Define what makes your offering unique',
+        'Create a compelling value proposition statement',
+        'Test your value proposition with potential customers',
+        'Refine based on feedback'
+      ],
+      examples: [
+        'Example: Dropbox's simple value proposition: "Secure file sharing and storage, anywhere." identifies both the core benefit (file sharing/storage) and the key differentiator (anywhere access).'
+      ]
+    },
+    'mvp': {
+      title: 'Minimum Viable Product',
+      description: 'Plan your MVP features and timeline',
+      timeEstimate: '2-4 weeks',
+      detailedDescription: 'An MVP (Minimum Viable Product) is the simplest version of your product that delivers value to customers. Creating an MVP allows you to test your concept with real users while minimizing development time and resources.',
+      tasks: [
+        'List all possible features for your product/service',
+        'Prioritize features based on customer needs and technical feasibility',
+        'Define the core features for your MVP',
+        'Create a development timeline with key milestones',
+        'Establish success metrics for your MVP launch'
+      ],
+      examples: [
+        'Example: Facebook's MVP was simply a profile page and the ability to connect with friends - no marketplace, no groups, no video calls.'
+      ]
+    },
+    'revenue-model': {
+      title: 'Revenue Model',
+      description: 'Define how your business will make money',
+      timeEstimate: '1-2 weeks',
+      detailedDescription: 'Your revenue model outlines how your business will generate income. It's essential to have a clear understanding of your pricing strategy, payment structure, and potential revenue streams.',
+      tasks: [
+        'Research pricing models in your industry',
+        'Analyze competitor pricing strategies',
+        'Define your primary and secondary revenue streams',
+        'Calculate your cost structure and profit margins',
+        'Test different pricing scenarios'
+      ],
+      examples: [
+        'Example: A SaaS company might use a freemium model with basic features free and premium features at tiered subscription levels of $9.99, $19.99, and $49.99 per month.'
+      ]
+    },
+    'cost-structure': {
+      title: 'Cost Structure',
+      description: 'Identify all costs associated with your business',
+      timeEstimate: '1-2 weeks',
+      detailedDescription: 'Understanding your cost structure helps you determine pricing, funding needs, and the path to profitability. This includes both one-time startup costs and ongoing operational expenses.',
+      tasks: [
+        'List all startup costs (equipment, licenses, legal fees, etc.)',
+        'Identify fixed monthly costs (rent, salaries, subscriptions)',
+        'Calculate variable costs per unit/service',
+        'Estimate marketing and customer acquisition costs',
+        'Create a break-even analysis'
+      ],
+      examples: [
+        'Example: A boutique clothing store might have startup costs of $50,000 (renovations, inventory, POS system), fixed monthly costs of $8,000 (rent, utilities, staff), and variable costs of 40% of retail price per item sold.'
+      ]
+    },
+    'business-entity': {
+      title: 'Business Entity',
+      description: 'Choose and register your business entity',
+      timeEstimate: '2-3 weeks',
+      detailedDescription: 'Selecting the right business entity type affects your legal liability, tax obligations, fundraising capabilities, and operational requirements. This is a crucial legal foundation for your business.',
+      tasks: [
+        'Research different business entity types (LLC, C-Corp, S-Corp, etc.)',
+        'Consult with a business attorney or tax professional',
+        'Register your chosen entity with state/local authorities',
+        'Obtain necessary licenses and permits',
+        'Set up your tax ID numbers and accounts'
+      ],
+      examples: [
+        'Example: Many tech startups choose to form a C-Corporation in Delaware due to the state's business-friendly laws and the ability to issue different classes of stock to investors.'
+      ]
+    },
+    'accounting': {
+      title: 'Accounting Setup',
+      description: 'Set up your accounting and tax processes',
+      timeEstimate: '1-2 weeks',
+      detailedDescription: 'Proper accounting systems help you track finances, prepare for taxes, and make informed business decisions. Setting this up early helps avoid costly mistakes and compliance issues.',
+      tasks: [
+        'Select accounting software appropriate for your business',
+        'Set up your chart of accounts',
+        'Establish bookkeeping processes (weekly/monthly)',
+        'Determine tax filing requirements and deadlines',
+        'Consider hiring an accountant or bookkeeper'
+      ],
+      examples: [
+        'Example: A small service business might start with QuickBooks Online ($25/month), set up weekly invoicing processes, and hire a part-time bookkeeper for 5 hours per month.'
+      ]
+    },
+    'brand-identity': {
+      title: 'Brand Identity',
+      description: 'Create your brand identity and messaging',
+      timeEstimate: '2-3 weeks',
+      detailedDescription: 'Your brand identity encompasses your visual elements, voice, and messaging that communicate your company's values and personality to customers. A consistent brand builds recognition and trust.',
+      tasks: [
+        'Define your brand values, mission, and personality',
+        'Create your company name, logo, and visual elements',
+        'Develop your brand voice and messaging guidelines',
+        'Design basic marketing materials (business cards, etc.)',
+        'Create brand style guidelines for consistency'
+      ],
+      examples: [
+        'Example: Mailchimp's playful brand identity features a distinctive yellow color, friendly chimp mascot, and conversational voice that makes email marketing seem approachable and fun.'
+      ]
+    },
+    'marketing-plan': {
+      title: 'Marketing Plan',
+      description: 'Develop a comprehensive marketing plan',
+      timeEstimate: '2-4 weeks',
+      detailedDescription: 'A marketing plan outlines how you'll reach and convert your target audience. It identifies the most effective channels, messaging, and tactics to acquire and retain customers.',
+      tasks: [
+        'Set specific, measurable marketing goals',
+        'Identify key marketing channels for your audience',
+        'Create a content strategy and editorial calendar',
+        'Develop an advertising budget and plan',
+        'Establish metrics to measure marketing effectiveness'
+      ],
+      examples: [
+        'Example: A B2B software company might focus on LinkedIn content, industry webinars, and targeted email campaigns to reach decision-makers, with goals of generating 100 qualified leads per month.'
+      ]
+    },
+    'launch-strategy': {
+      title: 'Launch Strategy',
+      description: 'Plan your product/service launch',
+      timeEstimate: '2-4 weeks',
+      detailedDescription: 'A well-executed launch introduces your product/service to the market with maximum impact. This critical phase requires careful planning to build anticipation and drive initial adoption.',
+      tasks: [
+        'Set launch goals and success metrics',
+        'Create a launch timeline with key milestones',
+        'Develop promotional assets and materials',
+        'Plan launch events or activities',
+        'Prepare customer onboarding and support processes'
+      ],
+      examples: [
+        'Example: A mobile app might use a phased launch with a closed beta for 100 users, followed by an invite-only period to build exclusivity, and finally a public launch with press outreach and social media campaign.'
+      ]
+    },
+  };
 
   // Define journey phases with steps
   const journeyPhases = [
@@ -160,6 +327,19 @@ const JourneyDetails = () => {
     }
   };
 
+  const handleOpenStepDetails = (stepId: string) => {
+    const stepDetails = stepsDetailsMap[stepId];
+    if (stepDetails) {
+      setSelectedStep(stepDetails);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedStep(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -259,7 +439,15 @@ const JourneyDetails = () => {
                                     </ul>
                                   </div>
                                 </div>
-                                <div className="flex-shrink-0">
+                                <div className="flex-shrink-0 space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleOpenStepDetails(step.id)}
+                                    className="mr-2"
+                                  >
+                                    <Info className="h-4 w-4 mr-1" /> Details
+                                  </Button>
                                   <Button size="sm">Start This Step</Button>
                                 </div>
                               </div>
@@ -276,6 +464,11 @@ const JourneyDetails = () => {
         </div>
       </main>
       <Footer />
+      <StepDetailsDialog 
+        isOpen={isDialogOpen} 
+        onClose={handleCloseDialog} 
+        stepDetails={selectedStep} 
+      />
     </div>
   );
 };

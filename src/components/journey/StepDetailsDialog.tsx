@@ -90,28 +90,6 @@ const StepDetailsDialog = ({
     }
   };
 
-  // Helper function for handling subtask addition from the edit sheet
-  const handleAddSubtask = (categoryId: string, title: string) => {
-    if (!selectedTask || !onTaskToggle) return;
-    
-    const category = selectedTask.categories.find(c => c.id === categoryId);
-    if (category) {
-      const newSubtask: Subtask = {
-        id: uuidv4(),
-        title,
-        completed: false
-      };
-      
-      // We can't directly update the task here, so we rely on the parent component
-      // to handle the update through its state management
-    }
-  };
-
-  // Helper function for handling subtask removal from the edit sheet
-  const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
-    // Similar to above, we rely on the parent component
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl mx-auto">
@@ -156,7 +134,7 @@ const StepDetailsDialog = ({
             </div>
           )}
           
-          {/* Related Tasks Section */}
+          {/* Tasks Section */}
           {relatedTasks.length > 0 && (
             <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
@@ -195,7 +173,7 @@ const StepDetailsDialog = ({
               )}
               
               <div className="space-y-4">
-                {relatedTasks.map((task, index) => (
+                {relatedTasks.map((task) => (
                   <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
                       <div>

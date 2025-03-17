@@ -1,13 +1,23 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Info, Clock, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { 
+  Info, 
+  Clock, 
+  CheckCircle2, 
+  AlertCircle, 
+  ChevronDown, 
+  ChevronUp, 
+  Calendar,
+  Edit,
+  Plus,
+  ArrowRight 
+} from 'lucide-react';
+import { format, isAfter, isBefore, addDays } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+import TaskDetailSheet from './TaskDetailSheet';
 
 export interface Subtask {
   id: string;
@@ -30,6 +40,7 @@ export interface Task {
   resources: string[];
   categories: TaskCategory[];
   deadline?: Date;
+  stepId?: string;
 }
 
 interface TaskCardProps {
@@ -40,6 +51,7 @@ interface TaskCardProps {
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
   onCategoryToggle: (taskId: string, categoryId: string) => void;
   onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
+  onViewStep?: (stepId: string) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ 
@@ -49,10 +61,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onTaskStatusChange,
   onSubtaskToggle,
   onCategoryToggle,
-  onDeadlineChange
+  onDeadlineChange,
+  onViewStep
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  
   const getCompletionPercentage = () => {
     const allSubtasks = task.categories.flatMap(category => category.subtasks);
     if (allSubtasks.length === 0) return 0;
@@ -79,6 +93,71 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
+  const handleAddSubtask = (categoryId: string, title: string) => {
+    const updatedTask = {...task};
+    const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
+    
+    if (categoryIndex !== -1) {
+      updatedTask.categories[categoryIndex].subtasks.push({
+        id: uuidv4(),
+        title,
+        completed: false
+      });
+      
+      if (updatedTask.status === 'pending') {
+        onTaskStatusChange(updatedTask, 'in-progress');
+      } else {
+        onTaskStatusChange(updatedTask, updatedTask.status);
+      }
+    }
+  };
+
+  const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
+    const updatedTask = {...task};
+    const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
+    
+    if (categoryIndex !== -1) {
+      updatedTask.categories[categoryIndex].subtasks = 
+        updatedTask.categories[categoryIndex].subtasks.filter(s => s.id !== subtaskId);
+      
+      onTaskStatusChange(updatedTask, updatedTask.status);
+    }
+  };
+
+  const getDeadlineStatus = () => {
+    if (!task.deadline) return null;
+    
+    const today = new Date();
+    const tomorrow = addDays(today, 1);
+    const threeDaysLater = addDays(today, 3);
+    
+    if (isBefore(task.deadline, today)) {
+      return "overdue";
+    } else if (isBefore(task.deadline, tomorrow)) {
+      return "due-today";
+    } else if (isBefore(task.deadline, threeDaysLater)) {
+      return "upcoming";
+    } else {
+      return "future";
+    }
+  };
+  
+  const deadlineStatus = getDeadlineStatus();
+  const deadlineBadgeStyle = () => {
+    if (!deadlineStatus) return "";
+    
+    switch (deadlineStatus) {
+      case "overdue":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "due-today":
+        return "bg-amber-100 text-amber-800 border-amber-300";
+      case "upcoming":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
   const completionPercentage = getCompletionPercentage();
   
   return (
@@ -93,6 +172,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 </div>
                 <h3 className="text-xl font-semibold">{task.title}</h3>
                 <div className="ml-2">{renderStatusBadge(task.status)}</div>
+                
+                {task.deadline && (
+                  <div className={`ml-auto text-xs flex items-center px-2 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
+                    <Calendar className="h-3 w-3 mr-1" /> 
+                    {format(task.deadline, 'MMM d')}
+                  </div>
+                )}
               </div>
               <p className="text-muted-foreground mb-4">{task.description}</p>
               
@@ -115,34 +201,38 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     <CheckCircle2 className="h-4 w-4 mr-1" />
                     {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
                   </Button>
+                  
+                  {task.stepId && onViewStep && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewStep(task.stepId!)}
+                    >
+                      <ArrowRight className="h-4 w-4 mr-1" />
+                      View Related Step
+                    </Button>
+                  )}
                 </div>
                 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {task.deadline ? format(task.deadline, 'PP') : 'Set Deadline'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="end">
-                    <CalendarComponent
-                      mode="single"
-                      selected={task.deadline}
-                      onSelect={(date) => onDeadlineChange(task.id, date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsEditSheetOpen(true)}
+                  className="flex items-center"
+                >
+                  <Edit className="h-4 w-4 mr-1" /> Edit
+                </Button>
               </div>
               
-              {/* Progress bar */}
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full" 
                   style={{ width: `${completionPercentage}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">{completionPercentage}% complete</p>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-xs text-muted-foreground">{completionPercentage}% complete</p>
+              </div>
               
               <Button 
                 variant="ghost" 
@@ -181,7 +271,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   {!category.collapsed && (
                     <div className="mt-3 space-y-2">
                       {category.subtasks.map((subtask) => (
-                        <div key={subtask.id} className="flex items-start space-x-2">
+                        <div key={subtask.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/40 transition-colors">
                           <Checkbox 
                             id={`subtask-${subtask.id}`}
                             checked={subtask.completed}
@@ -214,6 +304,21 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
         </div>
       </CardContent>
+      
+      <TaskDetailSheet
+        isOpen={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+        taskTitle={task.title}
+        taskId={task.id}
+        categories={task.categories}
+        deadline={task.deadline}
+        onAddSubtask={handleAddSubtask}
+        onRemoveSubtask={handleRemoveSubtask}
+        onSubtaskToggle={(categoryId, subtaskId, completed) => {
+          onSubtaskToggle(task.id, categoryId, subtaskId, completed);
+        }}
+        onDeadlineChange={(date) => onDeadlineChange(task.id, date)}
+      />
     </Card>
   );
 };

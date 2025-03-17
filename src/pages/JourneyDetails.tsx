@@ -4,13 +4,17 @@ import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BusinessIdeaData } from '@/components/journey/JourneyWizard';
+import { BusinessIdeaData, Journey } from '@/components/journey/types';
 import { AlertCircle, CheckCircle2, Clock, ArrowRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import TaskCard, { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/components/ui/use-toast';
+import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 
 const JourneyDetails = () => {
   const { user } = useAuth();
@@ -18,19 +22,629 @@ const JourneyDetails = () => {
   const [activeTab, setActiveTab] = useState('ideation');
   const [selectedStep, setSelectedStep] = useState<StepDetail | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
+  const { journeyId } = useParams<{ journeyId: string }>();
+  const navigate = useNavigate();
+  const [journey, setJourney] = useState<Journey | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && journeyId) {
       try {
+        const journeysKey = `journeys_${user.id}`;
+        const journeysData = localStorage.getItem(journeysKey);
+        
+        if (journeysData) {
+          const journeys = JSON.parse(journeysData);
+          const currentJourney = journeys.find((j: Journey) => j.id === journeyId);
+          
+          if (currentJourney) {
+            setJourney(currentJourney);
+            setBusinessData(currentJourney.businessIdeaData || null);
+            loadTasks();
+            return;
+          }
+        }
+        
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (currentUser.businessData) {
           setBusinessData(currentUser.businessData);
         }
       } catch (error) {
-        console.error("Error loading business data:", error);
+        console.error("Error loading journey data:", error);
       }
     }
-  }, [user?.id]);
+  }, [user?.id, journeyId]);
+
+  const loadTasks = () => {
+    if (!user?.id || !journeyId) return;
+    
+    try {
+      const tasksKey = `tasks_${user.id}_${journeyId}`;
+      const tasksData = localStorage.getItem(tasksKey);
+      
+      if (tasksData) {
+        const parsedTasks = JSON.parse(tasksData);
+        setTasks(parsedTasks);
+      } else {
+        setTasks(getSampleTasks());
+        saveTasks(getSampleTasks());
+      }
+    } catch (error) {
+      console.error("Error loading tasks:", error);
+    }
+  };
+
+  const saveTasks = (updatedTasks: Task[]) => {
+    if (!user?.id || !journeyId) return;
+    
+    try {
+      const tasksKey = `tasks_${user.id}_${journeyId}`;
+      localStorage.setItem(tasksKey, JSON.stringify(updatedTasks));
+    } catch (error) {
+      console.error("Error saving tasks:", error);
+    }
+  };
+
+  const getSampleTasks = (): Task[] => {
+    return [
+      {
+        id: uuidv4(),
+        title: "Market Research",
+        description: "Research your target market and competitors",
+        status: "in-progress",
+        resources: ["Market Research Template", "Competitive Analysis Guide"],
+        stepId: "market-research",
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Target Audience",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Define primary customer personas",
+                completed: true
+              },
+              {
+                id: uuidv4(),
+                title: "Identify customer pain points",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Estimate market size",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze demographic data",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create customer journey map",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Competitor Analysis",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Identify top 3 competitors",
+                completed: true
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze competitor pricing models",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Document competitor strengths and weaknesses",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze competitors' marketing strategies",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Review competitors' product features",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Industry Trends",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Identify key industry trends",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze market growth rate",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Research technological advancements",
+                completed: false
+              }
+            ]
+          }
+        ],
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+      },
+      {
+        id: uuidv4(),
+        title: "Value Proposition",
+        description: "Define your unique value proposition",
+        status: "pending",
+        resources: ["Value Proposition Canvas", "Customer Value Template"],
+        stepId: "value-proposition",
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Core Benefits",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "List key product/service benefits",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Identify unique selling points",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Map benefits to customer needs",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Quantify value delivered to customers",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Differentiation",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Compare with competitor offerings",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Craft value proposition statement",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Test proposition with potential customers",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Refine based on feedback",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Messaging",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Create elevator pitch",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Develop key marketing messages",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create customer-facing materials",
+                completed: false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: "MVP Planning",
+        description: "Define core features for your minimum viable product",
+        status: "pending",
+        resources: ["Feature Prioritization Template", "MVP Guide"],
+        stepId: "mvp",
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Feature Prioritization",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "List all potential features",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Score features based on value/effort",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Select core MVP features",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create feature roadmap",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Timeline Planning",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Set key development milestones",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create MVP development schedule",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Plan beta testing phase",
+                completed: false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: "Revenue Model Development",
+        description: "Create a sustainable revenue model for your business",
+        status: "pending",
+        resources: ["Pricing Strategy Guide", "Revenue Model Templates"],
+        stepId: "revenue-model",
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Pricing Strategy",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Research industry pricing models",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze competitor pricing",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Calculate cost-based pricing floor",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Determine value-based pricing ceiling",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Test pricing with potential customers",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Revenue Streams",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Identify primary revenue stream",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Explore secondary revenue opportunities",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create financial projections",
+                completed: false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: "Cost Structure Analysis",
+        description: "Define your business cost structure",
+        status: "pending",
+        resources: ["Cost Analysis Template", "Break-even Calculator"],
+        stepId: "cost-structure",
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Fixed Costs",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Identify all fixed monthly costs",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Calculate yearly overhead",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Identify cost reduction opportunities",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Variable Costs",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Calculate per-unit production costs",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Estimate customer acquisition costs",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze scaling cost implications",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Break-even Analysis",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Calculate break-even point",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Create sensitivity analysis",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Project time to profitability",
+                completed: false
+              }
+            ]
+          }
+        ]
+      }
+    ];
+  };
+
+  const handleTaskStatusChange = (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => {
+    const updatedTasks = tasks.map(t => {
+      if (t.id === task.id) {
+        return { ...t, status: newStatus };
+      }
+      return t;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: `Task ${newStatus === 'completed' ? 'completed' : 'updated'}`,
+      description: `"${task.title}" has been marked as ${newStatus}.`,
+      variant: "default",
+    });
+  };
+
+  const handleSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            const updatedSubtasks = category.subtasks.map(subtask => {
+              if (subtask.id === subtaskId) {
+                return { ...subtask, completed };
+              }
+              return subtask;
+            });
+            
+            return { ...category, subtasks: updatedSubtasks };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const handleCategoryToggle = (taskId: string, categoryId: string) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            return { ...category, collapsed: !category.collapsed };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const handleDeadlineChange = (taskId: string, deadline: Date | undefined) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, deadline };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: "Deadline updated",
+      description: deadline 
+        ? `Deadline set to ${deadline.toLocaleDateString()}` 
+        : "Deadline has been removed",
+      variant: "default",
+    });
+  };
+
+  const handleOpenTaskDetails = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailOpen(true);
+  };
+
+  const handleAddSubtask = (categoryId: string, title: string) => {
+    if (!selectedTask) return;
+    
+    const updatedTasks = tasks.map(task => {
+      if (task.id === selectedTask.id) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            const newSubtask: Subtask = {
+              id: uuidv4(),
+              title,
+              completed: false
+            };
+            
+            return {
+              ...category,
+              subtasks: [...category.subtasks, newSubtask]
+            };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    const updatedSelectedTask = updatedTasks.find(t => t.id === selectedTask.id);
+    if (updatedSelectedTask) {
+      setSelectedTask(updatedSelectedTask);
+    }
+  };
+
+  const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
+    if (!selectedTask) return;
+    
+    const updatedTasks = tasks.map(task => {
+      if (task.id === selectedTask.id) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              subtasks: category.subtasks.filter(subtask => subtask.id !== subtaskId)
+            };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    const updatedSelectedTask = updatedTasks.find(t => t.id === selectedTask.id);
+    if (updatedSelectedTask) {
+      setSelectedTask(updatedSelectedTask);
+    }
+  };
+
+  const handleCreateTaskFromStep = (stepId: string, title: string, description: string) => {
+    const newTask: Task = {
+      id: uuidv4(),
+      title,
+      description,
+      status: "pending",
+      resources: [],
+      stepId,
+      categories: [
+        {
+          id: uuidv4(),
+          title: "Action Items",
+          subtasks: []
+        }
+      ]
+    };
+    
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: "Task Created",
+      description: `A new task "${title}" has been created.`,
+      variant: "default",
+    });
+  };
+
+  const getTasksByStepId = (stepId: string) => {
+    return tasks.filter(task => task.stepId === stepId);
+  };
 
   const stepsDetailsMap: Record<string, StepDetail> = {
     'market-research': {
@@ -324,7 +938,11 @@ const JourneyDetails = () => {
   const handleOpenStepDetails = (stepId: string) => {
     const stepDetails = stepsDetailsMap[stepId];
     if (stepDetails) {
-      setSelectedStep(stepDetails);
+      setSelectedStep({
+        ...stepDetails,
+        stepId
+      });
+      setSelectedStepId(stepId);
       setIsDialogOpen(true);
     }
   };
@@ -334,6 +952,10 @@ const JourneyDetails = () => {
     setSelectedStep(null);
   };
 
+  const handleBackToJourneys = () => {
+    navigate('/journey');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -341,11 +963,21 @@ const JourneyDetails = () => {
         <div className="container-padding">
           <SubscriptionCheck>
             <div className="max-w-5xl mx-auto">
-              <div className="text-center mb-12">
-                <h1 className="h2 mb-4">Your Entrepreneurial Journey</h1>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.
-                </p>
+              <div className="mb-6">
+                <Button 
+                  variant="ghost" 
+                  onClick={handleBackToJourneys}
+                  className="text-primary hover:underline flex items-center mb-4"
+                >
+                  ← Back to All Journeys
+                </Button>
+                
+                <div className="text-center mb-8">
+                  <h1 className="h2 mb-4">{journey?.title || 'Your Entrepreneurial Journey'}</h1>
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    {journey?.description || 'Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.'}
+                  </p>
+                </div>
               </div>
 
               {businessData ? (
@@ -374,97 +1006,5 @@ const JourneyDetails = () => {
                 <Card className="mb-10">
                   <CardContent className="p-8 text-center">
                     <p className="text-muted-foreground">No business data available yet. Complete the initial questionnaire to see your personalized journey.</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card className="mb-10">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Next steps for your entrepreneurial journey:</h3>
-                  <ol className="list-decimal list-inside space-y-3 pl-2">
-                    {Object.entries(nextStepsMap).map(([stepText, tabId], index) => (
-                      <li key={index}>
-                        <button 
-                          onClick={() => handleStepClick(tabId)}
-                          className="text-left hover:text-primary inline-flex items-center"
-                        >
-                          {stepText}
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
-                  <p className="mt-4">Click on any step to begin, or use our AI assistant to guide you through the process.</p>
-                </CardContent>
-              </Card>
-
-              <div className="tabs-section">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
-                    {journeyPhases.map((phase) => (
-                      <TabsTrigger key={phase.id} value={phase.id}>{phase.title}</TabsTrigger>
-                    ))}
-                  </TabsList>
-
-                  {journeyPhases.map((phase) => (
-                    <TabsContent key={phase.id} value={phase.id}>
-                      <h2 className="text-2xl font-bold mb-6">{phase.title} Phase</h2>
-                      <div className="space-y-6">
-                        {phase.steps.map((step, index) => (
-                          <Card key={step.id}>
-                            <CardContent className="p-6">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <div className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                                      {index + 1}
-                                    </div>
-                                    <h3 className="text-xl font-semibold">{step.title}</h3>
-                                    <div className="ml-2">{renderStatusBadge(step.status)}</div>
-                                  </div>
-                                  <p className="text-muted-foreground mb-4">{step.description}</p>
-                                  
-                                  <div className="space-y-2">
-                                    <h4 className="text-sm font-medium">Resources:</h4>
-                                    <ul className="list-disc list-inside text-sm text-muted-foreground">
-                                      {step.resources.map((resource, i) => (
-                                        <li key={i}>{resource}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                </div>
-                                <div className="flex-shrink-0 space-x-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleOpenStepDetails(step.id)}
-                                    className="mr-2"
-                                  >
-                                    <Info className="h-4 w-4 mr-1" /> Details
-                                  </Button>
-                                  <Button size="sm">Start This Step</Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </div>
-            </div>
-          </SubscriptionCheck>
-        </div>
-      </main>
-      <Footer />
-      <StepDetailsDialog 
-        isOpen={isDialogOpen} 
-        onClose={handleCloseDialog} 
-        stepDetails={selectedStep} 
-      />
-    </div>
-  );
-};
-
-export default JourneyDetails;
+                    <Button 
+                      className

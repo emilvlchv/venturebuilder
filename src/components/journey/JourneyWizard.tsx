@@ -15,6 +15,11 @@ export interface BusinessIdeaData {
   teamStrengths: string;
   teamWeaknesses: string;
   targetCustomers: string;
+  revenueModel?: string;
+  marketingApproach?: string;
+  challengesForeseen?: string;
+  startupCosts?: string;
+  timelineMilestones?: string;
   additionalInfo?: string;
 }
 
@@ -125,7 +130,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
       case 'welcome':
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. I'll ask you a series of questions to understand your business better. Ready to begin?")}
+            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. I'll ask you a series of detailed questions to understand your business better and create specific tasks for your needs. Ready to begin?")}
             <div className="ml-11">
               <Button 
                 onClick={handleStartChat} 
@@ -148,7 +153,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
               <div className="w-3 h-3 rounded-full bg-primary"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-75"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-150"></div>
-              <div className="text-sm text-muted-foreground ml-2">Analyzing your business idea and generating your personalized journey...</div>
+              <div className="text-sm text-muted-foreground ml-2">Analyzing your business idea and generating your personalized journey with detailed tasks...</div>
             </div>
           </div>
         );
@@ -157,7 +162,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
         console.log("Rendering complete step content with View My Journey button");
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Your roadmap is now available below.")}
+            {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Your roadmap now includes detailed tasks organized into categories with deadlines and progress tracking to help you stay on track.")}
             <div className="ml-11">
               <Button 
                 onClick={handleComplete}

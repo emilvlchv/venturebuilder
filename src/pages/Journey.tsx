@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -7,12 +6,13 @@ import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PenLine, AlertCircle, CheckCircle2, Clock, ArrowRight, Info } from 'lucide-react';
+import { PenLine, ArrowRight, Info } from 'lucide-react';
 import Button from '@/components/shared/Button';
 import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
 import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
+import TaskCard, { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
+import { v4 as uuidv4 } from 'uuid';
 
 const Journey = () => {
   const { user } = useAuth();
@@ -26,6 +26,7 @@ const Journey = () => {
   const [activeTab, setActiveTab] = useState('ideation');
   const [selectedStep, setSelectedStep] = useState<StepDetail | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [tasks, setTasks] = useState<Record<string, Task[]>>({});
 
   // Load user data on component mount
   useEffect(() => {
@@ -40,11 +41,428 @@ const Journey = () => {
         if (currentUser.businessData) {
           setBusinessData(currentUser.businessData);
         }
+        
+        // Load tasks if available
+        const savedTasks = localStorage.getItem(`journey_tasks_${user.id}`);
+        if (savedTasks) {
+          setTasks(JSON.parse(savedTasks));
+        } else {
+          // Generate initial tasks if none exist
+          setTasks(generateInitialTasks());
+        }
       } catch (error) {
-        console.error("Error loading business data:", error);
+        console.error("Error loading data:", error);
+        // If there's an error, still generate initial tasks
+        setTasks(generateInitialTasks());
       }
     }
   }, [user?.id]);
+
+  // Generate initial tasks
+  const generateInitialTasks = () => {
+    const initialTasks: Record<string, Task[]> = {
+      'ideation': [
+        {
+          id: uuidv4(),
+          title: 'Market Research',
+          description: 'Research your target market and competitors',
+          status: 'in-progress',
+          resources: ['Market Research Template', 'Competitive Analysis Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Customer Research',
+              subtasks: [
+                { id: uuidv4(), title: 'Create detailed customer personas', completed: false },
+                { id: uuidv4(), title: 'Identify pain points and needs', completed: false },
+                { id: uuidv4(), title: 'Research demographic information', completed: false },
+                { id: uuidv4(), title: 'Map customer journey', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Competitor Analysis',
+              subtasks: [
+                { id: uuidv4(), title: 'Identify direct competitors', completed: true },
+                { id: uuidv4(), title: 'Analyze competitor pricing', completed: false },
+                { id: uuidv4(), title: 'Review competitor marketing strategies', completed: false },
+                { id: uuidv4(), title: 'Identify gaps in competitor offerings', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Market Size & Trends',
+              subtasks: [
+                { id: uuidv4(), title: 'Research total addressable market', completed: false },
+                { id: uuidv4(), title: 'Identify industry growth rate', completed: false },
+                { id: uuidv4(), title: 'Document key market trends', completed: false },
+                { id: uuidv4(), title: 'Analyze seasonal patterns', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Value Proposition',
+          description: 'Define your unique value proposition',
+          status: 'pending',
+          resources: ['Value Proposition Canvas', 'Customer Value Template'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Core Benefits',
+              subtasks: [
+                { id: uuidv4(), title: 'List all product/service benefits', completed: false },
+                { id: uuidv4(), title: 'Rank benefits by importance to customers', completed: false },
+                { id: uuidv4(), title: 'Link benefits to customer pain points', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Differentiation',
+              subtasks: [
+                { id: uuidv4(), title: 'Identify unique features', completed: false },
+                { id: uuidv4(), title: 'Compare with competitor offerings', completed: false },
+                { id: uuidv4(), title: 'Define clear points of differentiation', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Value Statement',
+              subtasks: [
+                { id: uuidv4(), title: 'Create initial value proposition statement', completed: false },
+                { id: uuidv4(), title: 'Test with potential customers', completed: false },
+                { id: uuidv4(), title: 'Refine based on feedback', completed: false },
+                { id: uuidv4(), title: 'Create final value statement', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Minimum Viable Product',
+          description: 'Plan your MVP features and timeline',
+          status: 'pending',
+          resources: ['MVP Planning Worksheet', 'Feature Prioritization Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Feature Definition',
+              subtasks: [
+                { id: uuidv4(), title: 'List all possible features', completed: false },
+                { id: uuidv4(), title: 'Categorize features (must-have vs nice-to-have)', completed: false },
+                { id: uuidv4(), title: 'Link features to customer needs', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Prioritization',
+              subtasks: [
+                { id: uuidv4(), title: 'Score features by value and complexity', completed: false },
+                { id: uuidv4(), title: 'Create priority matrix', completed: false },
+                { id: uuidv4(), title: 'Select core MVP features', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Development Planning',
+              subtasks: [
+                { id: uuidv4(), title: 'Create development roadmap', completed: false },
+                { id: uuidv4(), title: 'Set key milestones', completed: false },
+                { id: uuidv4(), title: 'Establish MVP success metrics', completed: false }
+              ]
+            }
+          ]
+        }
+      ],
+      'business-model': [
+        {
+          id: uuidv4(),
+          title: 'Revenue Model',
+          description: 'Define how your business will make money',
+          status: 'pending',
+          resources: ['Revenue Model Templates', 'Pricing Strategy Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Pricing Strategy',
+              subtasks: [
+                { id: uuidv4(), title: 'Research industry pricing models', completed: false },
+                { id: uuidv4(), title: 'Analyze competitor pricing', completed: false },
+                { id: uuidv4(), title: 'Calculate value-based pricing', completed: false },
+                { id: uuidv4(), title: 'Create pricing tiers', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Revenue Streams',
+              subtasks: [
+                { id: uuidv4(), title: 'Identify primary revenue stream', completed: false },
+                { id: uuidv4(), title: 'Explore secondary revenue opportunities', completed: false },
+                { id: uuidv4(), title: 'Evaluate recurring vs one-time revenue', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Financial Projections',
+              subtasks: [
+                { id: uuidv4(), title: 'Create sales forecast for 12 months', completed: false },
+                { id: uuidv4(), title: 'Project revenue growth', completed: false },
+                { id: uuidv4(), title: 'Calculate revenue targets', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Cost Structure',
+          description: 'Identify all costs associated with your business',
+          status: 'pending',
+          resources: ['Startup Cost Calculator', 'Operational Budget Template'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Startup Costs',
+              subtasks: [
+                { id: uuidv4(), title: 'List one-time startup expenses', completed: false },
+                { id: uuidv4(), title: 'Research equipment/technology needs', completed: false },
+                { id: uuidv4(), title: 'Calculate legal and licensing costs', completed: false },
+                { id: uuidv4(), title: 'Determine initial inventory needs', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Fixed Costs',
+              subtasks: [
+                { id: uuidv4(), title: 'Calculate monthly rent/lease costs', completed: false },
+                { id: uuidv4(), title: 'Estimate insurance expenses', completed: false },
+                { id: uuidv4(), title: 'Determine subscription services needed', completed: false },
+                { id: uuidv4(), title: 'Calculate staff salaries', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Variable Costs',
+              subtasks: [
+                { id: uuidv4(), title: 'Calculate cost per unit/service', completed: false },
+                { id: uuidv4(), title: 'Estimate shipping and fulfillment costs', completed: false },
+                { id: uuidv4(), title: 'Project marketing expenses', completed: false },
+                { id: uuidv4(), title: 'Determine commission structure', completed: false }
+              ]
+            }
+          ]
+        }
+      ],
+      'legal': [
+        {
+          id: uuidv4(),
+          title: 'Business Entity',
+          description: 'Choose and register your business entity',
+          status: 'pending',
+          resources: ['Entity Comparison Guide', 'Registration Checklist'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Entity Selection',
+              subtasks: [
+                { id: uuidv4(), title: 'Research business entity types', completed: false },
+                { id: uuidv4(), title: 'Compare tax implications', completed: false },
+                { id: uuidv4(), title: 'Evaluate liability protection', completed: false },
+                { id: uuidv4(), title: 'Consult with legal advisor', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Registration Process',
+              subtasks: [
+                { id: uuidv4(), title: 'Choose business name', completed: false },
+                { id: uuidv4(), title: 'File formation documents', completed: false },
+                { id: uuidv4(), title: 'Obtain EIN/tax ID', completed: false },
+                { id: uuidv4(), title: 'Register with state/local authorities', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Compliance',
+              subtasks: [
+                { id: uuidv4(), title: 'Research required licenses', completed: false },
+                { id: uuidv4(), title: 'Apply for permits', completed: false },
+                { id: uuidv4(), title: 'Understand regulatory requirements', completed: false },
+                { id: uuidv4(), title: 'Set up compliance calendar', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Accounting Setup',
+          description: 'Set up your accounting and tax processes',
+          status: 'pending',
+          resources: ['Accounting Basics', 'Tax Considerations Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Accounting System',
+              subtasks: [
+                { id: uuidv4(), title: 'Research accounting software options', completed: false },
+                { id: uuidv4(), title: 'Set up chart of accounts', completed: false },
+                { id: uuidv4(), title: 'Configure payment processing', completed: false },
+                { id: uuidv4(), title: 'Connect bank accounts', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Financial Processes',
+              subtasks: [
+                { id: uuidv4(), title: 'Set up invoice templates', completed: false },
+                { id: uuidv4(), title: 'Create expense tracking system', completed: false },
+                { id: uuidv4(), title: 'Establish bookkeeping routine', completed: false },
+                { id: uuidv4(), title: 'Define financial reporting process', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Tax Planning',
+              subtasks: [
+                { id: uuidv4(), title: 'Identify tax filing requirements', completed: false },
+                { id: uuidv4(), title: 'Research sales tax obligations', completed: false },
+                { id: uuidv4(), title: 'Set up tax calendar', completed: false },
+                { id: uuidv4(), title: 'Find tax professional', completed: false }
+              ]
+            }
+          ]
+        }
+      ],
+      'marketing': [
+        {
+          id: uuidv4(),
+          title: 'Brand Identity',
+          description: 'Create your brand identity and messaging',
+          status: 'pending',
+          resources: ['Brand Strategy Template', 'Visual Identity Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Brand Foundation',
+              subtasks: [
+                { id: uuidv4(), title: 'Define brand values and mission', completed: false },
+                { id: uuidv4(), title: 'Develop brand personality', completed: false },
+                { id: uuidv4(), title: 'Create brand story', completed: false },
+                { id: uuidv4(), title: 'Define brand positioning', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Visual Identity',
+              subtasks: [
+                { id: uuidv4(), title: 'Design logo', completed: false },
+                { id: uuidv4(), title: 'Select brand colors', completed: false },
+                { id: uuidv4(), title: 'Choose typography', completed: false },
+                { id: uuidv4(), title: 'Create visual style guide', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Brand Voice',
+              subtasks: [
+                { id: uuidv4(), title: 'Define tone of voice', completed: false },
+                { id: uuidv4(), title: 'Create messaging guidelines', completed: false },
+                { id: uuidv4(), title: 'Develop tagline/slogan', completed: false },
+                { id: uuidv4(), title: 'Create elevator pitch', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Marketing Plan',
+          description: 'Develop a comprehensive marketing plan',
+          status: 'pending',
+          resources: ['Marketing Plan Template', 'Digital Marketing Guide'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Strategy Development',
+              subtasks: [
+                { id: uuidv4(), title: 'Set SMART marketing goals', completed: false },
+                { id: uuidv4(), title: 'Define KPIs', completed: false },
+                { id: uuidv4(), title: 'Establish marketing budget', completed: false },
+                { id: uuidv4(), title: 'Identify target segments', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Channel Selection',
+              subtasks: [
+                { id: uuidv4(), title: 'Research marketing channels', completed: false },
+                { id: uuidv4(), title: 'Prioritize channels based on audience', completed: false },
+                { id: uuidv4(), title: 'Create channel-specific strategies', completed: false },
+                { id: uuidv4(), title: 'Develop testing plan', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Content Planning',
+              subtasks: [
+                { id: uuidv4(), title: 'Identify content types', completed: false },
+                { id: uuidv4(), title: 'Create content calendar', completed: false },
+                { id: uuidv4(), title: 'Plan content production', completed: false },
+                { id: uuidv4(), title: 'Develop distribution strategy', completed: false }
+              ]
+            }
+          ]
+        },
+        {
+          id: uuidv4(),
+          title: 'Launch Strategy',
+          description: 'Plan your product/service launch',
+          status: 'pending',
+          resources: ['Launch Checklist', 'Go-to-Market Strategy'],
+          categories: [
+            {
+              id: uuidv4(),
+              title: 'Pre-launch',
+              subtasks: [
+                { id: uuidv4(), title: 'Create launch timeline', completed: false },
+                { id: uuidv4(), title: 'Develop teaser campaign', completed: false },
+                { id: uuidv4(), title: 'Set up early access/waitlist', completed: false },
+                { id: uuidv4(), title: 'Prepare press kit', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Launch Day',
+              subtasks: [
+                { id: uuidv4(), title: 'Prepare launch announcement', completed: false },
+                { id: uuidv4(), title: 'Plan social media campaign', completed: false },
+                { id: uuidv4(), title: 'Organize launch event', completed: false },
+                { id: uuidv4(), title: 'Prepare email campaign', completed: false }
+              ]
+            },
+            {
+              id: uuidv4(),
+              title: 'Post-launch',
+              subtasks: [
+                { id: uuidv4(), title: 'Plan follow-up communications', completed: false },
+                { id: uuidv4(), title: 'Create customer onboarding process', completed: false },
+                { id: uuidv4(), title: 'Set up feedback collection', completed: false },
+                { id: uuidv4(), title: 'Prepare metrics tracking', completed: false }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+    
+    return initialTasks;
+  };
+
+  // Save tasks to localStorage
+  const saveTasks = (updatedTasks: Record<string, Task[]>) => {
+    if (user?.id) {
+      localStorage.setItem(`journey_tasks_${user.id}`, JSON.stringify(updatedTasks));
+    }
+  };
 
   const handleJourneyComplete = () => {
     console.log("Journey complete callback triggered");
@@ -62,6 +480,137 @@ const Journey = () => {
       }
     } catch (error) {
       console.error("Error loading updated business data:", error);
+    }
+  };
+
+  const handleTaskStatusChange = (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => {
+    const updatedTasks = { ...tasks };
+    const phaseKey = activeTab;
+    
+    if (updatedTasks[phaseKey]) {
+      const taskIndex = updatedTasks[phaseKey].findIndex(t => t.id === task.id);
+      if (taskIndex !== -1) {
+        updatedTasks[phaseKey][taskIndex] = {
+          ...updatedTasks[phaseKey][taskIndex],
+          status: newStatus
+        };
+        
+        // If marking as completed, also mark all subtasks as completed
+        if (newStatus === 'completed') {
+          updatedTasks[phaseKey][taskIndex].categories = updatedTasks[phaseKey][taskIndex].categories.map(category => ({
+            ...category,
+            subtasks: category.subtasks.map(subtask => ({
+              ...subtask,
+              completed: true
+            }))
+          }));
+        }
+        
+        // If marking as in-progress and all subtasks are completed, update some subtasks to not completed
+        if (newStatus === 'in-progress') {
+          const allCompleted = updatedTasks[phaseKey][taskIndex].categories.every(
+            category => category.subtasks.every(subtask => subtask.completed)
+          );
+          
+          if (allCompleted) {
+            updatedTasks[phaseKey][taskIndex].categories = updatedTasks[phaseKey][taskIndex].categories.map(category => {
+              // Mark the last subtask in each category as not completed
+              const updatedSubtasks = [...category.subtasks];
+              if (updatedSubtasks.length > 0) {
+                updatedSubtasks[updatedSubtasks.length - 1].completed = false;
+              }
+              return {
+                ...category,
+                subtasks: updatedSubtasks
+              };
+            });
+          }
+        }
+        
+        setTasks(updatedTasks);
+        saveTasks(updatedTasks);
+        
+        toast({
+          title: `Task ${newStatus === 'completed' ? 'Completed' : 'Updated'}`,
+          description: `"${task.title}" has been marked as ${newStatus}.`,
+        });
+      }
+    }
+  };
+
+  const handleSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
+    const updatedTasks = { ...tasks };
+    const phaseKey = activeTab;
+    
+    if (updatedTasks[phaseKey]) {
+      const taskIndex = updatedTasks[phaseKey].findIndex(t => t.id === taskId);
+      if (taskIndex !== -1) {
+        const categoryIndex = updatedTasks[phaseKey][taskIndex].categories.findIndex(c => c.id === categoryId);
+        if (categoryIndex !== -1) {
+          const subtaskIndex = updatedTasks[phaseKey][taskIndex].categories[categoryIndex].subtasks.findIndex(s => s.id === subtaskId);
+          if (subtaskIndex !== -1) {
+            // Update the specific subtask
+            updatedTasks[phaseKey][taskIndex].categories[categoryIndex].subtasks[subtaskIndex].completed = completed;
+            
+            // Check if all subtasks are completed
+            const allCompleted = updatedTasks[phaseKey][taskIndex].categories.every(
+              category => category.subtasks.every(subtask => subtask.completed)
+            );
+            
+            // Update task status based on subtasks
+            if (allCompleted) {
+              updatedTasks[phaseKey][taskIndex].status = 'completed';
+            } else {
+              updatedTasks[phaseKey][taskIndex].status = 'in-progress';
+            }
+            
+            setTasks(updatedTasks);
+            saveTasks(updatedTasks);
+          }
+        }
+      }
+    }
+  };
+
+  const handleCategoryToggle = (taskId: string, categoryId: string) => {
+    const updatedTasks = { ...tasks };
+    const phaseKey = activeTab;
+    
+    if (updatedTasks[phaseKey]) {
+      const taskIndex = updatedTasks[phaseKey].findIndex(t => t.id === taskId);
+      if (taskIndex !== -1) {
+        const categoryIndex = updatedTasks[phaseKey][taskIndex].categories.findIndex(c => c.id === categoryId);
+        if (categoryIndex !== -1) {
+          // Toggle the collapsed state
+          updatedTasks[phaseKey][taskIndex].categories[categoryIndex].collapsed = 
+            !updatedTasks[phaseKey][taskIndex].categories[categoryIndex].collapsed;
+          
+          setTasks(updatedTasks);
+          saveTasks(updatedTasks);
+        }
+      }
+    }
+  };
+
+  const handleDeadlineChange = (taskId: string, deadline: Date | undefined) => {
+    const updatedTasks = { ...tasks };
+    const phaseKey = activeTab;
+    
+    if (updatedTasks[phaseKey]) {
+      const taskIndex = updatedTasks[phaseKey].findIndex(t => t.id === taskId);
+      if (taskIndex !== -1) {
+        updatedTasks[phaseKey][taskIndex].deadline = deadline;
+        
+        setTasks(updatedTasks);
+        saveTasks(updatedTasks);
+        
+        toast({
+          title: "Deadline Updated",
+          description: deadline 
+            ? `Deadline set to ${format(deadline, 'MMMM d, yyyy')}` 
+            : "Deadline has been removed",
+        });
+      }
     }
   };
 
@@ -331,104 +880,6 @@ const Journey = () => {
     }
   };
 
-  // Define journey phases with steps
-  const journeyPhases = [
-    {
-      id: 'ideation',
-      title: 'Idea Validation',
-      steps: [
-        { 
-          id: 'market-research', 
-          title: 'Market Research', 
-          description: 'Research your target market and competitors',
-          status: 'in-progress',
-          resources: ['Market Research Template', 'Competitive Analysis Guide']
-        },
-        { 
-          id: 'value-proposition', 
-          title: 'Value Proposition', 
-          description: 'Define your unique value proposition',
-          status: 'pending',
-          resources: ['Value Proposition Canvas', 'Customer Value Template']
-        },
-        { 
-          id: 'mvp', 
-          title: 'Minimum Viable Product', 
-          description: 'Plan your MVP features and timeline',
-          status: 'pending',
-          resources: ['MVP Planning Worksheet', 'Feature Prioritization Guide']
-        }
-      ]
-    },
-    {
-      id: 'business-model',
-      title: 'Business Model',
-      steps: [
-        { 
-          id: 'revenue-model', 
-          title: 'Revenue Model', 
-          description: 'Define how your business will make money',
-          status: 'pending',
-          resources: ['Revenue Model Templates', 'Pricing Strategy Guide']
-        },
-        { 
-          id: 'cost-structure', 
-          title: 'Cost Structure', 
-          description: 'Identify all costs associated with your business',
-          status: 'pending',
-          resources: ['Startup Cost Calculator', 'Operational Budget Template']
-        }
-      ]
-    },
-    {
-      id: 'legal',
-      title: 'Legal & Finance',
-      steps: [
-        { 
-          id: 'business-entity', 
-          title: 'Business Entity', 
-          description: 'Choose and register your business entity',
-          status: 'pending',
-          resources: ['Entity Comparison Guide', 'Registration Checklist']
-        },
-        { 
-          id: 'accounting', 
-          title: 'Accounting Setup', 
-          description: 'Set up your accounting and tax processes',
-          status: 'pending',
-          resources: ['Accounting Basics', 'Tax Considerations Guide']
-        }
-      ]
-    },
-    {
-      id: 'marketing',
-      title: 'Marketing & Launch',
-      steps: [
-        { 
-          id: 'brand-identity', 
-          title: 'Brand Identity', 
-          description: 'Create your brand identity and messaging',
-          status: 'pending',
-          resources: ['Brand Strategy Template', 'Visual Identity Guide']
-        },
-        { 
-          id: 'marketing-plan', 
-          title: 'Marketing Plan', 
-          description: 'Develop a comprehensive marketing plan',
-          status: 'pending',
-          resources: ['Marketing Plan Template', 'Digital Marketing Guide']
-        },
-        { 
-          id: 'launch-strategy', 
-          title: 'Launch Strategy', 
-          description: 'Plan your product/service launch',
-          status: 'pending',
-          resources: ['Launch Checklist', 'Go-to-Market Strategy']
-        }
-      ]
-    }
-  ];
-
   // Create a mapping of next steps to their corresponding tabs
   const nextStepsMap = {
     'Complete your business plan': 'ideation',
@@ -490,7 +941,7 @@ const Journey = () => {
           <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
             <h1 className="h2 mb-4 animate-fade-in">Start Your Entrepreneurial Journey</h1>
             <p className="text-lg text-muted-foreground animate-fade-in delay-[50ms]">
-              Our AI assistant will guide you through a few questions to create a personalized roadmap for your business.
+              Our AI assistant will guide you through a series of questions to create a personalized roadmap for your business.
             </p>
           </div>
           
@@ -517,6 +968,12 @@ const Journey = () => {
                           <h3 className="font-medium">Team Composition</h3>
                           <p className="text-muted-foreground">{businessData.teamComposition}</p>
                         </div>
+                        {businessData.revenueModel && (
+                          <div>
+                            <h3 className="font-medium">Revenue Model</h3>
+                            <p className="text-muted-foreground">{businessData.revenueModel}</p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -545,52 +1002,36 @@ const Journey = () => {
                 <div className="tabs-section">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
-                      {journeyPhases.map((phase) => (
-                        <TabsTrigger key={phase.id} value={phase.id}>{phase.title}</TabsTrigger>
+                      {Object.keys(tasks).map((phaseId) => (
+                        <TabsTrigger key={phaseId} value={phaseId}>
+                          {phaseId === 'ideation' ? 'Idea Validation' : 
+                           phaseId === 'business-model' ? 'Business Model' : 
+                           phaseId === 'legal' ? 'Legal & Finance' : 
+                           phaseId === 'marketing' ? 'Marketing & Launch' : phaseId}
+                        </TabsTrigger>
                       ))}
                     </TabsList>
 
-                    {journeyPhases.map((phase) => (
-                      <TabsContent key={phase.id} value={phase.id}>
-                        <h2 className="text-2xl font-bold mb-6">{phase.title} Phase</h2>
+                    {Object.entries(tasks).map(([phaseId, phaseTasks]) => (
+                      <TabsContent key={phaseId} value={phaseId}>
+                        <h2 className="text-2xl font-bold mb-6">
+                          {phaseId === 'ideation' ? 'Idea Validation' : 
+                           phaseId === 'business-model' ? 'Business Model' : 
+                           phaseId === 'legal' ? 'Legal & Finance' : 
+                           phaseId === 'marketing' ? 'Marketing & Launch' : phaseId} Phase
+                        </h2>
                         <div className="space-y-6">
-                          {phase.steps.map((step, index) => (
-                            <Card key={step.id}>
-                              <CardContent className="p-6">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                                        {index + 1}
-                                      </div>
-                                      <h3 className="text-xl font-semibold">{step.title}</h3>
-                                      <div className="ml-2">{renderStatusBadge(step.status)}</div>
-                                    </div>
-                                    <p className="text-muted-foreground mb-4">{step.description}</p>
-                                    
-                                    <div className="space-y-2">
-                                      <h4 className="text-sm font-medium">Resources:</h4>
-                                      <ul className="list-disc list-inside text-sm text-muted-foreground">
-                                        {step.resources.map((resource, i) => (
-                                          <li key={i}>{resource}</li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div className="flex-shrink-0 space-x-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      onClick={() => handleOpenStepDetails(step.id)}
-                                      className="mr-2"
-                                    >
-                                      <Info className="h-4 w-4 mr-1" /> Details
-                                    </Button>
-                                    <Button size="sm">Start This Step</Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
+                          {phaseTasks.map((task, index) => (
+                            <TaskCard
+                              key={task.id}
+                              task={task}
+                              index={index}
+                              onOpenDetails={() => handleOpenStepDetails(task.id)}
+                              onTaskStatusChange={handleTaskStatusChange}
+                              onSubtaskToggle={handleSubtaskToggle}
+                              onCategoryToggle={handleCategoryToggle}
+                              onDeadlineChange={handleDeadlineChange}
+                            />
                           ))}
                         </div>
                       </TabsContent>

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, AlertTriangle } from 'lucide-react';
 import Button from '../shared/Button';
 import { BusinessIdeaData } from './types';
 import { useAuth } from '@/contexts/AuthContext';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ChatMessage {
   sender: 'user' | 'assistant';

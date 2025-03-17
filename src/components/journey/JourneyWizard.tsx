@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Send, User, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
-import { BusinessIdeaData, Journey } from './types';
+import { BusinessIdeaData, Journey, JourneyTask } from './types';
 import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
@@ -51,6 +51,135 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         description: "Your personalized business journey is ready to view.",
       });
     }, 3000);
+  };
+  
+  // Create default tasks for a journey
+  const createDefaultTasks = (userId: string, journeyId: string) => {
+    const tasksKey = `journey_tasks_${userId}_${journeyId}`;
+    const defaultTasks = {
+      ideation: [
+        { id: 'task1', title: 'Research market', completed: false, description: 'Conduct thorough market research to validate your business idea.' },
+        { id: 'task2', title: 'Define target audience', completed: false, description: 'Create detailed customer personas for your target audience.' },
+        { id: 'task3', title: 'Analyze competitors', completed: false, description: 'Identify key competitors and analyze their strengths and weaknesses.' }
+      ],
+      planning: [
+        { id: 'task4', title: 'Create business plan', completed: false, description: 'Develop a comprehensive business plan including financial projections.' },
+        { id: 'task5', title: 'Define pricing model', completed: false, description: 'Establish a pricing strategy that aligns with your target market and business goals.' }
+      ],
+      execution: [
+        { id: 'task6', title: 'Design MVP', completed: false, description: 'Create a minimum viable product to test with early customers.' },
+        { id: 'task7', title: 'Create branding', completed: false, description: 'Develop your brand identity including logo, colors, and messaging.' }
+      ]
+    };
+    
+    // Convert to the expected format with categories for each task
+    const formattedTasks = [
+      {
+        id: 'task1',
+        title: 'Research Market and Validate Business Idea',
+        description: 'Conduct thorough market research to validate your business concept.',
+        status: 'pending',
+        resources: [
+          'Use online surveys to gather customer feedback',
+          'Analyze industry reports for market trends',
+          'Conduct interviews with potential customers'
+        ],
+        categories: [
+          {
+            id: 'cat1',
+            title: 'Market Research',
+            subtasks: [
+              { id: 'subtask1', title: 'Define your target market', completed: false },
+              { id: 'subtask2', title: 'Research competitors', completed: false },
+              { id: 'subtask3', title: 'Identify market gaps', completed: false }
+            ],
+            collapsed: false
+          },
+          {
+            id: 'cat2',
+            title: 'Validation Methods',
+            subtasks: [
+              { id: 'subtask4', title: 'Create customer surveys', completed: false },
+              { id: 'subtask5', title: 'Conduct customer interviews', completed: false },
+              { id: 'subtask6', title: 'Test concept with focus groups', completed: false }
+            ],
+            collapsed: false
+          }
+        ],
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
+      },
+      {
+        id: 'task2',
+        title: 'Develop Business Plan',
+        description: 'Create a comprehensive business plan that outlines your strategy, operations, and financials.',
+        status: 'pending',
+        resources: [
+          'Business plan templates',
+          'Financial forecasting tools',
+          'Industry benchmark data'
+        ],
+        categories: [
+          {
+            id: 'cat3',
+            title: 'Strategic Planning',
+            subtasks: [
+              { id: 'subtask7', title: 'Define vision and mission', completed: false },
+              { id: 'subtask8', title: 'Set goals and objectives', completed: false },
+              { id: 'subtask9', title: 'Outline growth strategy', completed: false }
+            ],
+            collapsed: false
+          },
+          {
+            id: 'cat4',
+            title: 'Financial Projections',
+            subtasks: [
+              { id: 'subtask10', title: 'Create sales forecast', completed: false },
+              { id: 'subtask11', title: 'Determine startup costs', completed: false },
+              { id: 'subtask12', title: 'Project cash flow', completed: false }
+            ],
+            collapsed: false
+          }
+        ],
+        deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) // 3 weeks from now
+      },
+      {
+        id: 'task3',
+        title: 'Create Branding and Marketing Strategy',
+        description: 'Develop your brand identity and marketing approach to reach your target audience.',
+        status: 'pending',
+        resources: [
+          'Brand identity guidelines',
+          'Marketing channel comparison',
+          'Content strategy templates'
+        ],
+        categories: [
+          {
+            id: 'cat5',
+            title: 'Brand Development',
+            subtasks: [
+              { id: 'subtask13', title: 'Design logo and visual elements', completed: false },
+              { id: 'subtask14', title: 'Create brand messaging', completed: false },
+              { id: 'subtask15', title: 'Develop brand guidelines', completed: false }
+            ],
+            collapsed: false
+          },
+          {
+            id: 'cat6',
+            title: 'Marketing Channels',
+            subtasks: [
+              { id: 'subtask16', title: 'Identify primary marketing channels', completed: false },
+              { id: 'subtask17', title: 'Create content calendar', completed: false },
+              { id: 'subtask18', title: 'Set marketing budget', completed: false }
+            ],
+            collapsed: false
+          }
+        ],
+        deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000) // 4 weeks from now
+      }
+    ];
+    
+    localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
+    return formattedTasks;
   };
   
   // Function to handle completion of the initial chat
@@ -101,25 +230,10 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   localStorage.setItem(journeysKey, JSON.stringify(journeys));
                   
                   // Create default tasks for this journey
-                  const tasksKey = `journey_tasks_${userId}_${journeyId}`;
-                  if (!localStorage.getItem(tasksKey)) {
-                    const defaultTasks = {
-                      ideation: [
-                        { id: 'task1', title: 'Research market', completed: false },
-                        { id: 'task2', title: 'Define target audience', completed: false },
-                        { id: 'task3', title: 'Analyze competitors', completed: false }
-                      ],
-                      planning: [
-                        { id: 'task4', title: 'Create business plan', completed: false },
-                        { id: 'task5', title: 'Define pricing model', completed: false }
-                      ],
-                      execution: [
-                        { id: 'task6', title: 'Design MVP', completed: false },
-                        { id: 'task7', title: 'Create branding', completed: false }
-                      ]
-                    };
-                    localStorage.setItem(tasksKey, JSON.stringify(defaultTasks));
-                  }
+                  createDefaultTasks(userId, journeyId);
+                  
+                  // Navigate to journey details page
+                  navigate(`/journey-details/${journeyId}`);
                 }
               }
             }

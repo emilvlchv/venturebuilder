@@ -32,6 +32,21 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
+// Component to redirect users based on role
+const RoleBasedRedirect = () => {
+  const { user, isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/signin" replace />;
+  }
+  
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  
+  return <Navigate to="/journey" replace />;
+};
+
 // Component to restrict admin users from the journey page and redirect them to admin dashboard
 const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated } = useAuth();
@@ -92,6 +107,7 @@ const App = () => (
             <Route path="/payment" element={<Payment />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/dashboard" element={<RoleBasedRedirect />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>

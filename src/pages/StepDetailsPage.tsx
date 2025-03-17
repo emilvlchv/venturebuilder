@@ -23,6 +23,7 @@ import { Task } from '@/components/journey/TaskCard';
 import { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { SkipToContent } from '@/components/ui/skip-to-content';
 import { useToast } from '@/components/ui/use-toast';
+import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 
 const StepDetailsPage = () => {
   const { journeyId, stepId } = useParams<{ journeyId: string; stepId: string }>();
@@ -32,13 +33,21 @@ const StepDetailsPage = () => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
   
   const {
     tasks,
     stepsDetailsMap,
     handleCreateTaskFromStep,
     getTasksByStepId,
-    handleOpenTaskDetails
+    handleOpenTaskDetails,
+    handleTaskStatusChange,
+    handleSubtaskToggle,
+    handleCategoryToggle,
+    handleDeadlineChange,
+    handleAddSubtask,
+    handleRemoveSubtask
   } = useJourneyDetails();
   
   // Get step details from the step ID
@@ -91,6 +100,11 @@ const StepDetailsPage = () => {
       handleCreateTaskFromStep(stepId, newTaskTitle, stepDetails?.description || '');
       setNewTaskTitle('');
       setShowTaskForm(false);
+      
+      toast({
+        title: "Task created",
+        description: "Your new task has been created successfully.",
+      });
     }
   };
 
@@ -112,6 +126,17 @@ const StepDetailsPage = () => {
 
   const handleGoBack = () => {
     navigate(`/journey-details/${journeyId}`);
+  };
+
+  // Handle opening task details
+  const openTaskDetails = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailOpen(true);
+  };
+
+  // Handle closing task details
+  const closeTaskDetails = () => {
+    setIsTaskDetailOpen(false);
   };
 
   if (!stepDetails) {
@@ -242,11 +267,11 @@ const StepDetailsPage = () => {
               </div>
             </div>
             
-            {/* Combined Tasks Section */}
+            {/* Tasks Section (Made primary focus) */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <ListChecks className="h-5 w-5 text-primary" /> All Tasks
+                  <ListChecks className="h-5 w-5 text-primary" /> Tasks
                 </h2>
                 <Button 
                   variant="outline" 
@@ -259,103 +284,100 @@ const StepDetailsPage = () => {
                 </Button>
               </div>
               
-              {/* Recommended Tasks */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3">Recommended Tasks</h3>
-                <ul className="space-y-3 bg-muted/10 p-4 rounded-lg mb-6">
-                  {stepDetails.tasks.map((task, index) => (
-                    <li key={index} className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                      <span className="text-base">{task}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              {/* Custom Tasks */}
-              <div>
-                <h3 className="text-lg font-medium mb-3">Your Tasks</h3>
-                
-                {showTaskForm && (
-                  <div className="mb-6 p-5 border rounded-lg bg-muted/10">
-                    <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
-                        <input
-                          id="newTaskTitle"
-                          className="w-full p-3 border rounded-lg text-base"
-                          value={newTaskTitle}
-                          onChange={(e) => setNewTaskTitle(e.target.value)}
-                          placeholder="Enter task title..."
-                          aria-label="New task title"
-                        />
-                      </div>
-                      <div className="flex justify-end gap-3">
-                        <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
-                        <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
-                      </div>
+              {showTaskForm && (
+                <div className="mb-6 p-5 border rounded-lg bg-muted/10">
+                  <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+                      <input
+                        id="newTaskTitle"
+                        className="w-full p-3 border rounded-lg text-base"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        placeholder="Enter task title..."
+                        aria-label="New task title"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
+                      <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
                     </div>
                   </div>
-                )}
-                
-                {relatedTasks.length > 0 ? (
-                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                    {relatedTasks.map((task) => (
-                      <div key={task.id} className="border rounded-xl p-5 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-lg">{task.title}</h4>
-                              {renderStatusBadge(task.status)}
-                            </div>
-                            <p className="text-muted-foreground">{task.description}</p>
+                </div>
+              )}
+              
+              {relatedTasks.length > 0 ? (
+                <div className="space-y-4 max-h-[650px] overflow-y-auto pr-2">
+                  {relatedTasks.map((task) => (
+                    <div key={task.id} className="border rounded-xl p-5 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-lg">{task.title}</h4>
+                            {renderStatusBadge(task.status)}
                           </div>
-                          <Button 
-                            variant="outline" 
-                            size="lg" 
-                            onClick={() => handleOpenTaskDetails && handleOpenTaskDetails(task)}
-                            className="ml-2"
-                            aria-label={`Edit task: ${task.title}`}
-                          >
-                            <Edit className="h-4 w-4 mr-2" /> Edit
-                          </Button>
+                          <p className="text-muted-foreground">{task.description}</p>
                         </div>
-                        
-                        {/* Progress bar */}
-                        <div className="w-full bg-gray-200 rounded-full h-3 my-3">
-                          <div 
-                            className="bg-green-500 h-3 rounded-full" 
-                            style={{ width: `${getCompletionPercentage(task)}%` }}
-                            role="progressbar"
-                            aria-valuenow={getCompletionPercentage(task)}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          ></div>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {getCompletionPercentage(task)}% complete
-                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="lg" 
+                          onClick={() => openTaskDetails(task)}
+                          className="ml-2"
+                          aria-label={`Edit task: ${task.title}`}
+                        >
+                          <Edit className="h-4 w-4 mr-2" /> Edit
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-8 bg-muted/10 rounded-lg">
-                    <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
-                    <Button 
-                      onClick={() => setShowTaskForm(true)}
-                      className="flex items-center mx-auto"
-                    >
-                      <Plus className="h-4 w-4 mr-2" /> Create Your First Task
-                    </Button>
-                  </div>
-                )}
-              </div>
+                      
+                      {/* Progress bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-3 my-3">
+                        <div 
+                          className="bg-green-500 h-3 rounded-full" 
+                          style={{ width: `${getCompletionPercentage(task)}%` }}
+                          role="progressbar"
+                          aria-valuenow={getCompletionPercentage(task)}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        ></div>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {getCompletionPercentage(task)}% complete
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-8 bg-muted/10 rounded-lg">
+                  <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
+                  <Button 
+                    onClick={() => setShowTaskForm(true)}
+                    className="flex items-center mx-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Create Your First Task
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
       <Footer />
+      
+      {/* Task Detail Sheet */}
+      {selectedTask && (
+        <TaskDetailSheet
+          isOpen={isTaskDetailOpen}
+          onClose={closeTaskDetails}
+          task={selectedTask}
+          onStatusChange={handleTaskStatusChange}
+          onSubtaskToggle={handleSubtaskToggle}
+          onCategoryToggle={handleCategoryToggle}
+          onDeadlineChange={handleDeadlineChange}
+          onAddSubtask={handleAddSubtask}
+          onRemoveSubtask={handleRemoveSubtask}
+        />
+      )}
     </div>
   );
 };

@@ -55,12 +55,12 @@ const AppRoutes = () => {
       <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetailPage /></ProtectedRoute>} />
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute adminOnly><UserManagement /></ProtectedRoute>} />
-      <Route path="/admin/education" element={<ProtectedRoute adminOnly><EducationManagement /></ProtectedRoute>} />
-      <Route path="/admin/community" element={<ProtectedRoute adminOnly><CommunityManagement /></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute adminOnly><Settings /></ProtectedRoute>} />
-      <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><Analytics /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+      <Route path="/admin/education" element={<ProtectedRoute><EducationManagement /></ProtectedRoute>} />
+      <Route path="/admin/community" element={<ProtectedRoute><CommunityManagement /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/admin/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
 
       {/* 404 Page */}
       <Route path="*" element={<NotFound />} />

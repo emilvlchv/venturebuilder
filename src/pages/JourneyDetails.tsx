@@ -129,8 +129,8 @@ const JourneyDetails = () => {
     }
   ];
 
-  // Create a mapping of steps to their corresponding tabs
-  const stepToTabMapping = {
+  // Create a mapping of next steps to their corresponding tabs
+  const nextStepsMap = {
     'Complete your business plan': 'ideation',
     'Research your market': 'ideation',
     'Define your unique value proposition': 'ideation',
@@ -208,51 +208,17 @@ const JourneyDetails = () => {
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-4">Next steps for your entrepreneurial journey:</h3>
                   <ol className="list-decimal list-inside space-y-3 pl-2">
-                    <li>
-                      <button 
-                        onClick={() => handleStepClick('ideation')}
-                        className="text-left hover:text-primary inline-flex items-center"
-                      >
-                        Complete your business plan with our AI-powered templates
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => handleStepClick('ideation')}
-                        className="text-left hover:text-primary inline-flex items-center"
-                      >
-                        Research your market and competitors
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => handleStepClick('ideation')}
-                        className="text-left hover:text-primary inline-flex items-center"
-                      >
-                        Define your unique value proposition
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => handleStepClick('legal')}
-                        className="text-left hover:text-primary inline-flex items-center"
-                      >
-                        Set up your legal structure and financial foundation
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => handleStepClick('marketing')}
-                        className="text-left hover:text-primary inline-flex items-center"
-                      >
-                        Create your marketing strategy
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </button>
-                    </li>
+                    {Object.entries(nextStepsMap).map(([stepText, tabId], index) => (
+                      <li key={index}>
+                        <button 
+                          onClick={() => handleStepClick(tabId)}
+                          className="text-left hover:text-primary inline-flex items-center"
+                        >
+                          {stepText}
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </button>
+                      </li>
+                    ))}
                   </ol>
                   <p className="mt-4">Click on any step to begin, or use our AI assistant to guide you through the process.</p>
                 </CardContent>

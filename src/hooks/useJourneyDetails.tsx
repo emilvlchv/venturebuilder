@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
@@ -138,7 +137,12 @@ const stepDetailsData: Record<string, StepDetail> = {
     title: 'Market Research',
     description: 'Understand your target market and competitors',
     timeEstimate: '2-3 weeks',
-    detailedDescription: 'Market research is a critical first step in validating your business idea. It involves gathering, analyzing, and interpreting information about a market, its potential customers, and competitors. This research will help you understand if there's a real need for your product or service, how to position it in the market, and how to effectively reach your target audience.',
+    detailedDescription: 
+      'Market research is a critical first step in validating your business idea. ' +
+      'It involves gathering, analyzing, and interpreting information about a market, ' +
+      'its potential customers, and competitors. This research will help you understand ' +
+      'if there\'s a real need for your product or service, how to position it in the market, ' +
+      'and how to effectively reach your target audience.',
     tasks: [
       'Define your target market segments',
       'Analyze competitor strengths and weaknesses',
@@ -156,7 +160,11 @@ const stepDetailsData: Record<string, StepDetail> = {
     title: 'Idea Validation',
     description: 'Test your business concept with potential customers',
     timeEstimate: '1-2 weeks',
-    detailedDescription: 'Idea validation is the process of testing your business concept to determine if it solves a real problem for your target market. This step helps you confirm there's demand for your product or service before investing significant time and resources into development.',
+    detailedDescription: 
+      'Idea validation is the process of testing your business concept to determine ' +
+      'if it solves a real problem for your target market. This step helps you confirm ' +
+      'there\'s demand for your product or service before investing significant time ' +
+      'and resources into development.',
     tasks: [
       'Create a minimal viable product (MVP) or prototype',
       'Get feedback from potential customers',
@@ -355,14 +363,11 @@ export const useJourneyDetails = () => {
     description: 'A personalized roadmap to help you turn your business idea into reality.'
   };
   
-  // Get tasks by step ID
   const getTasksByStepId = useCallback((stepId: string) => {
     return tasks.filter(task => task.stepId === stepId);
   }, [tasks]);
   
-  // Create a new task
   const handleCreateTaskFromStep = useCallback((stepId: string, title: string, description: string, deadline?: Date) => {
-    // Create a deadline 2 weeks from now if not provided
     const taskDeadline = deadline || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     
     const newTask: Task = {
@@ -397,7 +402,6 @@ export const useJourneyDetails = () => {
     return newTask;
   }, []);
   
-  // Handle task status change
   const handleTaskStatusChange = useCallback((task: Task, status: 'completed' | 'in-progress' | 'pending') => {
     setTasks(prevTasks => 
       prevTasks.map(t => 
@@ -406,7 +410,6 @@ export const useJourneyDetails = () => {
     );
   }, []);
   
-  // Handle subtask toggling
   const handleSubtaskToggle = useCallback((taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
     setTasks(prevTasks => 
       prevTasks.map(task => {
@@ -421,7 +424,6 @@ export const useJourneyDetails = () => {
             return category;
           });
           
-          // Update task status if necessary
           let newStatus = task.status;
           const allSubtasks = updatedCategories.flatMap(category => category.subtasks);
           const completedCount = allSubtasks.filter(subtask => subtask.completed).length;
@@ -441,7 +443,6 @@ export const useJourneyDetails = () => {
     );
   }, []);
   
-  // Handle category toggling
   const handleCategoryToggle = useCallback((taskId: string, categoryId: string) => {
     setTasks(prevTasks => 
       prevTasks.map(task => {
@@ -458,7 +459,6 @@ export const useJourneyDetails = () => {
     );
   }, []);
   
-  // Handle deadline change
   const handleDeadlineChange = useCallback((taskId: string, deadline: Date | undefined) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
@@ -467,18 +467,15 @@ export const useJourneyDetails = () => {
     );
   }, []);
   
-  // Handle opening task details
   const handleOpenTaskDetails = useCallback((task: Task) => {
     setSelectedTask(task);
     setIsTaskDetailOpen(true);
   }, []);
   
-  // Handle closing task details
   const handleCloseTaskDetail = useCallback(() => {
     setIsTaskDetailOpen(false);
   }, []);
   
-  // Handle adding a subtask
   const handleAddSubtask = useCallback((categoryId: string, title: string) => {
     if (!selectedTask) return;
     
@@ -502,14 +499,12 @@ export const useJourneyDetails = () => {
       
       setSelectedTask(updatedTask);
       
-      // If task was in pending status, move it to in-progress
       if (updatedTask.status === 'pending') {
         handleTaskStatusChange(updatedTask, 'in-progress');
       }
     }
   }, [selectedTask, handleTaskStatusChange]);
   
-  // Handle removing a subtask
   const handleRemoveSubtask = useCallback((categoryId: string, subtaskId: string) => {
     if (!selectedTask) return;
     
@@ -528,7 +523,6 @@ export const useJourneyDetails = () => {
       
       setSelectedTask(updatedTask);
       
-      // Check if we need to update the task status
       const allSubtasks = updatedTask.categories.flatMap(cat => cat.subtasks);
       if (allSubtasks.length === 0) {
         handleTaskStatusChange(updatedTask, 'pending');
@@ -542,7 +536,6 @@ export const useJourneyDetails = () => {
     }
   }, [selectedTask, handleTaskStatusChange]);
   
-  // Safe date conversion utility
   const safelyGetDate = (dateInput: Date | string | undefined): Date | undefined => {
     if (!dateInput) return undefined;
     

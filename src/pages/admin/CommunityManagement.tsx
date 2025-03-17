@@ -61,7 +61,7 @@ const CommunityManagement: React.FC = () => {
     description: '',
     content: '',
     author: {
-      name: '',
+      name: '', // Ensure name is initialized as an empty string, not undefined
       role: ''
     },
     tags: [],
@@ -86,9 +86,11 @@ const CommunityManagement: React.FC = () => {
           likes: Number(post.likes || 0),
           comments: Number(post.comments || 0),
           featured: Boolean(post.featured || false),
-          author: typeof post.author === 'object' 
-            ? { ...post.author, name: post.author.name || 'Anonymous' } 
-            : { name: String(post.author || 'Anonymous'), role: '' }
+          author: {
+            name: post.author?.name || 'Anonymous', // Always ensure name exists
+            role: post.author?.role || '',
+            avatar: post.author?.avatar
+          }
         }));
         setPosts(validatedPosts);
       } catch (error) {
@@ -134,17 +136,18 @@ const CommunityManagement: React.FC = () => {
       // Parse tags from the input
       const tags = newTags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-      // Create a new post object
+      // Create a new post object with required name in author
       const post: CommunityPost = {
         id: Date.now(),
         title: newPost.title || '',
         description: newPost.description || '',
         content: newPost.content || '',
         author: {
-          name: newPost.author?.name || 'Anonymous',
-          role: newPost.author?.role
+          name: newPost.author?.name || 'Anonymous', // Ensure name is always provided
+          role: newPost.author?.role || '', 
+          avatar: newPost.author?.avatar
         },
-        date: new Date().toISOString(),
+        date: new Date().toLocaleDateString(),
         tags: tags,
         comments: 0,
         likes: 0,
@@ -161,7 +164,7 @@ const CommunityManagement: React.FC = () => {
         description: '',
         content: '',
         author: {
-          name: '',
+          name: '', // Initialize with empty string
           role: ''
         },
         tags: [],
@@ -538,7 +541,10 @@ const CommunityManagement: React.FC = () => {
                 value={newPost.author?.name || ''}
                 onChange={(e) => setNewPost({
                   ...newPost, 
-                  author: {...(newPost.author || {}), name: e.target.value}
+                  author: {
+                    ...newPost.author || {},
+                    name: e.target.value
+                  } as CommunityPost['author'] // Ensure proper type casting
                 })}
               />
             </div>
@@ -549,7 +555,10 @@ const CommunityManagement: React.FC = () => {
                 value={newPost.author?.role || ''}
                 onChange={(e) => setNewPost({
                   ...newPost, 
-                  author: {...(newPost.author || {}), role: e.target.value}
+                  author: {
+                    ...newPost.author || { name: '' }, // Ensure name exists
+                    role: e.target.value
+                  }
                 })}
               />
             </div>

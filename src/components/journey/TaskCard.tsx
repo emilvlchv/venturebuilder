@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -305,20 +306,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
       </CardContent>
       
-      <TaskDetailSheet
-        isOpen={isEditSheetOpen}
-        onOpenChange={setIsEditSheetOpen}
-        taskTitle={task.title}
-        taskId={task.id}
-        categories={task.categories}
-        deadline={task.deadline}
-        onAddSubtask={handleAddSubtask}
-        onRemoveSubtask={handleRemoveSubtask}
-        onSubtaskToggle={(categoryId, subtaskId, completed) => {
-          onSubtaskToggle(task.id, categoryId, subtaskId, completed);
-        }}
-        onDeadlineChange={(date) => onDeadlineChange(task.id, date)}
-      />
+      {isEditSheetOpen && (
+        <TaskDetailSheet
+          isOpen={isEditSheetOpen}
+          onClose={() => setIsEditSheetOpen(false)}
+          task={task}
+          onStatusChange={onTaskStatusChange}
+          onSubtaskToggle={onSubtaskToggle}
+          onCategoryToggle={onCategoryToggle}
+          onDeadlineChange={onDeadlineChange}
+          onAddSubtask={handleAddSubtask}
+          onRemoveSubtask={handleRemoveSubtask}
+        />
+      )}
     </Card>
   );
 };

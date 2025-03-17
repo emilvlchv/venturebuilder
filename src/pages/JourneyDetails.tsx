@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -15,6 +14,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import TaskCard, { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/components/ui/use-toast';
+import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 
 const JourneyDetails = () => {
   const { user } = useAuth();
@@ -22,10 +22,12 @@ const JourneyDetails = () => {
   const [activeTab, setActiveTab] = useState('ideation');
   const [selectedStep, setSelectedStep] = useState<StepDetail | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
   const { journeyId } = useParams<{ journeyId: string }>();
   const navigate = useNavigate();
   const [journey, setJourney] = useState<Journey | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
     if (user?.id && journeyId) {
@@ -66,7 +68,6 @@ const JourneyDetails = () => {
         const parsedTasks = JSON.parse(tasksData);
         setTasks(parsedTasks);
       } else {
-        // Initialize with sample tasks if none exist
         setTasks(getSampleTasks());
         saveTasks(getSampleTasks());
       }
@@ -198,7 +199,7 @@ const JourneyDetails = () => {
     toast({
       title: `Task ${newStatus === 'completed' ? 'completed' : 'updated'}`,
       description: `"${task.title}" has been marked as ${newStatus}.`,
-      variant: newStatus === 'completed' ? 'default' : 'outline',
+      variant: "default",
     });
   };
 
@@ -265,6 +266,75 @@ const JourneyDetails = () => {
         : "Deadline has been removed",
       variant: "default",
     });
+  };
+
+  const handleOpenTaskDetails = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailOpen(true);
+  };
+
+  const handleAddSubtask = (categoryId: string, title: string) => {
+    if (!selectedTask) return;
+    
+    const updatedTasks = tasks.map(task => {
+      if (task.id === selectedTask.id) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            const newSubtask: Subtask = {
+              id: uuidv4(),
+              title,
+              completed: false
+            };
+            
+            return {
+              ...category,
+              subtasks: [...category.subtasks, newSubtask]
+            };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    const updatedSelectedTask = updatedTasks.find(t => t.id === selectedTask.id);
+    if (updatedSelectedTask) {
+      setSelectedTask(updatedSelectedTask);
+    }
+  };
+
+  const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
+    if (!selectedTask) return;
+    
+    const updatedTasks = tasks.map(task => {
+      if (task.id === selectedTask.id) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              subtasks: category.subtasks.filter(subtask => subtask.id !== subtaskId)
+            };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    const updatedSelectedTask = updatedTasks.find(t => t.id === selectedTask.id);
+    if (updatedSelectedTask) {
+      setSelectedTask(updatedSelectedTask);
+    }
   };
 
   const stepsDetailsMap: Record<string, StepDetail> = {
@@ -573,15 +643,6 @@ const JourneyDetails = () => {
     navigate('/journey');
   };
 
-  const handleOpenTaskDetails = () => {
-    // This would be implemented later with a detailed task view
-    toast({
-      title: "Task Details",
-      description: "Detailed task view will be implemented in a future update.",
-      variant: "default",
-    });
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -671,7 +732,7 @@ const JourneyDetails = () => {
                       key={task.id}
                       task={task}
                       index={index}
-                      onOpenDetails={handleOpenTaskDetails}
+                      onOpenDetails={() => handleOpenTaskDetails(task)}
                       onTaskStatusChange={handleTaskStatusChange}
                       onSubtaskToggle={handleSubtaskToggle}
                       onCategoryToggle={handleCategoryToggle}
@@ -741,11 +802,28 @@ const JourneyDetails = () => {
         </div>
       </main>
       <Footer />
+      
       <StepDetailsDialog 
         isOpen={isDialogOpen} 
         onClose={handleCloseDialog} 
         stepDetails={selectedStep} 
       />
+      
+      {selectedTask && (
+        <TaskDetailSheet
+          isOpen={isTaskDetailOpen}
+          onOpenChange={setIsTaskDetailOpen}
+          taskTitle={selectedTask.title}
+          taskId={selectedTask.id}
+          categories={selectedTask.categories}
+          deadline={selectedTask.deadline}
+          onAddSubtask={handleAddSubtask}
+          onRemoveSubtask={handleRemoveSubtask}
+          onSubtaskToggle={(categoryId, subtaskId, completed) => 
+            handleSubtaskToggle(selectedTask.id, categoryId, subtaskId, completed)}
+          onDeadlineChange={(date) => handleDeadlineChange(selectedTask.id, date)}
+        />
+      )}
     </div>
   );
 };

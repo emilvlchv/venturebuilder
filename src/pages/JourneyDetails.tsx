@@ -90,7 +90,7 @@ const JourneyDetails = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDialogOpen, isTaskDetailOpen, handleCloseDialog, handleCloseTaskDetail, journeyPhases, setActiveTab]);
+  }, [isDialogOpen, isTaskDetailOpen, handleCloseDialog, handleCloseTaskDetail, journeyPhases, setActiveTab, toast]);
 
   return (
     <div className="min-h-screen flex flex-col">

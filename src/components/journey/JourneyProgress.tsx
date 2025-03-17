@@ -36,7 +36,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
   return (
     <div className="tabs-section mb-16">
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8" aria-label="Journey phases">
           {phases.map(phase => (
             <TabsTrigger key={phase.id} value={phase.id}>
               {phase.title}

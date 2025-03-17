@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Info, ExternalLink } from 'lucide-react';
 import { Task } from './TaskCard';
 
 interface StepProps {
@@ -73,9 +73,6 @@ const StepCard: React.FC<StepProps> = ({
                     )}
                     {task.title}
                   </span>
-                  <Button variant="ghost" size="sm" onClick={() => onOpenTaskDetails(task)}>
-                    View
-                  </Button>
                 </li>
               ))}
             </ul>
@@ -83,7 +80,13 @@ const StepCard: React.FC<StepProps> = ({
         )}
         
         <div className="flex items-center justify-between">
-          <Button onClick={() => onViewDetails(id)} variant="outline" size="sm">
+          <Button 
+            onClick={() => onViewDetails(id)} 
+            variant="outline" 
+            size="sm"
+            className="w-full flex justify-center gap-2"
+          >
+            <Info className="h-4 w-4" />
             View Details
           </Button>
         </div>

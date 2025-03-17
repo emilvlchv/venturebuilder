@@ -8,10 +8,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Card,
-  CardContent
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Save, ExternalLink, Maximize2 } from 'lucide-react';
 import { Task } from './TaskCard';
@@ -21,7 +17,7 @@ import DeadlineSelector from './task-details/DeadlineSelector';
 import SubtaskCategory from './task-details/SubtaskCategory';
 import ResourcesList from './task-details/ResourcesList';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
 interface TaskDetailSheetProps {
   isOpen: boolean;
@@ -93,6 +89,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
               size="sm" 
               onClick={() => setIsFullscreenMode(true)}
               className="hidden md:flex items-center"
+              aria-label="Expand to fullscreen view"
             >
               <Maximize2 className="h-4 w-4 mr-2" /> Expand
             </Button>
@@ -102,6 +99,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
               size="sm" 
               onClick={openInFullPage}
               className="flex items-center"
+              aria-label="Open in dedicated page"
             >
               <ExternalLink className="h-4 w-4 mr-2" /> Open Page
             </Button>
@@ -109,10 +107,11 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
         </div>
         
         <div>
-          <h3 className="text-sm font-medium mb-2">Task Status</h3>
+          <h3 className="text-sm font-medium mb-2" id={`task-status-${task.id}`}>Task Status</h3>
           <TaskStatusSelector 
             status={task.status} 
             onStatusChange={handleStatusChange} 
+            taskId={task.id}
           />
         </div>
 
@@ -125,7 +124,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
         <Separator />
 
         <div className="space-y-4">
-          <h3 className="text-sm font-medium">Task Breakdown</h3>
+          <h3 className="text-sm font-medium" id={`subtasks-heading-${task.id}`}>Task Breakdown</h3>
           {task.categories?.map(category => (
             <SubtaskCategory
               key={category.id}
@@ -149,7 +148,11 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
         )}
 
         <div className="pt-4">
-          <Button onClick={onClose} className="w-full">
+          <Button 
+            onClick={onClose} 
+            className="w-full"
+            aria-label="Save changes and close dialog"
+          >
             <Save className="mr-2 h-4 w-4" /> Close and Save Changes
           </Button>
         </div>
@@ -176,7 +179,9 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">{task.title}</DialogTitle>
-            <p className="text-muted-foreground mt-2">{task.description}</p>
+            <DialogDescription className="text-muted-foreground mt-2">
+              {task.description}
+            </DialogDescription>
           </DialogHeader>
 
           {renderContent()}

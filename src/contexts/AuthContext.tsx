@@ -8,6 +8,7 @@ type User = {
   username: string;
   email: string;
   businessIdea?: string;
+  role?: 'admin' | 'user';
 };
 
 type AuthContextType = {
@@ -27,6 +28,7 @@ type SignupData = {
   username: string;
   email: string;
   password: string;
+  role?: 'admin' | 'user';
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,6 +52,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
+    
+    // Initialize admin user for demo purposes if no users exist
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (users.length === 0) {
+      const adminUser = {
+        id: 'user_admin',
+        firstName: 'Admin',
+        lastName: 'User',
+        username: 'admin',
+        email: 'admin@example.com',
+        password: 'admin123',
+        role: 'admin'
+      };
+      localStorage.setItem('users', JSON.stringify([adminUser]));
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -93,10 +110,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Username is already taken');
       }
       
-      // Create new user with ID
+      // Create new user with ID and default role
       const newUser = {
         ...userData,
-        id: `user_${Date.now()}`
+        id: `user_${Date.now()}`,
+        role: userData.role || 'user' // Default to 'user' role if not specified
       };
       
       users.push(newUser);
@@ -210,4 +228,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-

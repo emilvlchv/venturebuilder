@@ -22,7 +22,7 @@ import {
   PopoverTrigger 
 } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, isAfter, isBefore, addDays } from 'date-fns';
 import { 
   Sheet,
   SheetContent,
@@ -156,6 +156,42 @@ const TaskCard: React.FC<TaskCardProps> = ({
     onDeadlineChange(task.id, twoWeeksFromNow);
   };
 
+  // Helper function to determine deadline status
+  const getDeadlineStatus = () => {
+    if (!task.deadline) return null;
+    
+    const today = new Date();
+    const tomorrow = addDays(today, 1);
+    const threeDaysLater = addDays(today, 3);
+    
+    if (isBefore(task.deadline, today)) {
+      return "overdue";
+    } else if (isBefore(task.deadline, tomorrow)) {
+      return "due-today";
+    } else if (isBefore(task.deadline, threeDaysLater)) {
+      return "upcoming";
+    } else {
+      return "future";
+    }
+  };
+  
+  // Get deadline status and styling
+  const deadlineStatus = getDeadlineStatus();
+  const deadlineBadgeStyle = () => {
+    if (!deadlineStatus) return "";
+    
+    switch (deadlineStatus) {
+      case "overdue":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "due-today":
+        return "bg-amber-100 text-amber-800 border-amber-300";
+      case "upcoming":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
   const completionPercentage = getCompletionPercentage();
   
   return (
@@ -170,6 +206,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 </div>
                 <h3 className="text-xl font-semibold">{task.title}</h3>
                 <div className="ml-2">{renderStatusBadge(task.status)}</div>
+                
+                {/* Discrete deadline badge */}
+                {task.deadline && (
+                  <div className={`ml-auto text-xs flex items-center px-2 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
+                    <Calendar className="h-3 w-3 mr-1" /> 
+                    {format(task.deadline, 'MMM d')}
+                  </div>
+                )}
               </div>
               <p className="text-muted-foreground mb-4">{task.description}</p>
               
@@ -336,12 +380,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
               </div>
               <div className="flex justify-between items-center mb-4">
                 <p className="text-xs text-muted-foreground">{completionPercentage}% complete</p>
-                {task.deadline && (
-                  <p className="text-xs flex items-center text-muted-foreground">
-                    <Calendar className="h-3 w-3 mr-1" /> 
-                    Due: {format(task.deadline, 'MMM d, yyyy')}
-                  </p>
-                )}
               </div>
               
               <Button 

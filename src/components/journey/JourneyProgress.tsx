@@ -21,8 +21,8 @@ interface JourneyProgressProps {
   activeTab: string;
   setActiveTab: (tabId: string) => void;
   getTasksByStepId: (stepId: string) => Task[];
-  onOpenStepDetails: (stepId: string) => void;
   onOpenTaskDetails: (task: Task) => void;
+  journeyId?: string;
 }
 
 const JourneyProgress: React.FC<JourneyProgressProps> = ({
@@ -30,8 +30,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
   activeTab,
   setActiveTab,
   getTasksByStepId,
-  onOpenStepDetails,
-  onOpenTaskDetails
+  onOpenTaskDetails,
+  journeyId
 }) => {
   return (
     <div className="tabs-section mb-16">
@@ -50,8 +50,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
               title={phase.title}
               steps={phase.steps}
               getTasksByStepId={getTasksByStepId}
-              onOpenStepDetails={onOpenStepDetails}
               onOpenTaskDetails={onOpenTaskDetails}
+              journeyId={journeyId}
             />
           </TabsContent>
         ))}

@@ -4,15 +4,16 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
-import StepDetailsDialog from '@/components/journey/StepDetailsDialog';
 import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 import JourneyHeader from '@/components/journey/JourneyHeader';
 import JourneyProgress from '@/components/journey/JourneyProgress';
 import { useJourneyDetails } from '@/hooks/useJourneyDetails';
 import { SkipToContent } from '@/components/ui/skip-to-content';
 import { useToast } from '@/components/ui/use-toast';
+import { useParams } from 'react-router-dom';
 
 const JourneyDetails = () => {
+  const { journeyId } = useParams<{ journeyId: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
   const {
@@ -20,8 +21,6 @@ const JourneyDetails = () => {
     businessData,
     activeTab,
     setActiveTab,
-    selectedStep,
-    isDialogOpen,
     isTaskDetailOpen,
     tasks,
     selectedTask,
@@ -32,10 +31,7 @@ const JourneyDetails = () => {
     handleOpenTaskDetails,
     handleAddSubtask,
     handleRemoveSubtask,
-    handleCreateTaskFromStep,
     getTasksByStepId,
-    handleOpenStepDetails,
-    handleCloseDialog,
     handleCloseTaskDetail,
     journeyPhases
   } = useJourneyDetails();
@@ -68,9 +64,6 @@ const JourneyDetails = () => {
         if (isTaskDetailOpen) {
           handleCloseTaskDetail();
           e.preventDefault();
-        } else if (isDialogOpen) {
-          handleCloseDialog();
-          e.preventDefault();
         }
       }
       
@@ -90,7 +83,7 @@ const JourneyDetails = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDialogOpen, isTaskDetailOpen, handleCloseDialog, handleCloseTaskDetail, journeyPhases, setActiveTab, toast]);
+  }, [isTaskDetailOpen, handleCloseTaskDetail, journeyPhases, setActiveTab, toast]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -113,8 +106,8 @@ const JourneyDetails = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 getTasksByStepId={getTasksByStepId}
-                onOpenStepDetails={handleOpenStepDetails}
                 onOpenTaskDetails={handleOpenTaskDetails}
+                journeyId={journeyId}
               />
               
               {/* Keyboard shortcuts help */}
@@ -132,17 +125,6 @@ const JourneyDetails = () => {
       </main>
       
       <Footer />
-      
-      {selectedStep && (
-        <StepDetailsDialog
-          isOpen={isDialogOpen}
-          onClose={handleCloseDialog}
-          stepDetails={selectedStep}
-          onCreateTask={handleCreateTaskFromStep}
-          tasks={getTasksByStepId(selectedStep.stepId || '')}
-          onTaskOpen={handleOpenTaskDetails}
-        />
-      )}
       
       {selectedTask && (
         <TaskDetailSheet

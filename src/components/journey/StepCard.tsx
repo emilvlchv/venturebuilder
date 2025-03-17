@@ -5,17 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle2, Clock, Info, ExternalLink } from 'lucide-react';
 import { Task } from './TaskCard';
+import { useNavigate } from 'react-router-dom';
 
 interface StepProps {
   id: string;
   title: string;
   description: string;
   status: string;
-  onViewDetails: (stepId: string) => void;
   relatedTasks: Task[];
   onOpenTaskDetails: (task: Task) => void;
   hasActiveTasks?: boolean;
   allTasksCompleted?: boolean;
+  journeyId?: string;
 }
 
 const StepCard: React.FC<StepProps> = ({
@@ -23,12 +24,14 @@ const StepCard: React.FC<StepProps> = ({
   title,
   description,
   status,
-  onViewDetails,
   relatedTasks,
   onOpenTaskDetails,
   hasActiveTasks = false,
-  allTasksCompleted = false
+  allTasksCompleted = false,
+  journeyId
 }) => {
+  const navigate = useNavigate();
+  
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -39,6 +42,12 @@ const StepCard: React.FC<StepProps> = ({
         return <Badge variant="outline"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
       default:
         return null;
+    }
+  };
+
+  const handleViewDetails = () => {
+    if (journeyId) {
+      navigate(`/journey-details/${journeyId}/step/${id}`);
     }
   };
 
@@ -81,7 +90,7 @@ const StepCard: React.FC<StepProps> = ({
         
         <div className="flex items-center justify-between">
           <Button 
-            onClick={() => onViewDetails(id)} 
+            onClick={handleViewDetails} 
             variant="outline" 
             size="sm"
             className="w-full flex justify-center gap-2"

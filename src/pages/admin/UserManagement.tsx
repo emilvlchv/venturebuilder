@@ -88,16 +88,25 @@ const UserManagement: React.FC = () => {
         
         // Map to ensure consistent structure and add missing properties
         // Also ensure proper type casting for role and status
-        const formattedUsers = storedUsers.map((user: any) => ({
-          ...user,
+        const formattedUsers = storedUsers.map((user: any) => {
           // Ensure role is either 'admin' or 'user'
-          role: user.role === 'admin' ? 'admin' : 'user',
+          const safeRole: 'admin' | 'user' = user.role === 'admin' ? 'admin' : 'user';
+          
           // Ensure status is one of the allowed values
-          status: ['active', 'inactive', 'pending'].includes(user.status) ? user.status : 'active',
-          createdAt: user.createdAt || new Date().toISOString().split('T')[0]
-        })) as AdminUser[];
+          const safeStatus: 'active' | 'inactive' | 'pending' = 
+            ['active', 'inactive', 'pending'].includes(user.status) 
+              ? (user.status as 'active' | 'inactive' | 'pending') 
+              : 'active';
+              
+          return {
+            ...user,
+            role: safeRole,
+            status: safeStatus,
+            createdAt: user.createdAt || new Date().toISOString().split('T')[0]
+          };
+        });
         
-        setUsers(formattedUsers);
+        setUsers(formattedUsers as AdminUser[]);
       } catch (error) {
         console.error('Error loading users:', error);
         toast({
@@ -254,7 +263,8 @@ const UserManagement: React.FC = () => {
             throw new Error('Cannot remove the last admin user');
           }
           
-          const newRole = user.role === 'admin' ? 'user' : 'admin';
+          // Use type assertion to ensure type safety
+          const newRole: 'admin' | 'user' = user.role === 'admin' ? 'user' : 'admin';
           return { ...user, role: newRole };
         }
         return user;
@@ -284,9 +294,10 @@ const UserManagement: React.FC = () => {
       // Update state with proper type casting
       const updatedUsers = users.map(user => {
         if (user.id === userId) {
-          // Ensure status is a valid option
-          const newStatus = user.status === 'active' ? 'inactive' : 'active';
-          return { ...user, status: newStatus as 'active' | 'inactive' | 'pending' };
+          // Ensure status is a valid option with type assertion
+          const newStatus: 'active' | 'inactive' | 'pending' = 
+            user.status === 'active' ? 'inactive' : 'active';
+          return { ...user, status: newStatus };
         }
         return user;
       });
@@ -315,13 +326,24 @@ const UserManagement: React.FC = () => {
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
       
       // Ensure proper typing when refreshing users
-      const typedUsers = storedUsers.map((user: any) => ({
-        ...user,
-        role: user.role === 'admin' ? 'admin' : 'user',
-        status: ['active', 'inactive', 'pending'].includes(user.status) ? user.status : 'active'
-      })) as AdminUser[];
+      const typedUsers = storedUsers.map((user: any) => {
+        // Explicitly handle type conversion for role
+        const safeRole: 'admin' | 'user' = user.role === 'admin' ? 'admin' : 'user';
+        
+        // Explicitly handle type conversion for status
+        const safeStatus: 'active' | 'inactive' | 'pending' = 
+          ['active', 'inactive', 'pending'].includes(user.status) 
+            ? (user.status as 'active' | 'inactive' | 'pending') 
+            : 'active';
+            
+        return {
+          ...user,
+          role: safeRole,
+          status: safeStatus
+        };
+      });
       
-      setUsers(typedUsers);
+      setUsers(typedUsers as AdminUser[]);
       
       toast({
         title: "User list refreshed",

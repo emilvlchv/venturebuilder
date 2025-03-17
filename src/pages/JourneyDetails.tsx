@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -1096,7 +1095,7 @@ const JourneyDetails = () => {
         <StepDetailsDialog
           isOpen={isDialogOpen}
           onClose={handleCloseDialog}
-          step={selectedStep}
+          stepDetails={selectedStep}
           onCreateTask={handleCreateTaskFromStep}
           tasks={getTasksByStepId(selectedStep.stepId || '')}
           onTaskOpen={handleOpenTaskDetails}

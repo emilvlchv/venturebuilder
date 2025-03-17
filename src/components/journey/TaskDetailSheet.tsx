@@ -14,34 +14,32 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Plus, Calendar as CalendarIcon } from 'lucide-react';
-import { Subtask, TaskCategory } from './TaskCard';
+import { Task, TaskCategory, Subtask } from './TaskCard';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TaskDetailSheetProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  taskTitle: string;
-  taskId: string;
-  categories: TaskCategory[];
-  deadline?: Date;
+  onClose: () => void;
+  task: Task;
+  onStatusChange: (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => void;
+  onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
+  onCategoryToggle: (taskId: string, categoryId: string) => void;
+  onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
   onAddSubtask: (categoryId: string, title: string) => void;
   onRemoveSubtask: (categoryId: string, subtaskId: string) => void;
-  onSubtaskToggle: (categoryId: string, subtaskId: string, completed: boolean) => void;
-  onDeadlineChange: (date: Date | undefined) => void;
 }
 
 const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
   isOpen,
-  onOpenChange,
-  taskTitle,
-  taskId,
-  categories,
-  deadline,
-  onAddSubtask,
-  onRemoveSubtask,
+  onClose,
+  task,
+  onStatusChange,
   onSubtaskToggle,
-  onDeadlineChange
+  onCategoryToggle,
+  onDeadlineChange,
+  onAddSubtask,
+  onRemoveSubtask
 }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -56,14 +54,14 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
     // Set deadline to 2 weeks from now
     const twoWeeksFromNow = new Date();
     twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-    onDeadlineChange(twoWeeksFromNow);
+    onDeadlineChange(task.id, twoWeeksFromNow);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+    <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit Task: {taskTitle}</SheetTitle>
+          <SheetTitle>Edit Task: {task.title}</SheetTitle>
           <SheetDescription>
             Customize deadlines and subtasks for this task.
           </SheetDescription>
@@ -86,7 +84,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => onDeadlineChange(undefined)}
+                  onClick={() => onDeadlineChange(task.id, undefined)}
                   className="flex-1"
                 >
                   Clear Deadline
@@ -97,18 +95,18 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
                 <p className="text-sm mb-2">Pick a specific date:</p>
                 <Calendar
                   mode="single"
-                  selected={deadline}
-                  onSelect={onDeadlineChange}
+                  selected={task.deadline}
+                  onSelect={(date) => onDeadlineChange(task.id, date || undefined)}
                   initialFocus
                   className="pointer-events-auto"
                 />
               </div>
               
               <div className="pt-2">
-                {deadline ? (
+                {task.deadline ? (
                   <p className="text-sm flex items-center">
                     <CalendarIcon className="h-4 w-4 mr-2" />
-                    Current deadline: {format(deadline, 'PPP')}
+                    Current deadline: {format(task.deadline, 'PPP')}
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">No deadline set</p>
@@ -121,7 +119,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Manage Subtasks</h3>
             
-            {categories.map(category => (
+            {task.categories.map(category => (
               <div key={category.id} className="border rounded-md p-4">
                 <h4 className="font-medium text-sm mb-2">{category.title}</h4>
                 
@@ -133,7 +131,7 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
                           id={`edit-subtask-${subtask.id}`}
                           checked={subtask.completed}
                           onCheckedChange={(checked) => {
-                            onSubtaskToggle(category.id, subtask.id, checked === true);
+                            onSubtaskToggle(task.id, category.id, subtask.id, checked === true);
                           }}
                         />
                         <p className="text-sm">{subtask.title}</p>

@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { CalendarClock, CheckCircle2, Plus, Calendar, Edit } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Task, TaskCategory, Subtask } from './TaskCard';
+import { Task } from './TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import TaskDetailSheet from './TaskDetailSheet';
@@ -30,27 +30,19 @@ interface StepDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   stepDetails: StepDetail | null;
-  relatedTasks?: Task[];
-  onTaskToggle?: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
-  onTaskStatusChange?: (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => void;
-  onCategoryToggle?: (taskId: string, categoryId: string) => void;
-  onDeadlineChange?: (taskId: string, deadline: Date | undefined) => void;
   onCreateTask?: (stepId: string, title: string, description: string) => void;
+  tasks?: Task[];
+  onTaskOpen?: (task: Task) => void;
 }
 
 const StepDetailsDialog = ({ 
   isOpen, 
   onClose, 
   stepDetails,
-  relatedTasks = [],
-  onTaskToggle,
-  onTaskStatusChange,
-  onCategoryToggle,
-  onDeadlineChange,
-  onCreateTask
+  onCreateTask,
+  tasks = [],
+  onTaskOpen
 }: StepDetailsDialogProps) => {
-  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   
@@ -75,11 +67,6 @@ const StepDetailsDialog = ({
     
     const completedCount = allSubtasks.filter(subtask => subtask.completed).length;
     return Math.round((completedCount / allSubtasks.length) * 100);
-  };
-
-  const handleOpenTaskDetails = (task: Task) => {
-    setSelectedTask(task);
-    setIsTaskDetailOpen(true);
   };
 
   const handleCreateTask = () => {
@@ -135,7 +122,7 @@ const StepDetailsDialog = ({
           )}
           
           {/* Tasks Section */}
-          {relatedTasks.length > 0 && (
+          {tasks.length > 0 && (
             <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Your Tasks for This Step</h3>
@@ -173,7 +160,7 @@ const StepDetailsDialog = ({
               )}
               
               <div className="space-y-4">
-                {relatedTasks.map((task) => (
+                {tasks.map((task) => (
                   <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -186,7 +173,7 @@ const StepDetailsDialog = ({
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => handleOpenTaskDetails(task)}
+                        onClick={() => onTaskOpen && onTaskOpen(task)}
                       >
                         <Edit className="h-4 w-4 mr-1" /> Edit
                       </Button>
@@ -202,59 +189,6 @@ const StepDetailsDialog = ({
                     <div className="mb-3 text-xs text-muted-foreground">
                       {getCompletionPercentage(task)}% complete
                     </div>
-                    
-                    {task.categories.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {task.categories.map((category) => (
-                          <div key={category.id} className="bg-muted/20 p-3 rounded-md">
-                            <div 
-                              className="flex justify-between items-center cursor-pointer"
-                              onClick={() => onCategoryToggle && onCategoryToggle(task.id, category.id)}
-                            >
-                              <h5 className="font-medium">{category.title}</h5>
-                            </div>
-                            
-                            {!category.collapsed && (
-                              <div className="mt-2 space-y-1">
-                                {category.subtasks.map((subtask) => (
-                                  <div key={subtask.id} className="flex items-start space-x-2 p-1">
-                                    <Checkbox 
-                                      id={`dialog-subtask-${subtask.id}`}
-                                      checked={subtask.completed}
-                                      onCheckedChange={(checked) => {
-                                        onTaskToggle && onTaskToggle(task.id, category.id, subtask.id, checked === true);
-                                      }}
-                                    />
-                                    <label 
-                                      htmlFor={`dialog-subtask-${subtask.id}`}
-                                      className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
-                                    >
-                                      {subtask.title}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <div className="mt-3">
-                      <Button 
-                        variant={task.status === 'completed' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          if (onTaskStatusChange) {
-                            const newStatus = task.status === 'completed' ? 'in-progress' : 'completed';
-                            onTaskStatusChange(task, newStatus);
-                          }
-                        }}
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                        {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
-                      </Button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -264,41 +198,8 @@ const StepDetailsDialog = ({
 
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>Close</Button>
-          <Button>Start This Step</Button>
         </DialogFooter>
       </DialogContent>
-      
-      {/* Task Edit Sheet */}
-      {selectedTask && (
-        <TaskDetailSheet
-          isOpen={isTaskDetailOpen}
-          onOpenChange={setIsTaskDetailOpen}
-          taskTitle={selectedTask.title}
-          taskId={selectedTask.id}
-          categories={selectedTask.categories}
-          deadline={selectedTask.deadline}
-          onAddSubtask={(categoryId, title) => {
-            // Pass through to parent
-            if (selectedTask && onTaskToggle) {
-              const newSubtaskId = uuidv4();
-              // We'll need the parent component to handle this
-            }
-          }}
-          onRemoveSubtask={(categoryId, subtaskId) => {
-            // Pass through to parent
-          }}
-          onSubtaskToggle={(categoryId, subtaskId, completed) => {
-            if (onTaskToggle && selectedTask) {
-              onTaskToggle(selectedTask.id, categoryId, subtaskId, completed);
-            }
-          }}
-          onDeadlineChange={(date) => {
-            if (onDeadlineChange && selectedTask) {
-              onDeadlineChange(selectedTask.id, date);
-            }
-          }}
-        />
-      )}
     </Dialog>
   );
 };

@@ -1,14 +1,17 @@
 
 import React, { useState } from 'react';
-import { 
+import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetClose,
-  SheetFooter
 } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Card,
+  CardContent
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Save } from 'lucide-react';
 import { Task } from './TaskCard';
@@ -22,7 +25,7 @@ interface TaskDetailSheetProps {
   isOpen: boolean;
   onClose: () => void;
   task: Task;
-  onStatusChange: (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => void;
+  onStatusChange: (task: Task, status: 'completed' | 'in-progress' | 'pending') => void;
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
   onCategoryToggle: (taskId: string, categoryId: string) => void;
   onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
@@ -41,71 +44,85 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
   onAddSubtask,
   onRemoveSubtask
 }) => {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [newSubtasks, setNewSubtasks] = useState<{[key: string]: string}>({});
+
+  const handleAddSubtask = (categoryId: string) => {
+    const subtaskTitle = newSubtasks[categoryId]?.trim();
+    if (subtaskTitle) {
+      onAddSubtask(categoryId, subtaskTitle);
+      // Reset input field
+      setNewSubtasks(prev => ({
+        ...prev,
+        [categoryId]: ''
+      }));
+    }
+  };
+
+  const handleNewSubtaskChange = (categoryId: string, value: string) => {
+    setNewSubtasks(prev => ({
+      ...prev,
+      [categoryId]: value
+    }));
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto p-6" role="dialog" aria-label="Edit Task">
-        <SheetHeader className="pb-6 mb-6 border-b">
-          <SheetTitle className="flex items-center justify-between text-2xl">
-            <span>Task Details</span>
-            {renderStatusBadge(task.status)}
-          </SheetTitle>
-          <SheetDescription className="pt-2 text-lg">
-            {task.title}
+    <Sheet open={isOpen} onOpenChange={isOpen => !isOpen && onClose()}>
+      <SheetContent className="w-full sm:max-w-md md:max-w-lg overflow-y-auto">
+        <SheetHeader className="mb-4">
+          <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
+          <SheetDescription className="text-muted-foreground">
+            {task.description}
           </SheetDescription>
         </SheetHeader>
-        
-        <div className="space-y-8">
-          {/* Progress Overview */}
+
+        <div className="space-y-6">
           <TaskProgressDisplay task={task} />
           
-          {/* Status Selector */}
-          <TaskStatusSelector task={task} onStatusChange={onStatusChange} />
-          
-          {/* Deadline Section */}
+          <div>
+            <h3 className="text-sm font-medium mb-2">Task Status</h3>
+            <TaskStatusSelector 
+              currentStatus={task.status} 
+              onStatusChange={(status) => onStatusChange(task, status)} 
+            />
+          </div>
+
           <DeadlineSelector 
-            taskId={task.id} 
             deadline={task.deadline} 
-            onDeadlineChange={onDeadlineChange}
+            onDeadlineChange={(date) => onDeadlineChange(task.id, date)} 
           />
-          
-          {/* Subtasks Editor */}
-          <div className="space-y-5">
-            <h3 className="text-base font-medium">Manage Subtasks</h3>
-            
-            {task.categories.map(category => (
+
+          <Separator />
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Task Breakdown</h3>
+            {task.categories?.map(category => (
               <SubtaskCategory
                 key={category.id}
                 category={category}
                 taskId={task.id}
+                newSubtaskValue={newSubtasks[category.id] || ''}
                 onSubtaskToggle={onSubtaskToggle}
                 onCategoryToggle={onCategoryToggle}
-                onAddSubtask={onAddSubtask}
+                onAddSubtask={handleAddSubtask}
                 onRemoveSubtask={onRemoveSubtask}
+                onNewSubtaskChange={handleNewSubtaskChange}
               />
             ))}
           </div>
-          
-          {/* Resources Section */}
-          <ResourcesList resources={task.resources} />
-        </div>
-        
-        <SheetFooter className="mt-8 flex-col sm:flex-row gap-3">
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={onClose}
-            className="w-full sm:w-auto order-2 sm:order-1"
-          >
-            Cancel
-          </Button>
-          <SheetClose asChild>
-            <Button className="w-full sm:w-auto order-1 sm:order-2" size="lg">
-              <Save className="h-4 w-4 mr-2" /> Save Changes
+
+          {task.resources && task.resources.length > 0 && (
+            <>
+              <Separator />
+              <ResourcesList resources={task.resources} />
+            </>
+          )}
+
+          <div className="pt-4">
+            <Button onClick={onClose} className="w-full">
+              <Save className="mr-2 h-4 w-4" /> Close and Save Changes
             </Button>
-          </SheetClose>
-        </SheetFooter>
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   );

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Send, User, ArrowRight } from 'lucide-react';
+import { ChevronRight, Send, User, ArrowRight, Info } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
@@ -55,22 +55,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   
   // Create default tasks for a journey
   const createDefaultTasks = (userId: string, journeyId: string) => {
-    const tasksKey = `journey_tasks_${userId}_${journeyId}`;
-    const defaultTasks = {
-      ideation: [
-        { id: 'task1', title: 'Research market', completed: false, description: 'Conduct thorough market research to validate your business idea.' },
-        { id: 'task2', title: 'Define target audience', completed: false, description: 'Create detailed customer personas for your target audience.' },
-        { id: 'task3', title: 'Analyze competitors', completed: false, description: 'Identify key competitors and analyze their strengths and weaknesses.' }
-      ],
-      planning: [
-        { id: 'task4', title: 'Create business plan', completed: false, description: 'Develop a comprehensive business plan including financial projections.' },
-        { id: 'task5', title: 'Define pricing model', completed: false, description: 'Establish a pricing strategy that aligns with your target market and business goals.' }
-      ],
-      execution: [
-        { id: 'task6', title: 'Design MVP', completed: false, description: 'Create a minimum viable product to test with early customers.' },
-        { id: 'task7', title: 'Create branding', completed: false, description: 'Develop your brand identity including logo, colors, and messaging.' }
-      ]
-    };
+    const tasksKey = `tasks_${userId}_${journeyId}`;
     
     // Convert to the expected format with categories for each task
     const formattedTasks = [
@@ -184,7 +169,17 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   
   // Function to handle completion of the initial chat
   const handleComplete = () => {
-    console.log("handleComplete called");
+    console.log("handleComplete called with journeyId:", journeyId);
+    
+    if (!journeyId) {
+      console.error("No journeyId provided");
+      toast({
+        title: "Error",
+        description: "Could not complete journey. Missing journey ID.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       // Store in local storage for demo purposes
@@ -208,45 +203,62 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               currentUser.businessData = businessData;
               localStorage.setItem('user', JSON.stringify(currentUser));
             }
-          }
-        }
-        
-        // If we have a journeyId, update the journey with the business data
-        if (journeyId) {
-          const userData = localStorage.getItem('user');
-          if (userData) {
-            const user = JSON.parse(userData);
-            const userId = user.id;
-            if (userId) {
-              const journeysKey = `journeys_${userId}`;
-              const journeysData = localStorage.getItem(journeysKey);
-              if (journeysData) {
-                const journeys = JSON.parse(journeysData);
-                const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
-                if (journeyIndex !== -1) {
-                  journeys[journeyIndex].businessIdeaData = businessData;
-                  journeys[journeyIndex].progress = 15; // Update progress
-                  journeys[journeyIndex].updatedAt = new Date().toISOString();
-                  localStorage.setItem(journeysKey, JSON.stringify(journeys));
-                  
-                  // Create default tasks for this journey
-                  createDefaultTasks(userId, journeyId);
-                  
-                  // Navigate to journey details page
-                  navigate(`/journey-details/${journeyId}`);
+            
+            // Update the journey with the business data
+            const journeysKey = `journeys_${userId}`;
+            const journeysData = localStorage.getItem(journeysKey);
+            if (journeysData) {
+              const journeys = JSON.parse(journeysData);
+              const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
+              if (journeyIndex !== -1) {
+                journeys[journeyIndex].businessIdeaData = businessData;
+                journeys[journeyIndex].progress = 15; // Update progress
+                journeys[journeyIndex].updatedAt = new Date().toISOString();
+                localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                
+                // Create default tasks for this journey
+                createDefaultTasks(userId, journeyId);
+                
+                // Navigate to journey details page with proper formatting
+                const journeyDetailsPath = `/journey-details/${journeyId}`;
+                console.log("Navigating to:", journeyDetailsPath);
+                
+                // Use setTimeout to ensure state updates have processed
+                setTimeout(() => {
+                  navigate(journeyDetailsPath);
+                }, 100);
+                
+                // Call the onComplete callback if provided
+                if (onComplete) {
+                  onComplete(businessData);
                 }
+                
+                return; // Exit after successful completion
+              } else {
+                console.error("Journey not found with ID:", journeyId);
               }
+            } else {
+              console.error("No journeys data found for user");
             }
           }
         }
       }
+      
+      // If we reached here, something went wrong
+      console.error("Failed to update journey data");
+      toast({
+        title: "Error",
+        description: "An error occurred while saving your journey data.",
+        variant: "destructive"
+      });
+      
     } catch (error) {
       console.error('Error saving business idea:', error);
-    }
-    
-    // Call the onComplete callback if provided
-    if (onComplete) {
-      onComplete(businessData);
+      toast({
+        title: "Error",
+        description: "An error occurred while saving your journey data.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -256,7 +268,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       console.log("Current step is complete, calling handleComplete");
       handleComplete();
     }
-  }, [currentStep]);
+  }, [currentStep, journeyId]); // Added journeyId to dependencies
 
   const renderAssistantMessage = (message: string) => {
     return (

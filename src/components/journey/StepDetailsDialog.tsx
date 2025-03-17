@@ -159,6 +159,7 @@ const StepDetailsDialog = ({
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       placeholder="Enter task title..."
+                      aria-label="New task title"
                     />
                   </div>
                   <div className="flex justify-end gap-3">
@@ -186,6 +187,7 @@ const StepDetailsDialog = ({
                         size="lg" 
                         onClick={() => onTaskOpen && onTaskOpen(task)}
                         className="ml-2"
+                        aria-label={`Edit task: ${task.title}`}
                       >
                         <Edit className="h-4 w-4 mr-2" /> Edit
                       </Button>

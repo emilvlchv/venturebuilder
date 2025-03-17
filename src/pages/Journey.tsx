@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import StepDetailsDialog from '@/components/journey/StepDetailsDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Journey } from '@/components/journey/types';
+import { Button } from '@/components/ui/button';
 
 const JourneyPage = () => {
   const { user } = useAuth();
@@ -127,15 +128,24 @@ const JourneyPage = () => {
             setSelectedJourney(updatedJourney);
           }
           
-          // Navigate to journey details
-          navigate(`/journey-details/${selectedJourneyId}`);
-          
-          toast({
-            title: "Journey Updated",
-            description: "Your journey has been updated with your business information.",
-          });
+          // Navigate to journey details with formatted URL
+          if (selectedJourneyId) {
+            const journeyDetailsPath = `/journey-details/${selectedJourneyId}`;
+            console.log("Navigating to:", journeyDetailsPath);
+            navigate(journeyDetailsPath);
+            
+            toast({
+              title: "Journey Updated",
+              description: "Your journey has been updated with your business information.",
+            });
+          }
         } catch (error) {
           console.error("Error updating journey:", error);
+          toast({
+            title: "Error",
+            description: "An error occurred while updating your journey.",
+            variant: "destructive"
+          });
         }
       }
     }
@@ -144,6 +154,20 @@ const JourneyPage = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setSelectedStep(null);
+  };
+
+  const handleViewJourneyDetails = () => {
+    if (selectedJourneyId) {
+      const journeyDetailsPath = `/journey-details/${selectedJourneyId}`;
+      console.log("Navigating to:", journeyDetailsPath);
+      navigate(journeyDetailsPath);
+    } else {
+      toast({
+        title: "Error",
+        description: "No journey selected to view.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -185,6 +209,10 @@ const JourneyPage = () => {
                       <div 
                         className="bg-primary h-2 rounded-full" 
                         style={{ width: `${selectedJourney.progress}%` }}
+                        role="progressbar"
+                        aria-valuenow={selectedJourney.progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
                       ></div>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -204,12 +232,12 @@ const JourneyPage = () => {
                         <p className="mb-6">
                           Your journey is underway! View the detailed steps and progress in the Journey Details page.
                         </p>
-                        <button 
-                          onClick={() => navigate(`/journey-details/${selectedJourneyId}`)}
+                        <Button 
+                          onClick={handleViewJourneyDetails}
                           className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
                         >
                           View Journey Details
-                        </button>
+                        </Button>
                       </Card>
                     </div>
                   )}

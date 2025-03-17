@@ -71,6 +71,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            
             <Route path="/journey" element={
               <ProtectedRoute>
                 <UserOnlyRoute>
@@ -78,6 +79,7 @@ const App = () => (
                 </UserOnlyRoute>
               </ProtectedRoute>
             } />
+            
             <Route path="/journey-details/:journeyId" element={
               <ProtectedRoute>
                 <UserOnlyRoute>
@@ -85,9 +87,12 @@ const App = () => (
                 </UserOnlyRoute>
               </ProtectedRoute>
             } />
+            
+            {/* Redirect any malformed journey-details URL to journey page */}
             <Route path="/journey-details" element={
               <Navigate to="/journey" replace />
             } />
+            
             <Route path="/education" element={<Education />} />
             <Route path="/community" element={<Community />} />
             <Route path="/about" element={<About />} />
@@ -119,7 +124,7 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
             </Route>
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Redirect any other unmatched routes to the 404 page */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

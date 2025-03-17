@@ -5,23 +5,10 @@ import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
+import { BusinessIdeaData, Journey } from './types';
+import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
-
-// Define the structure for storing conversation data
-export interface BusinessIdeaData {
-  businessIdea: string;
-  teamComposition: string;
-  teamStrengths: string;
-  teamWeaknesses: string;
-  targetCustomers: string;
-  revenueModel?: string;
-  marketingApproach?: string;
-  challengesForeseen?: string;
-  startupCosts?: string;
-  timelineMilestones?: string;
-  additionalInfo?: string;
-}
 
 interface JourneyWizardProps {
   onComplete?: (data: BusinessIdeaData) => void;
@@ -38,6 +25,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     targetCustomers: '',
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Debug: Monitor step changes
   useEffect(() => {
@@ -68,7 +56,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   // Function to handle completion of the initial chat
   const handleComplete = () => {
     console.log("handleComplete called");
-    // Save business idea to user profile if available
+    
     try {
       // Store in local storage for demo purposes
       if (businessData.businessIdea) {
@@ -111,6 +99,27 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   journeys[journeyIndex].progress = 15; // Update progress
                   journeys[journeyIndex].updatedAt = new Date().toISOString();
                   localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                  
+                  // Create default tasks for this journey
+                  const tasksKey = `journey_tasks_${userId}_${journeyId}`;
+                  if (!localStorage.getItem(tasksKey)) {
+                    const defaultTasks = {
+                      ideation: [
+                        { id: 'task1', title: 'Research market', completed: false },
+                        { id: 'task2', title: 'Define target audience', completed: false },
+                        { id: 'task3', title: 'Analyze competitors', completed: false }
+                      ],
+                      planning: [
+                        { id: 'task4', title: 'Create business plan', completed: false },
+                        { id: 'task5', title: 'Define pricing model', completed: false }
+                      ],
+                      execution: [
+                        { id: 'task6', title: 'Design MVP', completed: false },
+                        { id: 'task7', title: 'Create branding', completed: false }
+                      ]
+                    };
+                    localStorage.setItem(tasksKey, JSON.stringify(defaultTasks));
+                  }
                 }
               }
             }

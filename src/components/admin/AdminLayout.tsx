@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate, Outlet, Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   LayoutDashboard, 
@@ -20,10 +20,28 @@ import { useToast } from '@/hooks/use-toast';
 const AdminLayout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState("");
 
   // Check if user has admin role
   const isAdmin = user?.role === 'admin';
+
+  // Set active section based on current path
+  useEffect(() => {
+    const path = location.pathname.split('/')[2] || '';
+    setActiveSection(path || 'overview');
+  }, [location.pathname]);
+
+  // Memoize the logout handler to prevent unnecessary re-renders
+  const handleLogout = useCallback(() => {
+    logout();
+    navigate('/');
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
+  }, [logout, navigate, toast]);
 
   useEffect(() => {
     // Redirect non-admin users
@@ -39,109 +57,122 @@ const AdminLayout: React.FC = () => {
     }
   }, [isAuthenticated, isAdmin, navigate, toast]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-  };
-
   if (!isAuthenticated || !isAdmin) {
     return null;
   }
 
+  const isActive = (path: string) => {
+    return activeSection === path 
+      ? "bg-white/15 text-white font-medium" 
+      : "hover:bg-white/10 text-white/90";
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-primary/90 to-primary/100 text-white shadow-lg">
-        <div className="flex flex-col h-full">
-          <div className="p-6">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-lg bg-white text-primary flex items-center justify-center">
-                <span className="font-bold text-lg">VW</span>
+      {/* Sidebar - optimized rendering */}
+      <aside className="w-64 bg-gradient-to-b from-primary/90 to-primary/100 text-white shadow-lg flex flex-col">
+        <div className="p-6">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-lg bg-white text-primary flex items-center justify-center">
+              <span className="font-bold text-lg">VW</span>
+            </div>
+            <span className="font-bold text-xl text-white">Admin</span>
+          </Link>
+        </div>
+        
+        <nav className="flex-1 px-3 py-2 overflow-y-auto">
+          <div className="space-y-1">
+            <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 border-b border-white/10">Main</p>
+            <Link 
+              to="/admin" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('overview')}`}
+            >
+              <div className="flex items-center gap-3">
+                <LayoutDashboard size={18} className="text-white/70 group-hover:text-white" />
+                <span>Overview</span>
               </div>
-              <span className="font-bold text-xl text-white">Admin</span>
+              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
+            </Link>
+            <Link 
+              to="/admin/users" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('users')}`}
+            >
+              <div className="flex items-center gap-3">
+                <Users size={18} className="text-white/70 group-hover:text-white" />
+                <span>User Management</span>
+              </div>
+              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
+            </Link>
+            
+            <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">Content</p>
+            <Link 
+              to="/admin/community" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('community')}`}
+            >
+              <div className="flex items-center gap-3">
+                <FileText size={18} className="text-white/70 group-hover:text-white" />
+                <span>Community</span>
+              </div>
+              <Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>
+            </Link>
+            <Link 
+              to="/admin/education" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('education')}`}
+            >
+              <div className="flex items-center gap-3">
+                <BookOpen size={18} className="text-white/70 group-hover:text-white" />
+                <span>Education</span>
+              </div>
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px]">6</Badge>
+            </Link>
+            <Link 
+              to="/admin/analytics" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('analytics')}`}
+            >
+              <div className="flex items-center gap-3">
+                <BarChart4 size={18} className="text-white/70 group-hover:text-white" />
+                <span>Analytics</span>
+              </div>
+              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
+            </Link>
+            
+            <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">System</p>
+            <Link 
+              to="/admin/settings" 
+              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('settings')}`}
+            >
+              <div className="flex items-center gap-3">
+                <Settings size={18} className="text-white/70 group-hover:text-white" />
+                <span>Settings</span>
+              </div>
+              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
             </Link>
           </div>
-          
-          <nav className="flex-1 px-3 py-2">
-            <div className="space-y-1">
-              <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 border-b border-white/10">Main</p>
-              <Link to="/admin" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard size={18} className="text-white/70 group-hover:text-white" />
-                  <span>Overview</span>
-                </div>
-                <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-              </Link>
-              <Link to="/admin/users" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <Users size={18} className="text-white/70 group-hover:text-white" />
-                  <span>User Management</span>
-                </div>
-                <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-              </Link>
-              
-              <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">Content</p>
-              <Link to="/admin/community" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <FileText size={18} className="text-white/70 group-hover:text-white" />
-                  <span>Community</span>
-                </div>
-                <Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>
-              </Link>
-              <Link to="/admin/education" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <BookOpen size={18} className="text-white/70 group-hover:text-white" />
-                  <span>Education</span>
-                </div>
-                <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px]">6</Badge>
-              </Link>
-              <Link to="/admin/analytics" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <BarChart4 size={18} className="text-white/70 group-hover:text-white" />
-                  <span>Analytics</span>
-                </div>
-                <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-              </Link>
-              
-              <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">System</p>
-              <Link to="/admin/settings" className="flex items-center justify-between text-sm px-3 py-3 rounded-lg hover:bg-white/10 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <Settings size={18} className="text-white/70 group-hover:text-white" />
-                  <span>Settings</span>
-                </div>
-                <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-              </Link>
-            </div>
-          </nav>
-          
-          <div className="p-4 border-t border-white/10">
-            <div className="bg-white/10 p-4 rounded-lg mb-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="bg-white text-primary rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-xs text-white/70">Administrator</p>
-                </div>
+        </nav>
+        
+        <div className="p-4 border-t border-white/10">
+          <div className="bg-white/10 p-4 rounded-lg mb-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="bg-white text-primary rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
+                {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
               </div>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={handleLogout}
-                className="w-full bg-white hover:bg-white/90 text-primary"
-              >
-                <LogOut size={16} className="mr-2" />
-                Sign Out
-              </Button>
+              <div>
+                <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
+                <p className="text-xs text-white/70">Administrator</p>
+              </div>
             </div>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={handleLogout}
+              className="w-full bg-white hover:bg-white/90 text-primary"
+            >
+              <LogOut size={16} className="mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
-      </div>
+      </aside>
       
       {/* Main content */}
       <div className="flex-1 overflow-auto">

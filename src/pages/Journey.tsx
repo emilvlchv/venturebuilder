@@ -2,16 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import JourneyWizard, { BusinessIdeaData } from '@/components/journey/JourneyWizard';
+import JourneyWizard from '@/components/journey/JourneyWizard';
 import JourneyManager from '@/components/journey/JourneyManager';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import StepDetailsDialog from '@/components/journey/StepDetailsDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
-import TaskCard from '@/components/journey/TaskCard';
 import { Journey } from '@/components/journey/types';
 
 const JourneyPage = () => {
@@ -24,8 +22,6 @@ const JourneyPage = () => {
   const [hasCompletedInitialChat, setHasCompletedInitialChat] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStep, setSelectedStep] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('ideation');
-  const [tasks, setTasks] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     if (user?.id) {
@@ -62,7 +58,6 @@ const JourneyPage = () => {
           try {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
             if (currentUser.businessData) {
-              // Let the journey manager handle this migration
               console.log("Legacy data detected, will be migrated by JourneyManager");
             }
           } catch (error) {
@@ -72,26 +67,6 @@ const JourneyPage = () => {
       }
     }
   }, [user?.id]);
-
-  // Load tasks for selected journey
-  useEffect(() => {
-    if (selectedJourneyId && user?.id) {
-      const tasksKey = `journey_tasks_${user.id}_${selectedJourneyId}`;
-      const savedTasks = localStorage.getItem(tasksKey);
-      
-      if (savedTasks) {
-        try {
-          setTasks(JSON.parse(savedTasks));
-        } catch (error) {
-          console.error("Error loading tasks:", error);
-          setTasks({}); // Reset to empty if error
-        }
-      } else {
-        // No tasks saved yet for this journey
-        setTasks({});
-      }
-    }
-  }, [selectedJourneyId, user?.id]);
 
   const handleJourneySelect = (journeyId: string) => {
     if (user?.id) {
@@ -120,7 +95,7 @@ const JourneyPage = () => {
     }
   };
 
-  const handleJourneyComplete = (data: BusinessIdeaData) => {
+  const handleJourneyComplete = (data: any) => {
     console.log("Journey complete callback triggered with data:", data);
     setHasCompletedInitialChat(true);
     
@@ -151,6 +126,14 @@ const JourneyPage = () => {
           if (updatedJourney) {
             setSelectedJourney(updatedJourney);
           }
+          
+          // Navigate to journey details
+          navigate(`/journey-details/${selectedJourneyId}`);
+          
+          toast({
+            title: "Journey Updated",
+            description: "Your journey has been updated with your business information.",
+          });
         } catch (error) {
           console.error("Error updating journey:", error);
         }
@@ -215,41 +198,19 @@ const JourneyPage = () => {
                       journeyId={selectedJourneyId}
                     />
                   ) : (
-                    <div>
-                      {selectedJourney.businessIdeaData && (
-                        <Card className="mb-10 p-6">
-                          <h3 className="text-xl font-semibold mb-4">Business Overview</h3>
-                          <div className="space-y-4">
-                            <div>
-                              <h4 className="font-medium">Business Concept</h4>
-                              <p className="text-muted-foreground">{selectedJourney.businessIdeaData.businessIdea}</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Target Customers</h4>
-                              <p className="text-muted-foreground">{selectedJourney.businessIdeaData.targetCustomers}</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Team Composition</h4>
-                              <p className="text-muted-foreground">{selectedJourney.businessIdeaData.teamComposition}</p>
-                            </div>
-                          </div>
-                        </Card>
-                      )}
-                      
-                      <div className="mb-10">
-                        <h3 className="text-xl font-semibold mb-4">Journey Progress</h3>
-                        <p className="text-muted-foreground mb-6">
-                          Your personalized journey includes tasks and resources to help you take your business from idea to reality.
+                    <div className="text-center">
+                      <Card className="p-6 mb-6">
+                        <h3 className="text-xl font-semibold mb-4">Journey in Progress</h3>
+                        <p className="mb-6">
+                          Your journey is underway! View the detailed steps and progress in the Journey Details page.
                         </p>
-                        
-                        {/* Journey tasks will be displayed here */}
-                        <div className="opacity-70">
-                          <p>Tasks and detailed progress tracking will be shown here.</p>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            This feature is being implemented to provide detailed tracking of your business journey.
-                          </p>
-                        </div>
-                      </div>
+                        <button 
+                          onClick={() => navigate(`/journey-details/${selectedJourneyId}`)}
+                          className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                        >
+                          View Journey Details
+                        </button>
+                      </Card>
                     </div>
                   )}
                 </>

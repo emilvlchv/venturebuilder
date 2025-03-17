@@ -23,3 +23,22 @@ export interface BusinessIdeaData {
   timelineMilestones?: string;
   additionalInfo?: string;
 }
+
+export interface JourneyTask {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  dueDate?: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: string;
+  notes?: string;
+}
+
+export interface JourneyPhase {
+  id: string;
+  title: string;
+  description?: string;
+  tasks: JourneyTask[];
+  progress: number; // 0-100
+}

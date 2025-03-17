@@ -24,10 +24,11 @@ export interface BusinessIdeaData {
 }
 
 interface JourneyWizardProps {
-  onComplete?: () => void;
+  onComplete?: (data: BusinessIdeaData) => void;
+  journeyId?: string;
 }
 
-const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
+const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) => {
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [businessData, setBusinessData] = useState<BusinessIdeaData>({
     businessIdea: '',
@@ -92,6 +93,29 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
             }
           }
         }
+        
+        // If we have a journeyId, update the journey with the business data
+        if (journeyId) {
+          const userData = localStorage.getItem('user');
+          if (userData) {
+            const user = JSON.parse(userData);
+            const userId = user.id;
+            if (userId) {
+              const journeysKey = `journeys_${userId}`;
+              const journeysData = localStorage.getItem(journeysKey);
+              if (journeysData) {
+                const journeys = JSON.parse(journeysData);
+                const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
+                if (journeyIndex !== -1) {
+                  journeys[journeyIndex].businessIdeaData = businessData;
+                  journeys[journeyIndex].progress = 15; // Update progress
+                  journeys[journeyIndex].updatedAt = new Date().toISOString();
+                  localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                }
+              }
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error saving business idea:', error);
@@ -99,7 +123,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
     
     // Call the onComplete callback if provided
     if (onComplete) {
-      onComplete();
+      onComplete(businessData);
     }
   };
 
@@ -130,7 +154,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
       case 'welcome':
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. I'll ask you a series of detailed questions to understand your business better and create specific tasks for your needs. Ready to begin?")}
+            {renderAssistantMessage("Hi there! I'm your personal business guide. I'll help you create a tailored journey to bring your business idea to life. Ready to begin?")}
             <div className="ml-11">
               <Button 
                 onClick={handleStartChat} 
@@ -186,19 +210,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete }) => {
       <div className="glass rounded-2xl p-6 md:p-8">
         <div className="space-y-10">
           {renderStepContent()}
-        </div>
-      </div>
-      
-      {/* Debug Controls - Remove in production */}
-      <div className="mt-4 p-2 bg-orange-100 text-orange-800 rounded-md text-xs">
-        <p>Debug Controls (Remove in production)</p>
-        <div className="flex gap-2 mt-1">
-          <button 
-            onClick={() => setCurrentStep('complete')}
-            className="px-2 py-1 bg-orange-500 text-white rounded-md text-xs"
-          >
-            Force Complete Step
-          </button>
         </div>
       </div>
     </div>

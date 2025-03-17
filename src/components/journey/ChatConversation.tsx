@@ -25,26 +25,16 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     teamWeaknesses: '',
     targetCustomers: '',
     revenueModel: '',
-    marketingApproach: '',
-    challengesForeseen: '',
-    startupCosts: '',
-    timelineMilestones: '',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Define the questions to be asked by the AI
+  // Define the core questions to be asked by the AI (simplified)
   const questions = [
-    "What's your business idea? Please describe it in as much detail as possible, including what product or service you plan to offer.",
-    "Are you working on this idea alone or with a team? If you have a team, how many people are involved and what are their roles?",
-    "What are the key strengths of you and your team members? What skills, experience, or expertise do you bring to this venture?",
-    "What areas do you or your team feel less confident in? Understanding these gaps will help me suggest resources or strategies to address them.",
-    "Who are your target customers or clients? Please describe your ideal customer profile, including demographics, needs, and pain points.",
-    "How do you plan to make money with this business? What pricing model or revenue streams are you considering?",
-    "What marketing channels or approaches do you think would be most effective for reaching your target audience?",
-    "What are the biggest challenges or obstacles you anticipate facing in launching this business?",
-    "Have you estimated your startup costs? What financial resources do you currently have available?",
-    "What's your timeline for launching this business? Do you have any specific milestones or deadlines in mind?",
-    "Is there anything else you'd like to share about your business idea or requirements that might help me create a better personalized journey for you?"
+    "What's your business idea? Please describe it in detail.",
+    "Who is on your team for this business?",
+    "What are the key strengths of you and your team?",
+    "What areas might you need help with?",
+    "Who are your target customers or clients?"
   ];
 
   // Scroll to bottom of chat whenever new messages are added
@@ -91,24 +81,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       case 4:
         updatedBusinessData.targetCustomers = currentInput;
         break;
-      case 5:
-        updatedBusinessData.revenueModel = currentInput;
-        break;
-      case 6:
-        updatedBusinessData.marketingApproach = currentInput;
-        break;
-      case 7:
-        updatedBusinessData.challengesForeseen = currentInput;
-        break;
-      case 8:
-        updatedBusinessData.startupCosts = currentInput;
-        break;
-      case 9:
-        updatedBusinessData.timelineMilestones = currentInput;
-        break;
-      case 10:
-        updatedBusinessData.additionalInfo = currentInput;
-        break;
     }
     
     setBusinessData(updatedBusinessData);
@@ -127,7 +99,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         // Final message before completing
         setMessages(prev => [...prev, { 
           sender: 'assistant' as const, 
-          text: "Thank you for sharing all this information about your business idea! This will help me create a personalized journey with detailed tasks tailored to your specific needs. Let me analyze this information now." 
+          text: "Thank you for sharing this information about your business idea! I'll create a personalized journey with tasks tailored to your needs." 
         }]);
         
         // Complete the chat after a brief delay
@@ -152,11 +124,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       teamWeaknesses: 'Finance, legal',
       targetCustomers: 'Small businesses',
       revenueModel: 'SaaS subscription model',
-      marketingApproach: 'Content marketing and social media',
-      challengesForeseen: 'Funding and market competition',
-      startupCosts: '$50,000 initial investment',
-      timelineMilestones: '3 months to MVP, 6 months to market',
-      additionalInfo: 'Need help with initial funding',
     };
     
     console.log("Skipping to end, sending data:", updatedBusinessData);

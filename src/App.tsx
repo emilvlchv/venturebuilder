@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Index from "./pages/Index";
 import Journey from "./pages/Journey";
+import JourneyDetails from "./pages/JourneyDetails";
 import Education from "./pages/Education";
 import Community from "./pages/Community";
 import About from "./pages/About";
@@ -59,6 +60,13 @@ const App = () => (
               <ProtectedRoute>
                 <UserOnlyRoute>
                   <Journey />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/journey-details/:journeyId" element={
+              <ProtectedRoute>
+                <UserOnlyRoute>
+                  <JourneyDetails />
                 </UserOnlyRoute>
               </ProtectedRoute>
             } />

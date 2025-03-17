@@ -1,70 +1,45 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
-interface DeadlineSelectorProps {
-  taskId: string;
+export interface DeadlineSelectorProps {
   deadline?: Date;
-  onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
+  onDeadlineChange: (date: Date | undefined) => void;
+  taskId: string;
 }
 
-const DeadlineSelector: React.FC<DeadlineSelectorProps> = ({ taskId, deadline, onDeadlineChange }) => {
-  const setDefaultDeadline = () => {
-    // Set deadline to 2 weeks from now
-    const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-    onDeadlineChange(taskId, twoWeeksFromNow);
-  };
-
+const DeadlineSelector: React.FC<DeadlineSelectorProps> = ({ deadline, onDeadlineChange, taskId }) => {
   return (
-    <div className="space-y-3 p-5 bg-accent/30 rounded-xl">
-      <h3 className="text-base font-medium flex items-center">
-        <CalendarIcon className="h-5 w-5 mr-2 text-primary" /> Set Deadline
-      </h3>
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            onClick={setDefaultDeadline}
-            className="flex-1"
+    <div>
+      <h3 className="text-sm font-medium mb-2">Task Deadline</h3>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !deadline && "text-muted-foreground"
+            )}
           >
-            Set Default (2 weeks)
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {deadline ? format(deadline, "PPP") : <span>Set deadline</span>}
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            onClick={() => onDeadlineChange(taskId, undefined)}
-            className="flex-1"
-          >
-            Clear Deadline
-          </Button>
-        </div>
-        
-        <div className="p-5 bg-white rounded-lg shadow-sm">
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
             selected={deadline}
-            onSelect={(date) => onDeadlineChange(taskId, date || undefined)}
+            onSelect={onDeadlineChange}
             initialFocus
-            className="pointer-events-auto w-full"
+            className="p-3 pointer-events-auto"
           />
-        </div>
-        
-        <div className="pt-2">
-          {deadline ? (
-            <p className="flex items-center bg-blue-50 p-3 rounded-lg border border-blue-100 text-base">
-              <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
-              Current deadline: {format(deadline, 'PPP')}
-            </p>
-          ) : (
-            <p className="text-base text-muted-foreground bg-gray-50 p-3 rounded-lg border border-gray-100">No deadline set</p>
-          )}
-        </div>
-      </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

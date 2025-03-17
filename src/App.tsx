@@ -29,6 +29,7 @@ import EducationManagement from "./pages/admin/EducationManagement";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import { useAuth } from "@/contexts/AuthContext";
+import TaskDetailPage from "@/components/journey/TaskDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,15 @@ const App = () => (
               <ProtectedRoute>
                 <UserOnlyRoute>
                   <JourneyDetails />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            } />
+            
+            {/* Task detail standalone page */}
+            <Route path="/task/:taskId" element={
+              <ProtectedRoute>
+                <UserOnlyRoute>
+                  <TaskDetailPage />
                 </UserOnlyRoute>
               </ProtectedRoute>
             } />

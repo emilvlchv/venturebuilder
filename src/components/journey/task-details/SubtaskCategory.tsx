@@ -12,8 +12,10 @@ interface SubtaskCategoryProps {
   taskId: string;
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
   onCategoryToggle: (taskId: string, categoryId: string) => void;
-  onAddSubtask: (categoryId: string, title: string) => void;
+  onAddSubtask: (categoryId: string) => void;
   onRemoveSubtask: (categoryId: string, subtaskId: string) => void;
+  onNewSubtaskChange: (categoryId: string, value: string) => void;
+  newSubtaskValue: string;
 }
 
 const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
@@ -22,16 +24,10 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
   onSubtaskToggle,
   onCategoryToggle,
   onAddSubtask,
-  onRemoveSubtask
+  onRemoveSubtask,
+  onNewSubtaskChange,
+  newSubtaskValue
 }) => {
-  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
-
-  const handleAddSubtask = () => {
-    if (!newSubtaskTitle.trim()) return;
-    onAddSubtask(category.id, newSubtaskTitle);
-    setNewSubtaskTitle('');
-  };
-
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm">
       <div className="bg-muted/30 p-4 flex items-center justify-between">
@@ -85,19 +81,19 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
           <div className="flex items-center gap-2">
             <Input 
               placeholder="Add new subtask..." 
-              value={newSubtaskTitle}
-              onChange={(e) => setNewSubtaskTitle(e.target.value)}
+              value={newSubtaskValue}
+              onChange={(e) => onNewSubtaskChange(category.id, e.target.value)}
               className="text-base"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleAddSubtask();
+                  onAddSubtask(category.id);
                 }
               }}
             />
             <Button 
               variant="secondary" 
               size="lg"
-              onClick={handleAddSubtask}
+              onClick={() => onAddSubtask(category.id)}
               className="shrink-0"
             >
               <Plus className="h-4 w-4 mr-1" /> Add

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -1006,5 +1007,117 @@ const JourneyDetails = () => {
                 <Card className="mb-10">
                   <CardContent className="p-8 text-center">
                     <p className="text-muted-foreground">No business data available yet. Complete the initial questionnaire to see your personalized journey.</p>
-                    <Button 
-                      className
+                    <Button className="mt-4" onClick={() => navigate('/journey/new')}>
+                      Create Your Business Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="tabs-section mb-16">
+                <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid grid-cols-4 mb-8">
+                    {journeyPhases.map(phase => (
+                      <TabsTrigger key={phase.id} value={phase.id}>
+                        {phase.title}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  
+                  {journeyPhases.map(phase => (
+                    <TabsContent key={phase.id} value={phase.id} className="space-y-8">
+                      <div>
+                        <h2 className="text-2xl font-semibold mb-4">{phase.title}</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {phase.steps.map(step => {
+                            const relatedTasks = getTasksByStepId(step.id);
+                            const hasActiveTasks = relatedTasks.some(task => task.status === 'in-progress');
+                            const allTasksCompleted = relatedTasks.length > 0 && relatedTasks.every(task => task.status === 'completed');
+                            
+                            return (
+                              <Card key={step.id} className={`hover:shadow-md transition-shadow ${hasActiveTasks ? 'border-blue-400 border-2' : ''} ${allTasksCompleted ? 'border-green-400 border-2' : ''}`}>
+                                <CardHeader className="pb-2">
+                                  <div className="flex justify-between items-start">
+                                    <CardTitle className="text-lg">{step.title}</CardTitle>
+                                    {renderStatusBadge(step.status)}
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <p className="text-muted-foreground mb-4">{step.description}</p>
+                                  
+                                  {relatedTasks.length > 0 && (
+                                    <div className="mb-4">
+                                      <h4 className="text-sm font-medium mb-2">Related Tasks:</h4>
+                                      <ul className="space-y-1 text-sm">
+                                        {relatedTasks.map(task => (
+                                          <li key={task.id} className="flex items-center justify-between">
+                                            <span className="flex items-center">
+                                              {task.status === 'completed' ? (
+                                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                                              ) : task.status === 'in-progress' ? (
+                                                <Clock className="h-4 w-4 text-blue-500 mr-1" />
+                                              ) : (
+                                                <AlertCircle className="h-4 w-4 text-gray-400 mr-1" />
+                                              )}
+                                              {task.title}
+                                            </span>
+                                            <Button variant="ghost" size="sm" onClick={() => handleOpenTaskDetails(task)}>
+                                              View
+                                            </Button>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex items-center justify-between">
+                                    <Button onClick={() => handleOpenStepDetails(step.id)} variant="outline" size="sm">
+                                      View Details
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+            </div>
+          </SubscriptionCheck>
+        </div>
+      </main>
+      
+      <Footer />
+      
+      {selectedStep && (
+        <StepDetailsDialog
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+          step={selectedStep}
+          onCreateTask={handleCreateTaskFromStep}
+          tasks={getTasksByStepId(selectedStep.stepId || '')}
+          onTaskOpen={handleOpenTaskDetails}
+        />
+      )}
+      
+      {selectedTask && (
+        <TaskDetailSheet
+          isOpen={isTaskDetailOpen}
+          onClose={() => setIsTaskDetailOpen(false)}
+          task={selectedTask}
+          onStatusChange={handleTaskStatusChange}
+          onSubtaskToggle={handleSubtaskToggle}
+          onCategoryToggle={handleCategoryToggle}
+          onDeadlineChange={handleDeadlineChange}
+          onAddSubtask={handleAddSubtask}
+          onRemoveSubtask={handleRemoveSubtask}
+        />
+      )}
+    </div>
+  );
+};
+
+export default JourneyDetails;

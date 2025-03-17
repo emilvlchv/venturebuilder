@@ -1,10 +1,15 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { CheckCircle2, Calendar, AlertCircle } from 'lucide-react';
 
-export interface TaskStatusSelectorProps {
+interface TaskStatusSelectorProps {
   status: 'completed' | 'in-progress' | 'pending';
   onStatusChange: (status: 'completed' | 'in-progress' | 'pending') => void;
   taskId?: string;
@@ -13,76 +18,40 @@ export interface TaskStatusSelectorProps {
 const TaskStatusSelector: React.FC<TaskStatusSelectorProps> = ({ 
   status, 
   onStatusChange,
-  taskId = 'task' 
+  taskId = 'default'
 }) => {
-  const statusDescriptions = {
-    'pending': 'Task has not been started yet',
-    'in-progress': 'Task is currently being worked on',
-    'completed': 'Task has been successfully completed'
-  };
-
+  const statusLabelId = `status-label-${taskId}`;
+  
   return (
-    <div 
-      className="flex flex-wrap gap-3"
-      role="radiogroup"
-      aria-labelledby={`status-label-${taskId}`}
+    <Select 
+      value={status} 
+      onValueChange={(value: 'completed' | 'in-progress' | 'pending') => onStatusChange(value)}
+      aria-labelledby={statusLabelId}
     >
-      <span id={`status-label-${taskId}`} className="sr-only">Task Status</span>
-      
-      <Button
-        type="button"
-        variant={status === 'pending' ? 'default' : 'outline'}
-        size="sm"
-        className={cn(
-          "flex items-center",
-          status === 'pending' ? 'bg-muted/90 text-foreground hover:bg-muted/70 ring-2 ring-offset-2 ring-muted/90' : ''
-        )}
-        onClick={() => onStatusChange('pending')}
-        aria-checked={status === 'pending'}
-        role="radio"
-        aria-describedby={`pending-description-${taskId}`}
-      >
-        <AlertCircle className="h-4 w-4 mr-2" aria-hidden="true" /> 
-        <span>Not Started</span>
-        <span id={`pending-description-${taskId}`} className="sr-only">{statusDescriptions.pending}</span>
-      </Button>
-      
-      <Button
-        type="button"
-        variant={status === 'in-progress' ? 'default' : 'outline'}
-        size="sm"
-        className={cn(
-          "flex items-center",
-          status === 'in-progress' ? 'bg-blue-500 hover:bg-blue-600 ring-2 ring-offset-2 ring-blue-500' : ''
-        )}
-        onClick={() => onStatusChange('in-progress')}
-        aria-checked={status === 'in-progress'}
-        role="radio"
-        aria-describedby={`in-progress-description-${taskId}`}
-      >
-        <Clock className="h-4 w-4 mr-2" aria-hidden="true" /> 
-        <span>In Progress</span>
-        <span id={`in-progress-description-${taskId}`} className="sr-only">{statusDescriptions['in-progress']}</span>
-      </Button>
-      
-      <Button
-        type="button"
-        variant={status === 'completed' ? 'default' : 'outline'}
-        size="sm"
-        className={cn(
-          "flex items-center",
-          status === 'completed' ? 'bg-green-500 hover:bg-green-600 ring-2 ring-offset-2 ring-green-500' : ''
-        )}
-        onClick={() => onStatusChange('completed')}
-        aria-checked={status === 'completed'}
-        role="radio"
-        aria-describedby={`completed-description-${taskId}`}
-      >
-        <CheckCircle2 className="h-4 w-4 mr-2" aria-hidden="true" /> 
-        <span>Completed</span>
-        <span id={`completed-description-${taskId}`} className="sr-only">{statusDescriptions.completed}</span>
-      </Button>
-    </div>
+      <SelectTrigger className="w-full" aria-label="Select task status">
+        <SelectValue placeholder="Select status" />
+      </SelectTrigger>
+      <SelectContent position="popper">
+        <SelectItem value="pending" className="flex items-center">
+          <div className="flex items-center">
+            <AlertCircle className="mr-2 h-4 w-4 text-muted-foreground" /> 
+            <span>Not Started</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="in-progress" className="flex items-center">
+          <div className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4 text-blue-500" /> 
+            <span>In Progress</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="completed" className="flex items-center">
+          <div className="flex items-center">
+            <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> 
+            <span>Completed</span>
+          </div>
+        </SelectItem>
+      </SelectContent>
+    </Select>
   );
 };
 

@@ -176,17 +176,146 @@ const StepDetailsPage = () => {
             </p>
           </div>
 
-          <div className="my-6 bg-primary/10 p-5 rounded-xl flex items-center gap-4">
-            <CalendarClock className="h-8 w-8 text-primary" />
-            <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Tasks Section (Made primary focus - now 2 columns wide) */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <ListChecks className="h-5 w-5 text-primary" /> Tasks
+                  </h2>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={() => setShowTaskForm(!showTaskForm)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Task
+                  </Button>
+                </div>
+                
+                {showTaskForm && (
+                  <div className="mb-6 p-5 border rounded-lg bg-muted/10">
+                    <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+                        <input
+                          id="newTaskTitle"
+                          className="w-full p-3 border rounded-lg text-base"
+                          value={newTaskTitle}
+                          onChange={(e) => setNewTaskTitle(e.target.value)}
+                          placeholder="Enter task title..."
+                          aria-label="New task title"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
+                        <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {relatedTasks.length > 0 ? (
+                  <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2">
+                    {relatedTasks.map((task) => (
+                      <div key={task.id} className="border rounded-xl p-6 hover:shadow-md transition-shadow bg-card">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-semibold text-xl mb-2">{task.title}</h3>
+                            <p className="text-muted-foreground mb-4">{task.description}</p>
+                          </div>
+                          <div className="flex flex-col gap-2 items-end">
+                            {renderStatusBadge(task.status)}
+                            {task.deadline && (
+                              <span className="text-sm flex items-center gap-1 bg-muted/30 px-3 py-1 rounded-full">
+                                <Calendar className="h-4 w-4 text-primary" /> 
+                                Due: {task.deadline.toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Progress bar */}
+                        <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                          <div 
+                            className="bg-green-500 h-3 rounded-full" 
+                            style={{ width: `${getCompletionPercentage(task)}%` }}
+                            role="progressbar"
+                            aria-valuenow={getCompletionPercentage(task)}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          ></div>
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-4">
+                          {getCompletionPercentage(task)}% complete
+                        </div>
+                        
+                        {/* Subtasks preview */}
+                        {task.categories.length > 0 && (
+                          <div className="mt-4 border-t pt-4">
+                            <h4 className="font-medium text-sm mb-3">Subtasks</h4>
+                            <div className="space-y-2">
+                              {task.categories.flatMap(cat => 
+                                cat.subtasks.slice(0, 2).map(subtask => (
+                                  <div key={subtask.id} className="flex items-center gap-2 text-sm">
+                                    <span className={`w-2 h-2 rounded-full ${subtask.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                                    <span className={subtask.completed ? 'line-through text-muted-foreground' : ''}>
+                                      {subtask.title}
+                                    </span>
+                                  </div>
+                                ))
+                              ).slice(0, 3)}
+                              {task.categories.flatMap(cat => cat.subtasks).length > 3 && (
+                                <div className="text-sm text-muted-foreground">
+                                  +{task.categories.flatMap(cat => cat.subtasks).length - 3} more subtasks
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="mt-5 flex justify-end">
+                          <Button 
+                            variant="default" 
+                            size="lg" 
+                            onClick={() => openTaskDetails(task)}
+                            className="flex items-center gap-2"
+                            aria-label={`Edit task: ${task.title}`}
+                          >
+                            <Edit className="h-4 w-4" /> Edit Task
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8 bg-muted/10 rounded-lg">
+                    <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
+                    <Button 
+                      onClick={() => setShowTaskForm(true)}
+                      className="flex items-center mx-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Create Your First Task
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Sidebar with Step Info */}
             <div className="space-y-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Info className="h-5 w-5 text-primary" /> Overview
+                  <Info className="h-5 w-5 text-primary" /> Step Information
                 </h2>
+                <div className="bg-muted/10 p-5 rounded-xl flex items-center gap-4 mb-4">
+                  <CalendarClock className="h-6 w-6 text-primary" />
+                  <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
+                </div>
                 <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
               </div>
 
@@ -206,7 +335,7 @@ const StepDetailsPage = () => {
               {/* Document Upload Section */}
               <div className="bg-white p-6 rounded-xl shadow-sm border">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Upload className="h-5 w-5 text-primary" /> Related Documents
+                  <Upload className="h-5 w-5 text-primary" /> Documents
                 </h2>
                 
                 <Button 
@@ -265,99 +394,6 @@ const StepDetailsPage = () => {
                   </p>
                 )}
               </div>
-            </div>
-            
-            {/* Tasks Section (Made primary focus) */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <ListChecks className="h-5 w-5 text-primary" /> Tasks
-                </h2>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  onClick={() => setShowTaskForm(!showTaskForm)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Task
-                </Button>
-              </div>
-              
-              {showTaskForm && (
-                <div className="mb-6 p-5 border rounded-lg bg-muted/10">
-                  <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
-                      <input
-                        id="newTaskTitle"
-                        className="w-full p-3 border rounded-lg text-base"
-                        value={newTaskTitle}
-                        onChange={(e) => setNewTaskTitle(e.target.value)}
-                        placeholder="Enter task title..."
-                        aria-label="New task title"
-                      />
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
-                      <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {relatedTasks.length > 0 ? (
-                <div className="space-y-4 max-h-[650px] overflow-y-auto pr-2">
-                  {relatedTasks.map((task) => (
-                    <div key={task.id} className="border rounded-xl p-5 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-lg">{task.title}</h4>
-                            {renderStatusBadge(task.status)}
-                          </div>
-                          <p className="text-muted-foreground">{task.description}</p>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="lg" 
-                          onClick={() => openTaskDetails(task)}
-                          className="ml-2"
-                          aria-label={`Edit task: ${task.title}`}
-                        >
-                          <Edit className="h-4 w-4 mr-2" /> Edit
-                        </Button>
-                      </div>
-                      
-                      {/* Progress bar */}
-                      <div className="w-full bg-gray-200 rounded-full h-3 my-3">
-                        <div 
-                          className="bg-green-500 h-3 rounded-full" 
-                          style={{ width: `${getCompletionPercentage(task)}%` }}
-                          role="progressbar"
-                          aria-valuenow={getCompletionPercentage(task)}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {getCompletionPercentage(task)}% complete
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center p-8 bg-muted/10 rounded-lg">
-                  <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
-                  <Button 
-                    onClick={() => setShowTaskForm(true)}
-                    className="flex items-center mx-auto"
-                  >
-                    <Plus className="h-4 w-4 mr-2" /> Create Your First Task
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>

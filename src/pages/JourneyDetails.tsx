@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -21,7 +20,6 @@ const JourneyDetails = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Load business data from localStorage
     if (user?.id) {
       try {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -34,7 +32,6 @@ const JourneyDetails = () => {
     }
   }, [user?.id]);
 
-  // Define step details that will appear in the dialog
   const stepsDetailsMap: Record<string, StepDetail> = {
     'market-research': {
       title: 'Market Research',
@@ -58,14 +55,14 @@ const JourneyDetails = () => {
       timeEstimate: '1-2 weeks',
       detailedDescription: 'Your value proposition clearly articulates why customers should choose your product or service over competitors. It focuses on the specific benefits and solutions you provide to your target market.',
       tasks: [
-        'Identify your product/service's key benefits',
+        'Identify your product/service key benefits',
         'Define what makes your offering unique',
         'Create a compelling value proposition statement',
         'Test your value proposition with potential customers',
         'Refine based on feedback'
       ],
       examples: [
-        'Example: Dropbox's simple value proposition: "Secure file sharing and storage, anywhere." identifies both the core benefit (file sharing/storage) and the key differentiator (anywhere access).'
+        'Example: Dropbox simple value proposition: "Secure file sharing and storage, anywhere" identifies both the core benefit (file sharing/storage) and the key differentiator (anywhere access).'
       ]
     },
     'mvp': {
@@ -81,14 +78,14 @@ const JourneyDetails = () => {
         'Establish success metrics for your MVP launch'
       ],
       examples: [
-        'Example: Facebook's MVP was simply a profile page and the ability to connect with friends - no marketplace, no groups, no video calls.'
+        'Example: Facebook MVP was simply a profile page and the ability to connect with friends - no marketplace, no groups, no video calls.'
       ]
     },
     'revenue-model': {
       title: 'Revenue Model',
       description: 'Define how your business will make money',
       timeEstimate: '1-2 weeks',
-      detailedDescription: 'Your revenue model outlines how your business will generate income. It's essential to have a clear understanding of your pricing strategy, payment structure, and potential revenue streams.',
+      detailedDescription: 'Your revenue model outlines how your business will generate income. It\'s essential to have a clear understanding of your pricing strategy, payment structure, and potential revenue streams.',
       tasks: [
         'Research pricing models in your industry',
         'Analyze competitor pricing strategies',
@@ -129,7 +126,7 @@ const JourneyDetails = () => {
         'Set up your tax ID numbers and accounts'
       ],
       examples: [
-        'Example: Many tech startups choose to form a C-Corporation in Delaware due to the state's business-friendly laws and the ability to issue different classes of stock to investors.'
+        'Example: Many tech startups choose to form a C-Corporation in Delaware due to the state business-friendly laws and the ability to issue different classes of stock to investors.'
       ]
     },
     'accounting': {
@@ -152,7 +149,7 @@ const JourneyDetails = () => {
       title: 'Brand Identity',
       description: 'Create your brand identity and messaging',
       timeEstimate: '2-3 weeks',
-      detailedDescription: 'Your brand identity encompasses your visual elements, voice, and messaging that communicate your company's values and personality to customers. A consistent brand builds recognition and trust.',
+      detailedDescription: 'Your brand identity encompasses your visual elements, voice, and messaging that communicate your company values and personality to customers. A consistent brand builds recognition and trust.',
       tasks: [
         'Define your brand values, mission, and personality',
         'Create your company name, logo, and visual elements',
@@ -161,14 +158,14 @@ const JourneyDetails = () => {
         'Create brand style guidelines for consistency'
       ],
       examples: [
-        'Example: Mailchimp's playful brand identity features a distinctive yellow color, friendly chimp mascot, and conversational voice that makes email marketing seem approachable and fun.'
+        'Example: Mailchimp playful brand identity features a distinctive yellow color, friendly chimp mascot, and conversational voice that makes email marketing seem approachable and fun.'
       ]
     },
     'marketing-plan': {
       title: 'Marketing Plan',
       description: 'Develop a comprehensive marketing plan',
       timeEstimate: '2-4 weeks',
-      detailedDescription: 'A marketing plan outlines how you'll reach and convert your target audience. It identifies the most effective channels, messaging, and tactics to acquire and retain customers.',
+      detailedDescription: 'A marketing plan outlines how you will reach and convert your target audience. It identifies the most effective channels, messaging, and tactics to acquire and retain customers.',
       tasks: [
         'Set specific, measurable marketing goals',
         'Identify key marketing channels for your audience',
@@ -195,10 +192,9 @@ const JourneyDetails = () => {
       examples: [
         'Example: A mobile app might use a phased launch with a closed beta for 100 users, followed by an invite-only period to build exclusivity, and finally a public launch with press outreach and social media campaign.'
       ]
-    },
+    }
   };
 
-  // Define journey phases with steps
   const journeyPhases = [
     {
       id: 'ideation',
@@ -296,7 +292,6 @@ const JourneyDetails = () => {
     }
   ];
 
-  // Create a mapping of next steps to their corresponding tabs
   const nextStepsMap = {
     'Complete your business plan': 'ideation',
     'Research your market': 'ideation',
@@ -320,7 +315,6 @@ const JourneyDetails = () => {
 
   const handleStepClick = (tabId: string) => {
     setActiveTab(tabId);
-    // Scroll to tabs section
     const tabsElement = document.querySelector('.tabs-section');
     if (tabsElement) {
       tabsElement.scrollIntoView({ behavior: 'smooth' });

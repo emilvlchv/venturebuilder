@@ -23,10 +23,28 @@ import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
+import CommunityManagement from "./pages/admin/CommunityManagement";
+import EducationManagement from "./pages/admin/EducationManagement";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
+import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+// Component to restrict admin users from the journey page
+const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/signin" replace />;
+  }
+  
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -39,7 +57,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/journey" element={
               <ProtectedRoute>
-                <Journey />
+                <UserOnlyRoute>
+                  <Journey />
+                </UserOnlyRoute>
               </ProtectedRoute>
             } />
             <Route path="/journey-details" element={
@@ -69,6 +89,8 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<UserManagement />} />
+              <Route path="community" element={<CommunityManagement />} />
+              <Route path="education" element={<EducationManagement />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<Settings />} />
             </Route>

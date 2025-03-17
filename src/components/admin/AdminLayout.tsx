@@ -7,8 +7,9 @@ import {
   Users, 
   BarChart4, 
   Settings,
-  ChevronRight,
-  LogOut
+  LogOut,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -72,6 +73,14 @@ const AdminLayout: React.FC = () => {
               <Link to="/admin/users" className="flex items-center gap-2 text-sm px-3 py-2 rounded-md hover:bg-accent transition-colors">
                 <Users size={18} />
                 <span>User Management</span>
+              </Link>
+              <Link to="/admin/community" className="flex items-center gap-2 text-sm px-3 py-2 rounded-md hover:bg-accent transition-colors">
+                <FileText size={18} />
+                <span>Community Management</span>
+              </Link>
+              <Link to="/admin/education" className="flex items-center gap-2 text-sm px-3 py-2 rounded-md hover:bg-accent transition-colors">
+                <BookOpen size={18} />
+                <span>Education Content</span>
               </Link>
               <Link to="/admin/analytics" className="flex items-center gap-2 text-sm px-3 py-2 rounded-md hover:bg-accent transition-colors">
                 <BarChart4 size={18} />

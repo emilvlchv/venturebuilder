@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -11,6 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import TaskCard, { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/components/ui/use-toast';
 
 const JourneyDetails = () => {
   const { user } = useAuth();
@@ -21,6 +25,7 @@ const JourneyDetails = () => {
   const { journeyId } = useParams<{ journeyId: string }>();
   const navigate = useNavigate();
   const [journey, setJourney] = useState<Journey | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     if (user?.id && journeyId) {
@@ -35,6 +40,7 @@ const JourneyDetails = () => {
           if (currentJourney) {
             setJourney(currentJourney);
             setBusinessData(currentJourney.businessIdeaData || null);
+            loadTasks();
             return;
           }
         }
@@ -48,6 +54,218 @@ const JourneyDetails = () => {
       }
     }
   }, [user?.id, journeyId]);
+
+  const loadTasks = () => {
+    if (!user?.id || !journeyId) return;
+    
+    try {
+      const tasksKey = `tasks_${user.id}_${journeyId}`;
+      const tasksData = localStorage.getItem(tasksKey);
+      
+      if (tasksData) {
+        const parsedTasks = JSON.parse(tasksData);
+        setTasks(parsedTasks);
+      } else {
+        // Initialize with sample tasks if none exist
+        setTasks(getSampleTasks());
+        saveTasks(getSampleTasks());
+      }
+    } catch (error) {
+      console.error("Error loading tasks:", error);
+    }
+  };
+
+  const saveTasks = (updatedTasks: Task[]) => {
+    if (!user?.id || !journeyId) return;
+    
+    try {
+      const tasksKey = `tasks_${user.id}_${journeyId}`;
+      localStorage.setItem(tasksKey, JSON.stringify(updatedTasks));
+    } catch (error) {
+      console.error("Error saving tasks:", error);
+    }
+  };
+
+  const getSampleTasks = (): Task[] => {
+    return [
+      {
+        id: uuidv4(),
+        title: "Market Research",
+        description: "Research your target market and competitors",
+        status: "in-progress",
+        resources: ["Market Research Template", "Competitive Analysis Guide"],
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Target Audience",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Define primary customer personas",
+                completed: true
+              },
+              {
+                id: uuidv4(),
+                title: "Identify customer pain points",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Estimate market size",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Competitor Analysis",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Identify top 3 competitors",
+                completed: true
+              },
+              {
+                id: uuidv4(),
+                title: "Analyze competitor pricing models",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Document competitor strengths and weaknesses",
+                completed: false
+              }
+            ]
+          }
+        ],
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 days from now
+      },
+      {
+        id: uuidv4(),
+        title: "Value Proposition",
+        description: "Define your unique value proposition",
+        status: "pending",
+        resources: ["Value Proposition Canvas", "Customer Value Template"],
+        categories: [
+          {
+            id: uuidv4(),
+            title: "Core Benefits",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "List key product/service benefits",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Identify unique selling points",
+                completed: false
+              }
+            ]
+          },
+          {
+            id: uuidv4(),
+            title: "Differentiation",
+            subtasks: [
+              {
+                id: uuidv4(),
+                title: "Compare with competitor offerings",
+                completed: false
+              },
+              {
+                id: uuidv4(),
+                title: "Craft value proposition statement",
+                completed: false
+              }
+            ]
+          }
+        ]
+      }
+    ];
+  };
+
+  const handleTaskStatusChange = (task: Task, newStatus: 'completed' | 'in-progress' | 'pending') => {
+    const updatedTasks = tasks.map(t => {
+      if (t.id === task.id) {
+        return { ...t, status: newStatus };
+      }
+      return t;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: `Task ${newStatus === 'completed' ? 'completed' : 'updated'}`,
+      description: `"${task.title}" has been marked as ${newStatus}.`,
+      variant: newStatus === 'completed' ? 'default' : 'outline',
+    });
+  };
+
+  const handleSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            const updatedSubtasks = category.subtasks.map(subtask => {
+              if (subtask.id === subtaskId) {
+                return { ...subtask, completed };
+              }
+              return subtask;
+            });
+            
+            return { ...category, subtasks: updatedSubtasks };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const handleCategoryToggle = (taskId: string, categoryId: string) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        const updatedCategories = task.categories.map(category => {
+          if (category.id === categoryId) {
+            return { ...category, collapsed: !category.collapsed };
+          }
+          return category;
+        });
+        
+        return { ...task, categories: updatedCategories };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const handleDeadlineChange = (taskId: string, deadline: Date | undefined) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, deadline };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+    
+    toast({
+      title: "Deadline updated",
+      description: deadline 
+        ? `Deadline set to ${deadline.toLocaleDateString()}` 
+        : "Deadline has been removed",
+      variant: "default",
+    });
+  };
 
   const stepsDetailsMap: Record<string, StepDetail> = {
     'market-research': {
@@ -355,6 +573,15 @@ const JourneyDetails = () => {
     navigate('/journey');
   };
 
+  const handleOpenTaskDetails = () => {
+    // This would be implemented later with a detailed task view
+    toast({
+      title: "Task Details",
+      description: "Detailed task view will be implemented in a future update.",
+      variant: "default",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -434,6 +661,25 @@ const JourneyDetails = () => {
                   <p className="mt-4">Click on any step to begin, or use our AI assistant to guide you through the process.</p>
                 </CardContent>
               </Card>
+
+              {/* Tasks Section */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold mb-6">Your Current Tasks</h2>
+                <div className="space-y-6">
+                  {tasks.map((task, index) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      index={index}
+                      onOpenDetails={handleOpenTaskDetails}
+                      onTaskStatusChange={handleTaskStatusChange}
+                      onSubtaskToggle={handleSubtaskToggle}
+                      onCategoryToggle={handleCategoryToggle}
+                      onDeadlineChange={handleDeadlineChange}
+                    />
+                  ))}
+                </div>
+              </div>
 
               <div className="tabs-section">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

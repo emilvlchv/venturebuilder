@@ -13,30 +13,11 @@ import {
   ChevronUp, 
   Calendar,
   Edit,
-  Trash2,
   Plus 
 } from 'lucide-react';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
-import { 
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-  SheetFooter
-} from "@/components/ui/sheet";
-import { Input } from '@/components/ui/input';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
+import TaskDetailSheet from './TaskDetailSheet';
 
 export interface Subtask {
   id: string;
@@ -81,12 +62,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onDeadlineChange
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   
-  // Form for editing subtasks
-  const form = useForm();
-
   const getCompletionPercentage = () => {
     const allSubtasks = task.categories.flatMap(category => category.subtasks);
     if (allSubtasks.length === 0) return 0;
@@ -113,16 +90,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
     }
   };
 
-  const handleAddSubtask = (categoryId: string) => {
-    if (!newSubtaskTitle.trim()) return;
-    
+  // Helper function for handling subtask addition from the edit sheet
+  const handleAddSubtask = (categoryId: string, title: string) => {
     const updatedTask = {...task};
     const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
     
     if (categoryIndex !== -1) {
       updatedTask.categories[categoryIndex].subtasks.push({
         id: uuidv4(),
-        title: newSubtaskTitle,
+        title,
         completed: false
       });
       
@@ -132,11 +108,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
       } else {
         onTaskStatusChange(updatedTask, updatedTask.status);
       }
-      
-      setNewSubtaskTitle('');
     }
   };
 
+  // Helper function for handling subtask removal from the edit sheet
   const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
     const updatedTask = {...task};
     const categoryIndex = updatedTask.categories.findIndex(c => c.id === categoryId);
@@ -147,13 +122,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
       
       onTaskStatusChange(updatedTask, updatedTask.status);
     }
-  };
-
-  const setDefaultDeadline = () => {
-    // Set deadline to 2 weeks from now
-    const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-    onDeadlineChange(task.id, twoWeeksFromNow);
   };
 
   // Helper function to determine deadline status
@@ -238,137 +206,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   </Button>
                 </div>
                 
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center">
-                      <Edit className="h-4 w-4 mr-1" /> Edit
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Edit Task: {task.title}</SheetTitle>
-                      <SheetDescription>
-                        Customize deadlines and subtasks for this task.
-                      </SheetDescription>
-                    </SheetHeader>
-                    
-                    <div className="py-4 space-y-6">
-                      {/* Deadline Section */}
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Set Deadline</h3>
-                        <div className="flex flex-col gap-2">
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={setDefaultDeadline}
-                              className="flex-1"
-                            >
-                              Set Default (2 weeks)
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => onDeadlineChange(task.id, undefined)}
-                              className="flex-1"
-                            >
-                              Clear Deadline
-                            </Button>
-                          </div>
-                          
-                          <div className="border rounded-md p-4">
-                            <p className="text-sm mb-2">Pick a specific date:</p>
-                            <CalendarComponent
-                              mode="single"
-                              selected={task.deadline}
-                              onSelect={(date) => onDeadlineChange(task.id, date)}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
-                          </div>
-                          
-                          <div className="pt-2">
-                            {task.deadline ? (
-                              <p className="text-sm flex items-center">
-                                <Calendar className="h-4 w-4 mr-2" />
-                                Current deadline: {format(task.deadline, 'PPP')}
-                              </p>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">No deadline set</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Subtasks Editor */}
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-medium">Manage Subtasks</h3>
-                        
-                        {task.categories.map(category => (
-                          <div key={category.id} className="border rounded-md p-4">
-                            <h4 className="font-medium text-sm mb-2">{category.title}</h4>
-                            
-                            <div className="space-y-2">
-                              {category.subtasks.map(subtask => (
-                                <div key={subtask.id} className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded-md">
-                                  <div className="flex items-start gap-2 flex-1">
-                                    <Checkbox 
-                                      id={`edit-subtask-${subtask.id}`}
-                                      checked={subtask.completed}
-                                      onCheckedChange={(checked) => {
-                                        onSubtaskToggle(task.id, category.id, subtask.id, checked === true);
-                                      }}
-                                    />
-                                    <p className="text-sm">{subtask.title}</p>
-                                  </div>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0" 
-                                    onClick={() => handleRemoveSubtask(category.id, subtask.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                  </Button>
-                                </div>
-                              ))}
-                              
-                              <div className="pt-1">
-                                <div className="flex items-center gap-2">
-                                  <Input 
-                                    placeholder="Add new subtask..." 
-                                    value={selectedCategoryId === category.id ? newSubtaskTitle : ''}
-                                    onChange={(e) => {
-                                      setSelectedCategoryId(category.id);
-                                      setNewSubtaskTitle(e.target.value);
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        handleAddSubtask(category.id);
-                                      }
-                                    }}
-                                  />
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleAddSubtask(category.id)}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <SheetFooter>
-                      <SheetClose asChild>
-                        <Button>Done</Button>
-                      </SheetClose>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsEditSheetOpen(true)}
+                  className="flex items-center"
+                >
+                  <Edit className="h-4 w-4 mr-1" /> Edit
+                </Button>
               </div>
               
               {/* Progress bar */}
@@ -452,6 +297,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
         </div>
       </CardContent>
+      
+      {/* Task Edit Sheet */}
+      <TaskDetailSheet
+        isOpen={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+        taskTitle={task.title}
+        taskId={task.id}
+        categories={task.categories}
+        deadline={task.deadline}
+        onAddSubtask={handleAddSubtask}
+        onRemoveSubtask={handleRemoveSubtask}
+        onSubtaskToggle={(categoryId, subtaskId, completed) => {
+          onSubtaskToggle(task.id, categoryId, subtaskId, completed);
+        }}
+        onDeadlineChange={(date) => onDeadlineChange(task.id, date)}
+      />
     </Card>
   );
 };

@@ -292,7 +292,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
                                 <div className="flex items-center gap-2">
                                   <Input 
                                     placeholder="Add new subtask..." 
-                                    size="sm"
                                     value={selectedCategoryId === category.id ? newSubtaskTitle : ''}
                                     onChange={(e) => {
                                       setSelectedCategoryId(category.id);

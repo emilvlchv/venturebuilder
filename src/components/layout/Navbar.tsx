@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
@@ -32,6 +31,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
   const { toast } = useToast();
+  const isAdmin = user?.role === 'admin';
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -50,13 +50,12 @@ const Navbar = () => {
     };
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
   const navLinks = [
-    { name: 'Journey', path: '/journey' },
+    { name: 'Journey', path: isAdmin ? '/admin' : '/journey' },
     { name: 'Education', path: '/education' },
     { name: 'Community', path: '/community' },
     { name: 'Pricing', path: '/pricing' },
@@ -90,7 +89,6 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
               <span className="font-bold text-lg">VW</span>
@@ -98,7 +96,6 @@ const Navbar = () => {
             <span className="font-bold text-xl">VentureWayfinder</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navLinks.map((link) => (
@@ -116,11 +113,9 @@ const Navbar = () => {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {/* CTA Button - Fixed to always show authenticated state properly */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {/* Separate My Account button */}
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -143,8 +138,8 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground">@{user?.username}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
-                      My Journey
+                    <DropdownMenuItem onClick={() => navigate(isAdmin ? '/admin' : '/journey')} className="cursor-pointer">
+                      {isAdmin ? 'Admin Dashboard' : 'My Journey'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
                       <Settings size={16} className="mr-2" />
@@ -182,7 +177,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             {isAuthenticated && (
               <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
@@ -200,7 +194,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <nav className="flex flex-col space-y-2">

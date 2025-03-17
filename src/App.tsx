@@ -32,7 +32,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Component to restrict admin users from the journey page
+// Component to restrict admin users from the journey page and redirect them to admin dashboard
 const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAuthenticated } = useAuth();
   

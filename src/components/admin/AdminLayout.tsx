@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -16,6 +16,38 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+
+// Memoized sidebar link component to prevent unnecessary re-renders
+const SidebarLink = memo(({ 
+  to, 
+  isActive, 
+  icon, 
+  children, 
+  badge 
+}: { 
+  to: string; 
+  isActive: boolean; 
+  icon: React.ReactNode; 
+  children: React.ReactNode;
+  badge?: React.ReactNode;
+}) => {
+  return (
+    <Link 
+      to={to} 
+      className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${
+        isActive ? "bg-white/15 text-white font-medium" : "hover:bg-white/10 text-white/90"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {icon}
+        <span>{children}</span>
+      </div>
+      {badge || <ChevronRight size={16} className="text-white/40 group-hover:text-white" />}
+    </Link>
+  );
+});
+
+SidebarLink.displayName = 'SidebarLink';
 
 const AdminLayout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -62,9 +94,7 @@ const AdminLayout: React.FC = () => {
   }
 
   const isActive = (path: string) => {
-    return activeSection === path 
-      ? "bg-white/15 text-white font-medium" 
-      : "hover:bg-white/10 text-white/90";
+    return activeSection === path;
   };
 
   return (
@@ -83,70 +113,60 @@ const AdminLayout: React.FC = () => {
         <nav className="flex-1 px-3 py-2 overflow-y-auto">
           <div className="space-y-1">
             <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 border-b border-white/10">Main</p>
-            <Link 
+            
+            <SidebarLink 
               to="/admin" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('overview')}`}
+              isActive={isActive('overview')} 
+              icon={<LayoutDashboard size={18} className="text-white/70 group-hover:text-white" />}
             >
-              <div className="flex items-center gap-3">
-                <LayoutDashboard size={18} className="text-white/70 group-hover:text-white" />
-                <span>Overview</span>
-              </div>
-              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-            </Link>
-            <Link 
+              Overview
+            </SidebarLink>
+            
+            <SidebarLink 
               to="/admin/users" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('users')}`}
+              isActive={isActive('users')} 
+              icon={<Users size={18} className="text-white/70 group-hover:text-white" />}
             >
-              <div className="flex items-center gap-3">
-                <Users size={18} className="text-white/70 group-hover:text-white" />
-                <span>User Management</span>
-              </div>
-              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-            </Link>
+              User Management
+            </SidebarLink>
             
             <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">Content</p>
-            <Link 
+            
+            <SidebarLink 
               to="/admin/community" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('community')}`}
+              isActive={isActive('community')} 
+              icon={<FileText size={18} className="text-white/70 group-hover:text-white" />}
+              badge={<Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>}
             >
-              <div className="flex items-center gap-3">
-                <FileText size={18} className="text-white/70 group-hover:text-white" />
-                <span>Community</span>
-              </div>
-              <Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>
-            </Link>
-            <Link 
+              Community
+            </SidebarLink>
+            
+            <SidebarLink 
               to="/admin/education" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('education')}`}
+              isActive={isActive('education')} 
+              icon={<BookOpen size={18} className="text-white/70 group-hover:text-white" />}
+              badge={<Badge className="bg-amber-500 hover:bg-amber-600 text-[10px]">6</Badge>}
             >
-              <div className="flex items-center gap-3">
-                <BookOpen size={18} className="text-white/70 group-hover:text-white" />
-                <span>Education</span>
-              </div>
-              <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px]">6</Badge>
-            </Link>
-            <Link 
+              Education
+            </SidebarLink>
+            
+            <SidebarLink 
               to="/admin/analytics" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('analytics')}`}
+              isActive={isActive('analytics')} 
+              icon={<BarChart4 size={18} className="text-white/70 group-hover:text-white" />}
             >
-              <div className="flex items-center gap-3">
-                <BarChart4 size={18} className="text-white/70 group-hover:text-white" />
-                <span>Analytics</span>
-              </div>
-              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-            </Link>
+              Analytics
+            </SidebarLink>
             
             <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">System</p>
-            <Link 
+            
+            <SidebarLink 
               to="/admin/settings" 
-              className={`flex items-center justify-between text-sm px-3 py-3 rounded-lg transition-colors group ${isActive('settings')}`}
+              isActive={isActive('settings')} 
+              icon={<Settings size={18} className="text-white/70 group-hover:text-white" />}
             >
-              <div className="flex items-center gap-3">
-                <Settings size={18} className="text-white/70 group-hover:text-white" />
-                <span>Settings</span>
-              </div>
-              <ChevronRight size={16} className="text-white/40 group-hover:text-white" />
-            </Link>
+              Settings
+            </SidebarLink>
           </div>
         </nav>
         

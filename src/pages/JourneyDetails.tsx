@@ -4,13 +4,13 @@ import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BusinessIdeaData } from '@/components/journey/JourneyWizard';
+import { BusinessIdeaData, Journey } from '@/components/journey/types';
 import { AlertCircle, CheckCircle2, Clock, ArrowRight, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const JourneyDetails = () => {
   const { user } = useAuth();
@@ -18,19 +18,36 @@ const JourneyDetails = () => {
   const [activeTab, setActiveTab] = useState('ideation');
   const [selectedStep, setSelectedStep] = useState<StepDetail | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { journeyId } = useParams<{ journeyId: string }>();
+  const navigate = useNavigate();
+  const [journey, setJourney] = useState<Journey | null>(null);
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && journeyId) {
       try {
+        const journeysKey = `journeys_${user.id}`;
+        const journeysData = localStorage.getItem(journeysKey);
+        
+        if (journeysData) {
+          const journeys = JSON.parse(journeysData);
+          const currentJourney = journeys.find((j: Journey) => j.id === journeyId);
+          
+          if (currentJourney) {
+            setJourney(currentJourney);
+            setBusinessData(currentJourney.businessIdeaData || null);
+            return;
+          }
+        }
+        
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (currentUser.businessData) {
           setBusinessData(currentUser.businessData);
         }
       } catch (error) {
-        console.error("Error loading business data:", error);
+        console.error("Error loading journey data:", error);
       }
     }
-  }, [user?.id]);
+  }, [user?.id, journeyId]);
 
   const stepsDetailsMap: Record<string, StepDetail> = {
     'market-research': {
@@ -334,6 +351,10 @@ const JourneyDetails = () => {
     setSelectedStep(null);
   };
 
+  const handleBackToJourneys = () => {
+    navigate('/journey');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -341,11 +362,21 @@ const JourneyDetails = () => {
         <div className="container-padding">
           <SubscriptionCheck>
             <div className="max-w-5xl mx-auto">
-              <div className="text-center mb-12">
-                <h1 className="h2 mb-4">Your Entrepreneurial Journey</h1>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.
-                </p>
+              <div className="mb-6">
+                <Button 
+                  variant="ghost" 
+                  onClick={handleBackToJourneys}
+                  className="text-primary hover:underline flex items-center mb-4"
+                >
+                  ← Back to All Journeys
+                </Button>
+                
+                <div className="text-center mb-8">
+                  <h1 className="h2 mb-4">{journey?.title || 'Your Entrepreneurial Journey'}</h1>
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    {journey?.description || 'Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.'}
+                  </p>
+                </div>
               </div>
 
               {businessData ? (
@@ -374,6 +405,12 @@ const JourneyDetails = () => {
                 <Card className="mb-10">
                   <CardContent className="p-8 text-center">
                     <p className="text-muted-foreground">No business data available yet. Complete the initial questionnaire to see your personalized journey.</p>
+                    <Button 
+                      className="mt-4"
+                      onClick={handleBackToJourneys}
+                    >
+                      Go to Journey Setup
+                    </Button>
                   </CardContent>
                 </Card>
               )}

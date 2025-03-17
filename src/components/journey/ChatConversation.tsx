@@ -1,8 +1,8 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, User } from 'lucide-react';
-import { BusinessIdeaData } from './JourneyWizard';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState, useEffect } from 'react';
+import { Send, User, AlertTriangle } from 'lucide-react';
+import Button from '../shared/Button';
+import { BusinessIdeaData } from './types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ChatMessage {
   sender: 'user' | 'assistant';
@@ -28,7 +28,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Define the core questions to be asked by the AI (simplified)
   const questions = [
     "What's your business idea? Please describe it in detail.",
     "Who is on your team for this business?",
@@ -37,14 +36,12 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     "Who are your target customers or clients?"
   ];
 
-  // Scroll to bottom of chat whenever new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  // Initialize the chat with the first question
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessages([
@@ -55,15 +52,12 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Function to handle sending a user message
   const handleSendMessage = () => {
     if (!currentInput.trim()) return;
     
-    // Add user message to chat
     const newMessages = [...messages, { sender: 'user' as const, text: currentInput }];
     setMessages(newMessages);
     
-    // Store the response based on current question
     const updatedBusinessData = { ...businessData };
     switch (currentQuestion) {
       case 0:
@@ -87,25 +81,19 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     setCurrentInput('');
     setIsTyping(true);
     
-    // Add thinking delay to simulate AI response
     setTimeout(() => {
-      // Check if we have more questions
       if (currentQuestion < questions.length - 1) {
-        // Move to next question
         const nextQuestion = currentQuestion + 1;
         setCurrentQuestion(nextQuestion);
         setMessages(prev => [...prev, { sender: 'assistant' as const, text: questions[nextQuestion] }]);
       } else {
-        // Final message before completing
         setMessages(prev => [...prev, { 
           sender: 'assistant' as const, 
           text: "Thank you for sharing this information about your business idea! I'll create a personalized journey with tasks tailored to your needs." 
         }]);
         
-        // Complete the chat after a brief delay
         setTimeout(() => {
           console.log("Chat completed, sending data to parent:", updatedBusinessData);
-          // Make sure to call onComplete with the updated data
           onComplete(updatedBusinessData);
         }, 2000);
       }
@@ -114,9 +102,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     }, 1500);
   };
 
-  // For testing: allow skipping to the end
   const handleSkipToEnd = () => {
-    // Only for development/testing to quickly reach the end
     const updatedBusinessData = {
       businessIdea: 'Test business idea',
       teamComposition: 'Solo founder with 2 employees',
@@ -130,7 +116,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     onComplete(updatedBusinessData);
   };
 
-  // Handle pressing Enter to send message
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -206,7 +191,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         </div>
       )}
       
-      {/* For testing purposes - uncomment to enable quick testing */}
       <button 
         onClick={handleSkipToEnd}
         className="mt-4 p-2 bg-orange-500 text-white rounded"

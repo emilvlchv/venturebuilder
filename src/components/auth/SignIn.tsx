@@ -58,6 +58,35 @@ const SignIn = () => {
     }
   };
 
+  const resetAdminAccount = () => {
+    // Clear existing users
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const nonAdminUsers = users.filter((u: any) => u.email !== 'admin@example.com');
+    
+    // Add fresh admin user
+    const adminUser = {
+      id: 'user_admin',
+      firstName: 'Admin',
+      lastName: 'User',
+      username: 'admin',
+      email: 'admin@example.com',
+      password: 'admin123', 
+      role: 'admin'
+    };
+    
+    nonAdminUsers.push(adminUser);
+    localStorage.setItem('users', JSON.stringify(nonAdminUsers));
+    
+    toast({
+      title: "Admin account reset",
+      description: "The admin account has been reset. Try logging in with admin@example.com and admin123.",
+    });
+    
+    // Pre-fill the form with admin credentials
+    form.setValue('email', 'admin@example.com');
+    form.setValue('password', 'admin123');
+  };
+
   return (
     <div className="max-w-md w-full mx-auto p-6 space-y-6">
       <div className="text-center space-y-2">
@@ -101,13 +130,24 @@ const SignIn = () => {
         </form>
       </Form>
 
-      <div className="text-center">
+      <div className="text-center space-y-4">
         <p className="text-sm text-muted-foreground">
           Don't have an account?{" "}
           <Link to="/signup" className="text-primary hover:underline">
             Sign up
           </Link>
         </p>
+        
+        <div className="border-t pt-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={resetAdminAccount} 
+            className="text-xs"
+          >
+            Reset Admin Account
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -45,17 +45,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-    
-    // Initialize admin user for demo purposes if no users exist
+  // Initialize admin user
+  const initializeAdminUser = () => {
+    console.log('Initializing admin user');
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (users.length === 0) {
+    
+    // Check if admin user already exists
+    const adminExists = users.some((u: any) => u.email === 'admin@example.com');
+    
+    if (!adminExists) {
+      console.log('Admin user does not exist, creating...');
       const adminUser = {
         id: 'user_admin',
         firstName: 'Admin',
@@ -65,23 +64,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password: 'admin123',
         role: 'admin'
       };
-      localStorage.setItem('users', JSON.stringify([adminUser]));
+      
+      users.push(adminUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      console.log('Admin user created');
+    } else {
+      console.log('Admin user already exists');
     }
+  };
+
+  useEffect(() => {
+    // Check if user is logged in from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    
+    // Initialize admin user for demo purposes
+    initializeAdminUser();
+    
+    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log(`Attempting to login with email: ${email}`);
+      
       // This is a mock login - in a real app, you would call an API
-      // For demo purposes, we'll check if the user exists in localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
+      console.log(`Found ${users.length} users in localStorage`);
+      
       const foundUser = users.find((u: any) => 
         u.email === email && u.password === password
       );
       
       if (!foundUser) {
+        console.error('No matching user found');
         throw new Error('Invalid email or password');
       }
+      
+      console.log('Login successful for user:', foundUser.email);
       
       const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);

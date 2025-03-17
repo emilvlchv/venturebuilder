@@ -9,13 +9,21 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, CheckCircle2, Plus, Calendar, Edit, ListChecks, Info, Lightbulb } from 'lucide-react';
+import { 
+  CalendarClock, 
+  CheckCircle2, 
+  Plus, 
+  Calendar, 
+  Edit, 
+  ListChecks, 
+  Info, 
+  Lightbulb,
+  FileText,
+  Bookmark
+} from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Task } from './TaskCard';
+import { Task, TaskCategory } from './TaskCard';
 import { Badge } from '@/components/ui/badge';
-import { v4 as uuidv4 } from 'uuid';
-import TaskDetailSheet from './TaskDetailSheet';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 export interface StepDetail {
   title: string;
@@ -36,6 +44,83 @@ interface StepDetailsDialogProps {
   onTaskOpen?: (task: Task) => void;
 }
 
+// Reusable components
+const TaskProgressBar = ({ task }: { task: Task }) => {
+  const getCompletionPercentage = () => {
+    const allSubtasks = task.categories.flatMap(category => category.subtasks);
+    if (allSubtasks.length === 0) return 0;
+    
+    const completedCount = allSubtasks.filter(subtask => subtask.completed).length;
+    return Math.round((completedCount / allSubtasks.length) * 100);
+  };
+  
+  const percentage = getCompletionPercentage();
+  
+  return (
+    <>
+      <div className="w-full bg-gray-200 rounded-full h-3 my-3">
+        <div 
+          className="bg-green-500 h-3 rounded-full" 
+          style={{ width: `${percentage}%` }}
+          role="progressbar"
+          aria-valuenow={percentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        ></div>
+      </div>
+      <div className="text-sm text-muted-foreground">
+        {percentage}% complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
+      </div>
+    </>
+  );
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  switch (status) {
+    case 'completed':
+      return <Badge className="bg-green-500"><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</Badge>;
+    case 'in-progress':
+      return <Badge className="bg-blue-500"><Calendar className="h-4 w-4 mr-1" /> In Progress</Badge>;
+    case 'pending':
+      return <Badge variant="outline"><CalendarClock className="h-4 w-4 mr-1" /> Not Started</Badge>;
+    default:
+      return null;
+  }
+};
+
+const TaskCreationForm = ({ 
+  onCancel, 
+  onCreate, 
+  newTaskTitle, 
+  setNewTaskTitle 
+}: { 
+  onCancel: () => void; 
+  onCreate: () => void; 
+  newTaskTitle: string; 
+  setNewTaskTitle: (value: string) => void;
+}) => (
+  <div className="mb-6 p-5 border rounded-lg bg-muted/10">
+    <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
+    <div className="space-y-4">
+      <div>
+        <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+        <input
+          id="newTaskTitle"
+          className="w-full p-3 border rounded-lg text-base"
+          value={newTaskTitle}
+          onChange={(e) => setNewTaskTitle(e.target.value)}
+          placeholder="Enter task title..."
+          aria-label="New task title"
+        />
+      </div>
+      <div className="flex justify-end gap-3">
+        <Button variant="outline" size="lg" onClick={onCancel}>Cancel</Button>
+        <Button size="lg" onClick={onCreate}>Create Task</Button>
+      </div>
+    </div>
+  </div>
+);
+
 const StepDetailsDialog = ({ 
   isOpen, 
   onClose, 
@@ -48,27 +133,6 @@ const StepDetailsDialog = ({
   const [newTaskTitle, setNewTaskTitle] = useState('');
   
   if (!stepDetails) return null;
-
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <Badge className="bg-green-500"><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</Badge>;
-      case 'in-progress':
-        return <Badge className="bg-blue-500"><Calendar className="h-4 w-4 mr-1" /> In Progress</Badge>;
-      case 'pending':
-        return <Badge variant="outline"><CalendarClock className="h-4 w-4 mr-1" /> Not Started</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const getCompletionPercentage = (task: Task) => {
-    const allSubtasks = task.categories.flatMap(category => category.subtasks);
-    if (allSubtasks.length === 0) return 0;
-    
-    const completedCount = allSubtasks.filter(subtask => subtask.completed).length;
-    return Math.round((completedCount / allSubtasks.length) * 100);
-  };
 
   const handleCreateTask = () => {
     if (onCreateTask && stepDetails.stepId && newTaskTitle.trim()) {
@@ -88,13 +152,15 @@ const StepDetailsDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="my-6 bg-primary/10 p-5 rounded-xl flex items-center gap-4">
+        <div className="mb-6 bg-primary/10 p-5 rounded-xl flex items-center gap-4">
           <CalendarClock className="h-8 w-8 text-primary" />
           <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column: Step Information */}
           <div className="space-y-6">
+            {/* Overview */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Info className="h-5 w-5 text-primary" /> Overview
@@ -102,6 +168,7 @@ const StepDetailsDialog = ({
               <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
             </div>
 
+            {/* Key Tasks */}
             <div className="bg-white p-6 rounded-xl shadow-sm border">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <ListChecks className="h-5 w-5 text-primary" /> Key Tasks
@@ -116,6 +183,7 @@ const StepDetailsDialog = ({
               </ul>
             </div>
 
+            {/* Examples */}
             {stepDetails.examples && stepDetails.examples.length > 0 && (
               <div className="bg-white p-6 rounded-xl shadow-sm border">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -130,7 +198,7 @@ const StepDetailsDialog = ({
             )}
           </div>
           
-          {/* Tasks Section */}
+          {/* Right Column: User Tasks */}
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold flex items-center gap-2">
@@ -147,29 +215,17 @@ const StepDetailsDialog = ({
               </Button>
             </div>
             
+            {/* Task Creation Form */}
             {showTaskForm && (
-              <div className="mb-6 p-5 border rounded-lg bg-muted/10">
-                <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
-                    <input
-                      id="newTaskTitle"
-                      className="w-full p-3 border rounded-lg text-base"
-                      value={newTaskTitle}
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
-                      placeholder="Enter task title..."
-                      aria-label="New task title"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
-                    <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
-                  </div>
-                </div>
-              </div>
+              <TaskCreationForm 
+                onCancel={() => setShowTaskForm(false)}
+                onCreate={handleCreateTask}
+                newTaskTitle={newTaskTitle}
+                setNewTaskTitle={setNewTaskTitle}
+              />
             )}
             
+            {/* Task List */}
             {tasks.length > 0 ? (
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                 {tasks.map((task) => (
@@ -178,7 +234,7 @@ const StepDetailsDialog = ({
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-semibold text-lg">{task.title}</h4>
-                          {renderStatusBadge(task.status)}
+                          <StatusBadge status={task.status} />
                         </div>
                         <p className="text-muted-foreground">{task.description}</p>
                       </div>
@@ -193,20 +249,8 @@ const StepDetailsDialog = ({
                       </Button>
                     </div>
                     
-                    {/* Progress bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-3 my-3">
-                      <div 
-                        className="bg-green-500 h-3 rounded-full" 
-                        style={{ width: `${getCompletionPercentage(task)}%` }}
-                        role="progressbar"
-                        aria-valuenow={getCompletionPercentage(task)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      ></div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {getCompletionPercentage(task)}% complete
-                    </div>
+                    {/* Progress */}
+                    <TaskProgressBar task={task} />
                   </div>
                 ))}
               </div>

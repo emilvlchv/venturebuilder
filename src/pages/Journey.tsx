@@ -6,13 +6,15 @@ import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PenLine, ArrowRight, Info } from 'lucide-react';
+import { PenLine, ArrowRight, Info, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import Button from '@/components/shared/Button';
 import { useToast } from '@/hooks/use-toast';
 import StepDetailsDialog, { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TaskCard, { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
 import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 const Journey = () => {
   const { user } = useAuth();
@@ -28,37 +30,30 @@ const Journey = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<Record<string, Task[]>>({});
 
-  // Load user data on component mount
   useEffect(() => {
     if (user?.id) {
-      // Check if user has completed the initial chat
       const completedChat = localStorage.getItem(`journey_initial_chat_${user.id}`) === 'completed';
       setHasCompletedInitialChat(completedChat);
       
-      // Load business data if available
       try {
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (currentUser.businessData) {
           setBusinessData(currentUser.businessData);
         }
         
-        // Load tasks if available
         const savedTasks = localStorage.getItem(`journey_tasks_${user.id}`);
         if (savedTasks) {
           setTasks(JSON.parse(savedTasks));
         } else {
-          // Generate initial tasks if none exist
           setTasks(generateInitialTasks());
         }
       } catch (error) {
         console.error("Error loading data:", error);
-        // If there's an error, still generate initial tasks
         setTasks(generateInitialTasks());
       }
     }
   }, [user?.id]);
 
-  // Generate initial tasks
   const generateInitialTasks = () => {
     const initialTasks: Record<string, Task[]> = {
       'ideation': [
@@ -457,7 +452,6 @@ const Journey = () => {
     return initialTasks;
   };
 
-  // Save tasks to localStorage
   const saveTasks = (updatedTasks: Record<string, Task[]>) => {
     if (user?.id) {
       localStorage.setItem(`journey_tasks_${user.id}`, JSON.stringify(updatedTasks));
@@ -466,13 +460,11 @@ const Journey = () => {
 
   const handleJourneyComplete = () => {
     console.log("Journey complete callback triggered");
-    // Mark initial chat as completed when user finishes
     if (user?.id) {
       localStorage.setItem(`journey_initial_chat_${user.id}`, 'completed');
     }
     setHasCompletedInitialChat(true);
     
-    // Reload business data
     try {
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       if (currentUser.businessData) {
@@ -495,7 +487,6 @@ const Journey = () => {
           status: newStatus
         };
         
-        // If marking as completed, also mark all subtasks as completed
         if (newStatus === 'completed') {
           updatedTasks[phaseKey][taskIndex].categories = updatedTasks[phaseKey][taskIndex].categories.map(category => ({
             ...category,
@@ -506,7 +497,6 @@ const Journey = () => {
           }));
         }
         
-        // If marking as in-progress and all subtasks are completed, update some subtasks to not completed
         if (newStatus === 'in-progress') {
           const allCompleted = updatedTasks[phaseKey][taskIndex].categories.every(
             category => category.subtasks.every(subtask => subtask.completed)
@@ -514,7 +504,6 @@ const Journey = () => {
           
           if (allCompleted) {
             updatedTasks[phaseKey][taskIndex].categories = updatedTasks[phaseKey][taskIndex].categories.map(category => {
-              // Mark the last subtask in each category as not completed
               const updatedSubtasks = [...category.subtasks];
               if (updatedSubtasks.length > 0) {
                 updatedSubtasks[updatedSubtasks.length - 1].completed = false;
@@ -549,15 +538,12 @@ const Journey = () => {
         if (categoryIndex !== -1) {
           const subtaskIndex = updatedTasks[phaseKey][taskIndex].categories[categoryIndex].subtasks.findIndex(s => s.id === subtaskId);
           if (subtaskIndex !== -1) {
-            // Update the specific subtask
             updatedTasks[phaseKey][taskIndex].categories[categoryIndex].subtasks[subtaskIndex].completed = completed;
             
-            // Check if all subtasks are completed
             const allCompleted = updatedTasks[phaseKey][taskIndex].categories.every(
               category => category.subtasks.every(subtask => subtask.completed)
             );
             
-            // Update task status based on subtasks
             if (allCompleted) {
               updatedTasks[phaseKey][taskIndex].status = 'completed';
             } else {
@@ -581,7 +567,6 @@ const Journey = () => {
       if (taskIndex !== -1) {
         const categoryIndex = updatedTasks[phaseKey][taskIndex].categories.findIndex(c => c.id === categoryId);
         if (categoryIndex !== -1) {
-          // Toggle the collapsed state
           updatedTasks[phaseKey][taskIndex].categories[categoryIndex].collapsed = 
             !updatedTasks[phaseKey][taskIndex].categories[categoryIndex].collapsed;
           
@@ -625,21 +610,17 @@ const Journey = () => {
     if (!editingField || !businessData) return;
     
     try {
-      // Create updated business data
       const updatedBusinessData = {
         ...businessData,
         [editingField]: editValue
       };
       
-      // Update in state
       setBusinessData(updatedBusinessData);
       
-      // Save to localStorage
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       currentUser.businessData = updatedBusinessData;
       localStorage.setItem('user', JSON.stringify(currentUser));
       
-      // Update users array if needed
       if (user?.id) {
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const userIndex = users.findIndex((u: any) => u.id === user.id);
@@ -654,7 +635,6 @@ const Journey = () => {
         description: "Your business information has been updated."
       });
       
-      // Reset editing state
       setEditingField(null);
     } catch (error) {
       console.error("Error updating business data:", error);
@@ -716,7 +696,6 @@ const Journey = () => {
     );
   };
 
-  // Define step details that will appear in the dialog
   const stepsDetailsMap: Record<string, StepDetail> = {
     'market-research': {
       title: 'Market Research',
@@ -880,7 +859,6 @@ const Journey = () => {
     }
   };
 
-  // Create a mapping of next steps to their corresponding tabs
   const nextStepsMap = {
     'Complete your business plan': 'ideation',
     'Research your market': 'ideation',
@@ -904,7 +882,6 @@ const Journey = () => {
 
   const handleStepClick = (tabId: string) => {
     setActiveTab(tabId);
-    // Scroll to tabs section
     const tabsElement = document.querySelector('.tabs-section');
     if (tabsElement) {
       tabsElement.scrollIntoView({ behavior: 'smooth' });
@@ -925,9 +902,7 @@ const Journey = () => {
   };
 
   useEffect(() => {
-    // If coming from journey-details URL, ensure we show the completed journey view
     if (location.pathname.includes('journey-details')) {
-      // Redirect to /journey but show the completed journey content
       navigate('/journey', { replace: true });
       setHasCompletedInitialChat(true);
     }
@@ -947,7 +922,6 @@ const Journey = () => {
           
           {hasCompletedInitialChat ? (
             <SubscriptionCheck>
-              {/* This content is only shown to users with subscriptions */}
               <div className="max-w-5xl mx-auto">
                 {businessData && (
                   <Card className="mb-10">
@@ -1041,7 +1015,6 @@ const Journey = () => {
               </div>
             </SubscriptionCheck>
           ) : (
-            /* This is shown to all users - the initial chat to get their business idea */
             <JourneyWizard onComplete={handleJourneyComplete} />
           )}
         </div>

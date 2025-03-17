@@ -87,11 +87,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500 shadow-sm"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+        return <Badge className="bg-green-500 shadow-sm"><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</Badge>;
       case 'in-progress':
-        return <Badge className="bg-blue-500 shadow-sm"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
+        return <Badge className="bg-blue-500 shadow-sm"><Clock className="h-4 w-4 mr-1" /> In Progress</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="shadow-sm"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
+        return <Badge variant="outline" className="shadow-sm"><AlertCircle className="h-4 w-4 mr-1" /> Not Started</Badge>;
       default:
         return null;
     }
@@ -180,24 +180,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const completionPercentage = getCompletionPercentage();
   
   return (
-    <Card className="transition-all duration-300 hover:shadow-md border-l-4 border-l-primary">
-      <CardContent className="p-6">
+    <Card className="transition-all duration-300 hover:shadow-md border-l-[6px] border-l-primary animate-fade-in shadow-lg">
+      <CardContent className="p-8">
         {/* Header Section */}
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-5">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary text-primary-foreground w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold shadow-sm">
                 {index + 1}
               </div>
-              <h3 className="text-xl font-semibold">{task.title}</h3>
+              <h3 className="text-2xl font-semibold">{task.title}</h3>
             </div>
             
             <div className="flex items-center gap-2">
               {renderStatusBadge(task.status)}
               
               {task.deadline && (
-                <div className={`text-xs flex items-center gap-1 px-2.5 py-1 rounded-full border ${deadlineBadgeStyle()}`}>
-                  <Calendar className="h-3 w-3" /> 
+                <div className={`text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${deadlineBadgeStyle()}`}>
+                  <Calendar className="h-4 w-4" /> 
                   <span>{deadlineLabel()}: {format(task.deadline, 'MMM d')}</span>
                 </div>
               )}
@@ -205,17 +205,21 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
           
           {/* Description & Progress Section */}
-          <div className="bg-muted/30 p-3 rounded-lg">
-            <p className="text-muted-foreground mb-3">{task.description}</p>
+          <div className="bg-muted/30 p-5 rounded-xl">
+            <p className="text-muted-foreground mb-4 text-base">{task.description}</p>
             
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1.5">
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
               <div 
-                className={`h-2.5 rounded-full ${completionPercentage >= 100 ? 'bg-green-500' : 'bg-primary'} transition-all duration-500`} 
+                className={`h-3 rounded-full ${completionPercentage >= 100 ? 'bg-green-500' : 'bg-primary'} transition-all duration-500`} 
                 style={{ width: `${completionPercentage}%` }}
+                role="progressbar"
+                aria-valuenow={completionPercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
               ></div>
             </div>
-            <div className="flex justify-between items-center text-xs">
-              <p className="text-muted-foreground">{completionPercentage}% complete</p>
+            <div className="flex justify-between items-center text-sm">
+              <p className="text-muted-foreground font-medium">{completionPercentage}% complete</p>
               <p className="text-muted-foreground">
                 {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length} / 
                 {task.categories.flatMap(c => c.subtasks).length} subtasks
@@ -224,105 +228,115 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </div>
           
           {/* Actions Section */}
-          <div className="flex flex-wrap gap-2 justify-between items-center">
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3 justify-between items-center">
+            <div className="flex flex-wrap gap-3">
               <Button 
                 variant="outline" 
-                size="sm" 
+                size="lg" 
                 onClick={onOpenDetails}
                 className="flex items-center shadow-sm hover:shadow transition-all"
               >
-                <Info className="h-4 w-4 mr-1" /> Details
+                <Info className="h-5 w-5 mr-2" /> Details
               </Button>
               
               <Button
                 variant={task.status === 'completed' ? 'default' : 'outline'}
-                size="sm"
+                size="lg"
                 onClick={handleStatusChange}
                 className={`flex items-center shadow-sm hover:shadow transition-all ${task.status === 'completed' ? 'bg-green-500 hover:bg-green-600' : ''}`}
               >
-                <CheckCircle2 className="h-4 w-4 mr-1" />
+                <CheckCircle2 className="h-5 w-5 mr-2" />
                 {task.status === 'completed' ? 'Completed' : 'Mark Complete'}
               </Button>
               
               {task.stepId && onViewStep && (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="lg"
                   onClick={() => onViewStep(task.stepId!)}
                   className="flex items-center hover:bg-primary/10"
                 >
-                  <ArrowRight className="h-4 w-4 mr-1" />
+                  <ArrowRight className="h-5 w-5 mr-2" />
                   View Related Step
                 </Button>
               )}
             </div>
             
             <Button 
-              variant="ghost" 
-              size="sm" 
+              variant="outline"
+              size="lg" 
               onClick={() => setIsEditSheetOpen(true)}
               className="flex items-center hover:bg-primary/10"
             >
-              <Edit className="h-4 w-4 mr-1" /> Edit
+              <Edit className="h-5 w-5 mr-2" /> Edit Task
             </Button>
           </div>
           
           {/* Subtasks Toggle Button */}
           <Button 
-            variant="ghost" 
-            size="sm" 
+            variant="secondary" 
+            size="lg" 
             onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center justify-center w-full border border-muted transition-colors ${isOpen ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
+            className={`flex items-center justify-center w-full border transition-colors mt-2 ${isOpen ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
+            aria-expanded={isOpen}
+            aria-controls="subtasks-section"
           >
             {isOpen ? (
               <>
-                <ChevronUp className="h-4 w-4 mr-1" /> Hide Subtasks
+                <ChevronUp className="h-5 w-5 mr-2" /> Hide Subtasks
               </>
             ) : (
               <>
-                <ChevronDown className="h-4 w-4 mr-1" /> Show Subtasks ({task.categories.flatMap(c => c.subtasks).length})
+                <ChevronDown className="h-5 w-5 mr-2" /> Show Subtasks ({task.categories.flatMap(c => c.subtasks).length})
               </>
             )}
           </Button>
           
           {/* Subtasks Expanded Section */}
           {isOpen && (
-            <div className="mt-2 space-y-4 animate-accordion-down">
+            <div 
+              id="subtasks-section" 
+              className="mt-4 space-y-5 animate-accordion-down"
+            >
               {task.categories.map((category) => (
-                <div key={category.id} className="border rounded-md overflow-hidden">
+                <div key={category.id} className="border rounded-xl overflow-hidden shadow-sm">
                   <div 
-                    className="flex justify-between items-center p-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="flex justify-between items-center p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => onCategoryToggle(task.id, category.id)}
+                    aria-expanded={!category.collapsed}
+                    aria-controls={`category-${category.id}-content`}
                   >
                     <div className="flex items-center gap-2">
-                      <Bookmark className="h-4 w-4 text-primary" />
-                      <h4 className="font-medium">{category.title}</h4>
-                      <Badge variant="outline" className="ml-2 text-xs">
+                      <Bookmark className="h-5 w-5 text-primary" />
+                      <h4 className="font-medium text-lg">{category.title}</h4>
+                      <Badge variant="outline" className="ml-2 text-sm">
                         {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
                       </Badge>
                     </div>
                     {category.collapsed ? 
-                      <ChevronDown className="h-4 w-4" /> : 
-                      <ChevronUp className="h-4 w-4" />
+                      <ChevronDown className="h-5 w-5" /> : 
+                      <ChevronUp className="h-5 w-5" />
                     }
                   </div>
                   
                   {!category.collapsed && (
-                    <div className="p-3 space-y-1.5 bg-white">
+                    <div 
+                      id={`category-${category.id}-content`} 
+                      className="p-4 space-y-2 bg-white"
+                    >
                       {category.subtasks.map((subtask) => (
-                        <div key={subtask.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-muted/20 transition-colors">
+                        <div key={subtask.id} className="flex items-start space-x-3 p-3 rounded-md hover:bg-muted/20 transition-colors">
                           <Checkbox 
                             id={`subtask-${subtask.id}`}
                             checked={subtask.completed}
                             onCheckedChange={(checked) => {
                               onSubtaskToggle(task.id, category.id, subtask.id, checked === true);
                             }}
-                            className="mt-0.5"
+                            className="mt-1"
                           />
                           <label 
                             htmlFor={`subtask-${subtask.id}`}
-                            className={`text-sm cursor-pointer flex-1 ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
+                            className={`text-base cursor-pointer flex-1 ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
                           >
                             {subtask.title}
                           </label>
@@ -337,14 +351,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
           
           {/* Resources Section */}
           {task.resources.length > 0 && (
-            <div className="mt-4 p-3 bg-accent/40 rounded-lg">
-              <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
-                <FileText className="h-4 w-4" /> Resources
+            <div className="mt-5 p-5 bg-accent/40 rounded-xl">
+              <h4 className="text-base font-medium flex items-center gap-2 mb-3">
+                <FileText className="h-5 w-5" /> Resources
               </h4>
-              <ul className="list-none space-y-1.5">
+              <ul className="list-none space-y-2">
                 {task.resources.map((resource, i) => (
-                  <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/70 flex-shrink-0"></div>
+                  <li key={i} className="text-base text-muted-foreground flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary/70 flex-shrink-0"></div>
                     {resource}
                   </li>
                 ))}

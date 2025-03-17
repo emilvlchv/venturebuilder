@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, CheckCircle2, Plus, Calendar, Edit } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Plus, Calendar, Edit, ListChecks, Info, Lightbulb } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task } from './TaskCard';
 import { Badge } from '@/components/ui/badge';
@@ -51,11 +51,11 @@ const StepDetailsDialog = ({
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+        return <Badge className="bg-green-500"><CheckCircle2 className="h-4 w-4 mr-1" /> Completed</Badge>;
       case 'in-progress':
-        return <Badge className="bg-blue-500"><Calendar className="h-3 w-3 mr-1" /> In Progress</Badge>;
+        return <Badge className="bg-blue-500"><Calendar className="h-4 w-4 mr-1" /> In Progress</Badge>;
       case 'pending':
-        return <Badge variant="outline"><CalendarClock className="h-3 w-3 mr-1" /> Not Started</Badge>;
+        return <Badge variant="outline"><CalendarClock className="h-4 w-4 mr-1" /> Not Started</Badge>;
       default:
         return null;
     }
@@ -79,125 +79,150 @@ const StepDetailsDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl mx-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{stepDetails.title}</DialogTitle>
-          <DialogDescription className="text-base">
+      <DialogContent className="max-w-5xl mx-auto p-8" role="dialog" aria-labelledby="step-details-title">
+        <DialogHeader className="pb-5 mb-6 border-b">
+          <DialogTitle id="step-details-title" className="text-3xl font-bold">{stepDetails.title}</DialogTitle>
+          <DialogDescription className="text-lg mt-2">
             {stepDetails.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="my-4 bg-muted/30 p-4 rounded-md flex items-center gap-3">
-          <CalendarClock className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
+        <div className="my-6 bg-primary/10 p-5 rounded-xl flex items-center gap-4">
+          <CalendarClock className="h-8 w-8 text-primary" />
+          <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium mb-2">Overview</h3>
-            <p className="text-muted-foreground">{stepDetails.detailedDescription}</p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium mb-2">Key Tasks</h3>
-            <ul className="space-y-1.5">
-              {stepDetails.tasks.map((task, index) => (
-                <li key={index} className="flex gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>{task}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {stepDetails.examples && stepDetails.examples.length > 0 && (
-            <div>
-              <h3 className="text-lg font-medium mb-2">Examples</h3>
-              <div className="bg-muted/50 p-4 rounded-md space-y-3">
-                {stepDetails.examples.map((example, index) => (
-                  <p key={index}>{example}</p>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" /> Overview
+              </h3>
+              <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
             </div>
-          )}
+
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-primary" /> Key Tasks
+              </h3>
+              <ul className="space-y-3">
+                {stepDetails.tasks.map((task, index) => (
+                  <li key={index} className="flex gap-3 items-start">
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-base">{task}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {stepDetails.examples && stepDetails.examples.length > 0 && (
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-primary" /> Examples
+                </h3>
+                <div className="bg-muted/20 p-5 rounded-lg space-y-4">
+                  {stepDetails.examples.map((example, index) => (
+                    <p key={index} className="text-base italic">{example}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           
           {/* Tasks Section */}
-          {tasks.length > 0 && (
-            <div className="mt-8">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium">Your Tasks for This Step</h3>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowTaskForm(!showTaskForm)}
-                  className="flex items-center gap-1"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Task
-                </Button>
-              </div>
-              
-              {showTaskForm && (
-                <div className="mb-4 p-4 border rounded-md">
-                  <h4 className="font-medium mb-2">Create a new task</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="newTaskTitle" className="block text-sm mb-1">Task Title</label>
-                      <input
-                        id="newTaskTitle"
-                        className="w-full p-2 border rounded-md"
-                        value={newTaskTitle}
-                        onChange={(e) => setNewTaskTitle(e.target.value)}
-                        placeholder="Enter task title..."
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setShowTaskForm(false)}>Cancel</Button>
-                      <Button size="sm" onClick={handleCreateTask}>Create Task</Button>
-                    </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-primary" /> Your Tasks
+              </h3>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => setShowTaskForm(!showTaskForm)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Task
+              </Button>
+            </div>
+            
+            {showTaskForm && (
+              <div className="mb-6 p-5 border rounded-lg bg-muted/10">
+                <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+                    <input
+                      id="newTaskTitle"
+                      className="w-full p-3 border rounded-lg text-base"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      placeholder="Enter task title..."
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <Button variant="outline" size="lg" onClick={() => setShowTaskForm(false)}>Cancel</Button>
+                    <Button size="lg" onClick={handleCreateTask}>Create Task</Button>
                   </div>
                 </div>
-              )}
-              
-              <div className="space-y-4">
+              </div>
+            )}
+            
+            {tasks.length > 0 ? (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                 {tasks.map((task) => (
-                  <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-2">
+                  <div key={task.id} className="border rounded-xl p-5 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-semibold text-lg">{task.title}</h4>
                           {renderStatusBadge(task.status)}
                         </div>
                         <p className="text-muted-foreground">{task.description}</p>
                       </div>
                       <Button 
-                        variant="ghost" 
-                        size="sm" 
+                        variant="outline" 
+                        size="lg" 
                         onClick={() => onTaskOpen && onTaskOpen(task)}
+                        className="ml-2"
                       >
-                        <Edit className="h-4 w-4 mr-1" /> Edit
+                        <Edit className="h-4 w-4 mr-2" /> Edit
                       </Button>
                     </div>
                     
                     {/* Progress bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2 my-3">
+                    <div className="w-full bg-gray-200 rounded-full h-3 my-3">
                       <div 
-                        className="bg-green-500 h-2 rounded-full" 
+                        className="bg-green-500 h-3 rounded-full" 
                         style={{ width: `${getCompletionPercentage(task)}%` }}
+                        role="progressbar"
+                        aria-valuenow={getCompletionPercentage(task)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
                       ></div>
                     </div>
-                    <div className="mb-3 text-xs text-muted-foreground">
+                    <div className="text-sm text-muted-foreground">
                       {getCompletionPercentage(task)}% complete
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="text-center p-8 bg-muted/10 rounded-lg">
+                <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
+                <Button 
+                  onClick={() => setShowTaskForm(true)}
+                  className="flex items-center mx-auto"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Create Your First Task
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={onClose}>Close</Button>
+        <DialogFooter className="mt-8">
+          <Button variant="outline" size="lg" onClick={onClose}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

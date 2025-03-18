@@ -157,6 +157,7 @@ const journeyPhasesData = [
 // Sample step details for the market research step
 const stepDetailsData: Record<string, StepDetail> = {
   'market-research': {
+    id: 'market-research',
     title: 'Market Research',
     description: 'Understand your target market and competitors',
     timeEstimate: '2-3 weeks',
@@ -177,9 +178,11 @@ const stepDetailsData: Record<string, StepDetail> = {
       'Example: A food delivery startup conducting research to understand customer preferences, delivery times, and pricing expectations in different neighborhoods.',
       'Example: An e-commerce clothing brand researching competitors to identify gaps in the market for sustainable fashion.'
     ],
-    stepId: 'market-research'
+    businessIdea: 'EcoFresh Delivery',
+    status: 'in-progress'
   },
   'idea-validation': {
+    id: 'idea-validation',
     title: 'Idea Validation',
     description: 'Test your business concept with potential customers',
     timeEstimate: '1-2 weeks',
@@ -199,7 +202,8 @@ const stepDetailsData: Record<string, StepDetail> = {
       'Example: A software startup creating a simple landing page to gauge interest in their solution and collect email addresses of interested users.',
       'Example: A physical product business creating a prototype and getting feedback from potential customers at local events or through online focus groups.'
     ],
-    stepId: 'idea-validation'
+    businessIdea: 'EcoFresh Delivery',
+    status: 'pending'
   }
 };
 

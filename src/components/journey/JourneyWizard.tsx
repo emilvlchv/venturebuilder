@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Send, User, ArrowRight, Info } from 'lucide-react';
 import Button from '../shared/Button';
@@ -163,15 +164,20 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     ];
     
     // Generate AI tasks based on the user's business data
-    let formattedTasks: Task[] = standardTasks;
+    let formattedTasks: Task[] = [];
+    
     if (businessData.businessIdea) {
       // Generate personalized AI tasks
       const aiTasks = generateAITasks(businessData);
-      formattedTasks = [...standardTasks, ...aiTasks];
-      
       console.log("Generated AI tasks:", aiTasks);
+      
+      // Merge standard and AI-generated tasks
+      formattedTasks = [...standardTasks, ...aiTasks];
+    } else {
+      formattedTasks = standardTasks;
     }
     
+    // Save tasks to localStorage
     localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
     return formattedTasks;
   };
@@ -220,6 +226,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 journeys[journeyIndex].updatedAt = new Date().toISOString();
                 localStorage.setItem(journeysKey, JSON.stringify(journeys));
                 
+                // Create AI-generated tasks
                 createDefaultTasks(userId, journeyId);
                 
                 const journeyDetailsPath = `/journey-details/${journeyId}`;

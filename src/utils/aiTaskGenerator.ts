@@ -12,29 +12,38 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
 
   const tasks: Task[] = [];
   
-  // Generate market validation tasks
+  // Discovery Phase Tasks
   if (businessData.targetCustomers) {
     tasks.push(createMarketValidationTask(businessData));
   }
   
-  // Generate team optimization tasks
   if (businessData.teamStrengths || businessData.teamWeaknesses) {
     tasks.push(createTeamOptimizationTask(businessData));
   }
   
-  // Generate product development tasks
+  // Planning Phase Tasks
   if (businessData.businessIdea && businessData.problem) {
     tasks.push(createProductDevelopmentTask(businessData));
   }
   
-  // Generate financial planning tasks
   if (businessData.revenueModel || businessData.businessIdea) {
     tasks.push(createFinancialPlanningTask(businessData));
   }
   
-  // Generate marketing strategy tasks
+  // Launch Phase Tasks
   if (businessData.targetCustomers) {
     tasks.push(createMarketingStrategyTask(businessData));
+  }
+  
+  if (businessData.businessIdea) {
+    tasks.push(createLegalSetupTask(businessData));
+    tasks.push(createLaunchPlanTask(businessData));
+  }
+  
+  // Growth Phase Tasks
+  if (businessData.businessIdea && businessData.targetCustomers) {
+    tasks.push(createCustomerAcquisitionTask(businessData));
+    tasks.push(createScalingStrategyTask(businessData));
   }
   
   return tasks;
@@ -243,6 +252,167 @@ const createMarketingStrategyTask = (businessData: BusinessIdeaData): Task => {
           { id: uuidv4(), title: 'Create marketing budget allocation', completed: false },
           { id: uuidv4(), title: 'Set up analytics and tracking systems', completed: false },
           { id: uuidv4(), title: 'Plan launch campaign', completed: false }
+        ],
+        collapsed: false
+      }
+    ]
+  };
+};
+
+/**
+ * Creates a legal setup task for the business
+ */
+const createLegalSetupTask = (businessData: BusinessIdeaData): Task => {
+  const businessIdea = businessData.businessIdea || 'your business';
+  const industry = businessData.industry || 'your industry';
+  
+  return {
+    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
+    title: `Legal Formation for ${businessIdea.substring(0, 25)}`,
+    description: `Set up the legal structure and compliance framework for your ${industry} business.`,
+    status: 'pending',
+    stepId: 'legal-setup',
+    resources: ['Business Structure Guide', 'Trademark Registration Resources', 'Compliance Checklist'],
+    categories: [
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Business Formation',
+        subtasks: [
+          { id: uuidv4(), title: 'Determine optimal business structure (LLC, Corp, etc.)', completed: false },
+          { id: uuidv4(), title: 'Register business name and entity', completed: false },
+          { id: uuidv4(), title: 'Obtain necessary business licenses', completed: false },
+          { id: uuidv4(), title: 'Apply for EIN/Tax ID', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Intellectual Property',
+        subtasks: [
+          { id: uuidv4(), title: 'Conduct trademark search for business name', completed: false },
+          { id: uuidv4(), title: 'File trademark application if appropriate', completed: false },
+          { id: uuidv4(), title: 'Develop intellectual property protection strategy', completed: false },
+          { id: uuidv4(), title: 'Create standard contracts and agreements', completed: false }
+        ],
+        collapsed: false
+      }
+    ]
+  };
+};
+
+/**
+ * Creates a launch plan task
+ */
+const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
+  const businessIdea = businessData.businessIdea || 'your business';
+  
+  return {
+    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
+    title: `Launch Plan for ${businessIdea.substring(0, 25)}`,
+    description: `Create a comprehensive launch strategy for bringing ${businessIdea.substring(0, 40)} to market.`,
+    status: 'pending',
+    stepId: 'launch-preparation',
+    resources: ['Launch Checklist', 'PR Strategy Guide', 'Event Planning Templates'],
+    categories: [
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Launch Preparation',
+        subtasks: [
+          { id: uuidv4(), title: 'Create detailed launch timeline', completed: false },
+          { id: uuidv4(), title: 'Develop launch announcement strategy', completed: false },
+          { id: uuidv4(), title: 'Prepare marketing materials for launch', completed: false },
+          { id: uuidv4(), title: 'Set up tracking for launch metrics', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Launch Execution',
+        subtasks: [
+          { id: uuidv4(), title: 'Plan launch event or webinar', completed: false },
+          { id: uuidv4(), title: 'Prepare early customer onboarding process', completed: false },
+          { id: uuidv4(), title: 'Develop customer feedback collection system', completed: false },
+          { id: uuidv4(), title: 'Create post-launch assessment plan', completed: false }
+        ],
+        collapsed: false
+      }
+    ]
+  };
+};
+
+/**
+ * Creates a customer acquisition task
+ */
+const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => {
+  const targetCustomers = businessData.targetCustomers || 'your target market';
+  
+  return {
+    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
+    title: `Customer Acquisition Strategy`,
+    description: `Develop a sustainable customer acquisition framework to attract ${targetCustomers} to your business.`,
+    status: 'pending',
+    stepId: 'customer-acquisition',
+    resources: ['Acquisition Channel Analysis', 'CAC Calculator', 'Conversion Optimization Guide'],
+    categories: [
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Acquisition Channels',
+        subtasks: [
+          { id: uuidv4(), title: 'Identify top 3 customer acquisition channels', completed: false },
+          { id: uuidv4(), title: 'Create channel-specific acquisition strategies', completed: false },
+          { id: uuidv4(), title: 'Set up attribution tracking', completed: false },
+          { id: uuidv4(), title: 'Develop customer acquisition budget', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Conversion Optimization',
+        subtasks: [
+          { id: uuidv4(), title: 'Set up conversion funnel tracking', completed: false },
+          { id: uuidv4(), title: 'Identify and optimize conversion bottlenecks', completed: false },
+          { id: uuidv4(), title: 'Implement A/B testing framework', completed: false },
+          { id: uuidv4(), title: 'Create customer acquisition reporting dashboard', completed: false }
+        ],
+        collapsed: false
+      }
+    ]
+  };
+};
+
+/**
+ * Creates a scaling strategy task
+ */
+const createScalingStrategyTask = (businessData: BusinessIdeaData): Task => {
+  const businessIdea = businessData.businessIdea || 'your business';
+  
+  return {
+    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
+    title: `Scaling Strategy for Long-term Growth`,
+    description: `Develop a comprehensive plan to scale ${businessIdea.substring(0, 40)} for sustainable long-term growth.`,
+    status: 'pending',
+    stepId: 'scaling-strategy',
+    resources: ['Scale-up Playbook', 'Growth Metrics Guide', 'Operational Efficiency Framework'],
+    categories: [
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Growth Planning',
+        subtasks: [
+          { id: uuidv4(), title: 'Define key growth metrics and targets', completed: false },
+          { id: uuidv4(), title: 'Identify potential new markets or segments', completed: false },
+          { id: uuidv4(), title: 'Develop product/service expansion strategy', completed: false },
+          { id: uuidv4(), title: 'Create 1-3 year growth roadmap', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
+        title: 'Operational Scaling',
+        subtasks: [
+          { id: uuidv4(), title: 'Identify operational bottlenecks', completed: false },
+          { id: uuidv4(), title: 'Develop plan for operational efficiency', completed: false },
+          { id: uuidv4(), title: 'Create hiring and team scaling plan', completed: false },
+          { id: uuidv4(), title: 'Plan for technology and systems scaling', completed: false }
         ],
         collapsed: false
       }

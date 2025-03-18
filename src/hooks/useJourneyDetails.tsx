@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, TaskCategory, Subtask } from '@/components/journey/types';
 import { StepDetail } from '@/components/journey/StepDetailsDialog';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Sample journey phases for the demo
 const journeyPhasesData = [
@@ -54,6 +56,15 @@ const journeyPhasesData = [
         resources: []
       },
       {
+        id: 'business-plan',
+        title: 'Business Plan',
+        description: 'Document your business strategy and execution plan',
+        status: 'pending',
+        hasActiveTasks: false,
+        allTasksCompleted: false,
+        resources: []
+      },
+      {
         id: 'financial-projection',
         title: 'Financial Projection',
         description: 'Estimate costs, revenue, and profitability',
@@ -88,7 +99,7 @@ const journeyPhasesData = [
         resources: []
       },
       {
-        id: 'marketing-plan',
+        id: 'marketing',
         title: 'Marketing Plan',
         description: 'Develop your marketing strategy and channels',
         status: 'pending',
@@ -363,17 +374,62 @@ const mockBusinessData = {
 };
 
 export const useJourneyDetails = () => {
+  const { journeyId } = useParams<{ journeyId: string }>();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('discovery');
-  const [tasks, setTasks] = useState<Task[]>(initialTasksData);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [newSubtasks, setNewSubtasks] = useState<{[key: string]: string}>({});
+  const [journey, setJourney] = useState<any>(null);
+  const [businessData, setBusinessData] = useState<any>(null);
   
-  const journey = {
-    id: '8818f516-349c-46ec-a000-a89506ae78f6',
-    title: 'Your Entrepreneurial Journey',
-    description: 'A personalized roadmap to help you turn your business idea into reality.'
-  };
+  useEffect(() => {
+    if (user?.id && journeyId) {
+      try {
+        const journeysKey = `journeys_${user.id}`;
+        const journeysData = localStorage.getItem(journeysKey);
+        
+        if (journeysData) {
+          const journeys = JSON.parse(journeysData);
+          const currentJourney = journeys.find((j: any) => j.id === journeyId);
+          
+          if (currentJourney) {
+            setJourney(currentJourney);
+            setBusinessData(currentJourney.businessIdeaData || null);
+          }
+        }
+        
+        const tasksKey = `tasks_${user.id}_${journeyId}`;
+        const tasksData = localStorage.getItem(tasksKey);
+        
+        if (tasksData) {
+          const storedTasks = JSON.parse(tasksData);
+          setTasks(storedTasks);
+        } else {
+          setTasks(initialTasksData);
+        }
+      } catch (error) {
+        console.error("Error loading journey data:", error);
+        setTasks(initialTasksData);
+      }
+    } else {
+      setTasks(initialTasksData);
+      setJourney({
+        id: '8818f516-349c-46ec-a000-a89506ae78f6',
+        title: 'Your Entrepreneurial Journey',
+        description: 'A personalized roadmap to help you turn your business idea into reality.'
+      });
+      setBusinessData({
+        name: 'EcoFresh Delivery',
+        industry: 'Food & Beverage',
+        stage: 'Idea/Concept',
+        targetMarket: 'Urban professionals concerned about sustainability',
+        problem: 'Excessive packaging waste in food delivery services',
+        solution: 'Eco-friendly food delivery using reusable containers and electric vehicles'
+      });
+    }
+  }, [user?.id, journeyId]);
   
   const getTasksByStepId = useCallback((stepId: string) => {
     return tasks.filter(task => task.stepId === stepId);
@@ -564,7 +620,7 @@ export const useJourneyDetails = () => {
   
   return {
     journey,
-    businessData: mockBusinessData,
+    businessData,
     journeyPhases: journeyPhasesData,
     activeTab,
     setActiveTab,

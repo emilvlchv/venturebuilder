@@ -41,7 +41,10 @@ const JourneyDetails = () => {
 
   // Initialize local tasks with tasks from the hook
   useEffect(() => {
-    setLocalTasks(initialTasks);
+    if (initialTasks && initialTasks.length > 0) {
+      console.log("Setting local tasks from initialTasks:", initialTasks);
+      setLocalTasks(initialTasks);
+    }
   }, [initialTasks]);
 
   // Adapt businessData to match BusinessIdeaData interface
@@ -122,28 +125,28 @@ const JourneyDetails = () => {
   };
 
   // Handle status change for a task by updating localTasks
-  const handleLocalTaskStatusChange = (status: 'completed' | 'in-progress' | 'pending') => {
+  const handleLocalTaskStatusChange = (task: Task, status: 'completed' | 'in-progress' | 'pending') => {
     if (selectedTask) {
       // Update the selected task in the useJourneyDetails hook
       handleTaskStatusChange(selectedTask, status);
       
       // Also update the local tasks
-      const updatedTasks = localTasks.map(task => 
-        task.id === selectedTask.id ? {...task, status} : task
+      const updatedTasks = localTasks.map(t => 
+        t.id === selectedTask.id ? {...t, status} : t
       );
       setLocalTasks(updatedTasks);
     }
   };
 
-  // Handle subtask toggle with corrected parameters
-  const handleLocalSubtaskToggle = (categoryId: string, subtaskId: string, completed: boolean) => {
+  // Handle subtask toggle 
+  const handleLocalSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
     if (selectedTask) {
       // Update subtask in the hook
-      handleSubtaskToggle(selectedTask.id, categoryId, subtaskId, completed);
+      handleSubtaskToggle(taskId, categoryId, subtaskId, completed);
       
       // Also update in localTasks
       const updatedTasks = localTasks.map(task => {
-        if (task.id === selectedTask.id) {
+        if (task.id === taskId) {
           const updatedCategories = task.categories.map(category => {
             if (category.id === categoryId) {
               const updatedSubtasks = category.subtasks.map(subtask => 
@@ -207,12 +210,8 @@ const JourneyDetails = () => {
           isOpen={isTaskDetailOpen}
           onClose={handleCloseTaskDetail}
           task={selectedTask}
-          onStatusChange={(task, status) => {
-            handleLocalTaskStatusChange(status);
-          }}
-          onSubtaskToggle={(taskId, categoryId, subtaskId, completed) => {
-            handleLocalSubtaskToggle(categoryId, subtaskId, completed);
-          }}
+          onStatusChange={handleLocalTaskStatusChange}
+          onSubtaskToggle={handleLocalSubtaskToggle}
           onCategoryToggle={handleCategoryToggle}
           onDeadlineChange={handleDeadlineChange}
           onAddSubtask={handleAddSubtask}

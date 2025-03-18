@@ -48,28 +48,28 @@ const JourneyHeader: React.FC<JourneyHeaderProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium">Business Concept</h3>
-                <p className="text-muted-foreground">{businessData.businessIdea || "Not specified"}</p>
+                <p className="text-muted-foreground">{businessData.businessIdea || businessData.solution || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Target Customers</h3>
-                <p className="text-muted-foreground">{businessData.targetCustomers || "Not specified"}</p>
+                <p className="text-muted-foreground">{businessData.targetCustomers || businessData.targetMarket || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Team Composition</h3>
-                <p className="text-muted-foreground">{businessData.teamComposition || "Not specified"}</p>
+                <p className="text-muted-foreground">{businessData.teamComposition || businessData.stage || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Team Strengths</h3>
-                <p className="text-muted-foreground">{businessData.teamStrengths || "Not specified"}</p>
+                <p className="text-muted-foreground">{businessData.teamStrengths || businessData.industry || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Team Weaknesses</h3>
-                <p className="text-muted-foreground">{businessData.teamWeaknesses || "Not specified"}</p>
+                <p className="text-muted-foreground">{businessData.teamWeaknesses || businessData.problem || "Not specified"}</p>
               </div>
-              {businessData.revenueModel && (
+              {(businessData.revenueModel || businessData.industry) && (
                 <div>
                   <h3 className="font-medium">Revenue Model</h3>
-                  <p className="text-muted-foreground">{businessData.revenueModel}</p>
+                  <p className="text-muted-foreground">{businessData.revenueModel || "Not specified"}</p>
                 </div>
               )}
             </div>

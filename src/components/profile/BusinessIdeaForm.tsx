@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,7 +27,7 @@ export function BusinessIdeaForm() {
 
   // Extract default values safely from user object
   const defaultValues = {
-    businessIdea: user?.businessIdea || '',
+    businessIdea: user?.businessIdea || user?.businessProfileData?.solution || '',
     targetCustomers: user?.businessProfileData?.targetMarket || '',
     teamComposition: user?.businessProfileData?.stage || '',
     teamStrengths: user?.businessProfileData?.industry || '',
@@ -46,6 +45,7 @@ export function BusinessIdeaForm() {
       await updateUserInfo({ 
         businessIdea: data.businessIdea,
         businessProfileData: {
+          solution: data.businessIdea,
           targetMarket: data.targetCustomers,
           stage: data.teamComposition,
           industry: data.teamStrengths,
@@ -53,6 +53,48 @@ export function BusinessIdeaForm() {
           revenueModel: data.revenueModel,
         } as BusinessProfileData
       });
+      
+      // Also update any active journeys with this business data
+      if (user?.id) {
+        const journeysKey = `journeys_${user.id}`;
+        const journeysData = localStorage.getItem(journeysKey);
+        
+        if (journeysData) {
+          const journeys = JSON.parse(journeysData);
+          let updated = false;
+          
+          const updatedJourneys = journeys.map((journey: any) => {
+            if (journey.businessIdeaData) {
+              updated = true;
+              return {
+                ...journey,
+                businessIdeaData: {
+                  ...journey.businessIdeaData,
+                  businessIdea: data.businessIdea,
+                  targetCustomers: data.targetCustomers,
+                  teamComposition: data.teamComposition,
+                  teamStrengths: data.teamStrengths,
+                  teamWeaknesses: data.teamWeaknesses,
+                  revenueModel: data.revenueModel,
+                  // Add compatibility with the other format
+                  solution: data.businessIdea,
+                  targetMarket: data.targetCustomers,
+                  stage: data.teamComposition,
+                  industry: data.teamStrengths,
+                  problem: data.teamWeaknesses,
+                },
+                updatedAt: new Date().toISOString()
+              };
+            }
+            return journey;
+          });
+          
+          if (updated) {
+            localStorage.setItem(journeysKey, JSON.stringify(updatedJourneys));
+          }
+        }
+      }
+      
       toast({
         title: "Business information saved",
         description: "Your business details have been saved successfully. This will help personalize your journey and generate AI-powered recommendations.",

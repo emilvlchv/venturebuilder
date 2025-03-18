@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -49,12 +48,12 @@ const JourneyDetails = () => {
 
   // Adapt businessData to match BusinessIdeaData interface
   const adaptedBusinessData: BusinessIdeaData = businessData ? {
-    businessIdea: businessData.solution || '',
-    targetCustomers: businessData.targetMarket || '',
-    teamComposition: businessData.stage || '',
-    teamStrengths: businessData.industry || '',
-    teamWeaknesses: businessData.problem || '',
-    revenueModel: '',
+    businessIdea: businessData.solution || businessData.businessIdea || '',
+    targetCustomers: businessData.targetMarket || businessData.targetCustomers || '',
+    teamComposition: businessData.stage || businessData.teamComposition || '',
+    teamStrengths: businessData.industry || businessData.teamStrengths || '',
+    teamWeaknesses: businessData.problem || businessData.teamWeaknesses || '',
+    revenueModel: businessData.revenueModel || '',
     industry: businessData.industry || '',
     stage: businessData.stage || '',
     problem: businessData.problem || '',

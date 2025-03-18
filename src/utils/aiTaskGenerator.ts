@@ -24,6 +24,8 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
   // Planning Phase Tasks
   if (businessData.businessIdea && businessData.problem) {
     tasks.push(createProductDevelopmentTask(businessData));
+  } else if (businessData.businessIdea) {
+    tasks.push(createProductDevelopmentTask(businessData));
   }
   
   if (businessData.revenueModel || businessData.businessIdea) {
@@ -57,6 +59,12 @@ const createMarketValidationTask = (businessData: BusinessIdeaData): Task => {
   const businessIdea = businessData.businessIdea || 'business idea';
   const industry = businessData.industry || 'your industry';
   
+  // Extract key elements from the target market to create more specific subtasks
+  const targetKeywords = targetMarket.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 3)
+    .join(', ');
+  
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
     title: `Validate Your Idea with ${targetMarket.substring(0, 30)}`,
@@ -70,10 +78,10 @@ const createMarketValidationTask = (businessData: BusinessIdeaData): Task => {
         title: 'Customer Validation',
         subtasks: [
           { id: uuidv4(), title: `Create interview questions specific to ${targetMarket}`, completed: false },
-          { id: uuidv4(), title: `Identify 8-10 potential customers from ${targetMarket}`, completed: false },
+          { id: uuidv4(), title: `Identify 8-10 potential ${targetKeywords || 'customers'} for interviews`, completed: false },
           { id: uuidv4(), title: 'Schedule and conduct customer interviews', completed: false },
           { id: uuidv4(), title: 'Document and analyze feedback patterns', completed: false },
-          { id: uuidv4(), title: 'Prepare a validation summary report', completed: false }
+          { id: uuidv4(), title: `Prepare a validation summary report for ${businessIdea.substring(0, 30)}`, completed: false }
         ],
         collapsed: false
       },
@@ -83,8 +91,8 @@ const createMarketValidationTask = (businessData: BusinessIdeaData): Task => {
         subtasks: [
           { id: uuidv4(), title: `Identify 5 main competitors serving ${targetMarket}`, completed: false },
           { id: uuidv4(), title: 'Analyze competitor strengths and weaknesses', completed: false },
-          { id: uuidv4(), title: 'Identify market gaps and opportunities', completed: false },
-          { id: uuidv4(), title: 'Define your unique value proposition', completed: false }
+          { id: uuidv4(), title: `Identify market gaps and opportunities in the ${industry} space`, completed: false },
+          { id: uuidv4(), title: `Define your unique value proposition compared to competitors`, completed: false }
         ],
         collapsed: false
       }
@@ -100,6 +108,17 @@ const createTeamOptimizationTask = (businessData: BusinessIdeaData): Task => {
   const weaknesses = businessData.teamWeaknesses || 'areas for improvement';
   const composition = businessData.teamComposition || 'your current team';
   
+  // Extract key elements from strengths/weaknesses for personalization
+  const strengthKeywords = strengths.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' and ');
+  
+  const weaknessKeywords = weaknesses.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' and ');
+  
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
     title: `Team Optimization Strategy`,
@@ -112,10 +131,10 @@ const createTeamOptimizationTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Team Assessment',
         subtasks: [
-          { id: uuidv4(), title: `Document detailed team strengths in ${strengths.split(' ').slice(0, 3).join(' ')}`, completed: false },
-          { id: uuidv4(), title: `Create improvement plan for ${weaknesses.split(' ').slice(0, 3).join(' ')}`, completed: false },
-          { id: uuidv4(), title: 'Assign roles based on team member strengths', completed: false },
-          { id: uuidv4(), title: 'Identify skills gaps and outsourcing needs', completed: false }
+          { id: uuidv4(), title: `Document detailed team strengths in ${strengthKeywords || 'key areas'}`, completed: false },
+          { id: uuidv4(), title: `Create improvement plan for ${weaknessKeywords || 'weak areas'}`, completed: false },
+          { id: uuidv4(), title: `Assign roles based on team member strengths`, completed: false },
+          { id: uuidv4(), title: `Identify skills gaps and develop plans to address ${weaknessKeywords || 'them'}`, completed: false }
         ],
         collapsed: false
       },
@@ -124,9 +143,9 @@ const createTeamOptimizationTask = (businessData: BusinessIdeaData): Task => {
         title: 'Team Development',
         subtasks: [
           { id: uuidv4(), title: 'Create a communication protocol for the team', completed: false },
-          { id: uuidv4(), title: 'Establish decision-making framework', completed: false },
+          { id: uuidv4(), title: `Establish decision-making framework for ${composition}`, completed: false },
           { id: uuidv4(), title: 'Set up regular check-ins and progress reviews', completed: false },
-          { id: uuidv4(), title: 'Identify training or mentorship opportunities', completed: false }
+          { id: uuidv4(), title: `Identify training opportunities to address ${weaknessKeywords || 'skill gaps'}`, completed: false }
         ],
         collapsed: false
       }
@@ -141,6 +160,12 @@ const createProductDevelopmentTask = (businessData: BusinessIdeaData): Task => {
   const problem = businessData.problem || 'the problem you\'re addressing';
   const solution = businessData.solution || businessData.businessIdea || 'your solution';
   
+  // Extract key elements from solution for personalization
+  const solutionKeywords = solution.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 3)
+    .join(' ');
+  
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
     title: `Develop MVP for ${solution.substring(0, 30)}`,
@@ -153,9 +178,9 @@ const createProductDevelopmentTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'MVP Planning',
         subtasks: [
-          { id: uuidv4(), title: 'Define core features that address the key problem', completed: false },
+          { id: uuidv4(), title: `Define core features of ${solutionKeywords || 'your solution'} that address the key problem`, completed: false },
           { id: uuidv4(), title: 'Create MVP feature list and prioritization matrix', completed: false },
-          { id: uuidv4(), title: 'Develop timeline and resource requirements', completed: false },
+          { id: uuidv4(), title: `Develop timeline for developing ${solutionKeywords || 'MVP'}`, completed: false },
           { id: uuidv4(), title: 'Identify success metrics for MVP testing', completed: false }
         ],
         collapsed: false
@@ -164,7 +189,7 @@ const createProductDevelopmentTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Development & Testing',
         subtasks: [
-          { id: uuidv4(), title: 'Create MVP prototype or initial version', completed: false },
+          { id: uuidv4(), title: `Create ${solutionKeywords || 'MVP'} prototype or initial version`, completed: false },
           { id: uuidv4(), title: 'Develop testing protocol with target users', completed: false },
           { id: uuidv4(), title: 'Conduct MVP testing and collect feedback', completed: false },
           { id: uuidv4(), title: 'Document learnings and plan iterations', completed: false }
@@ -182,6 +207,12 @@ const createFinancialPlanningTask = (businessData: BusinessIdeaData): Task => {
   const revenueModel = businessData.revenueModel || 'your revenue model';
   const businessIdea = businessData.businessIdea || 'your business';
   
+  // Extract key elements for personalization
+  const businessKeywords = businessIdea.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' ');
+  
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
     title: `Financial Strategy for ${businessIdea.substring(0, 25)}`,
@@ -194,9 +225,9 @@ const createFinancialPlanningTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Financial Projections',
         subtasks: [
-          { id: uuidv4(), title: 'Create startup cost estimation', completed: false },
+          { id: uuidv4(), title: `Create startup cost estimation for ${businessKeywords || 'your business'}`, completed: false },
           { id: uuidv4(), title: 'Develop 12-month revenue projection', completed: false },
-          { id: uuidv4(), title: 'Create expense forecast and budget', completed: false },
+          { id: uuidv4(), title: `Create expense forecast and budget for ${businessKeywords || 'operations'}`, completed: false },
           { id: uuidv4(), title: 'Calculate break-even analysis', completed: false },
           { id: uuidv4(), title: 'Develop 3-year financial forecast', completed: false }
         ],
@@ -206,7 +237,7 @@ const createFinancialPlanningTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Revenue Strategy',
         subtasks: [
-          { id: uuidv4(), title: 'Finalize pricing model and strategy', completed: false },
+          { id: uuidv4(), title: `Finalize pricing model for ${businessKeywords || 'your offering'}`, completed: false },
           { id: uuidv4(), title: 'Define key revenue streams and metrics', completed: false },
           { id: uuidv4(), title: 'Create sales forecast and targets', completed: false },
           { id: uuidv4(), title: 'Develop financial KPIs and tracking systems', completed: false }
@@ -224,6 +255,12 @@ const createMarketingStrategyTask = (businessData: BusinessIdeaData): Task => {
   const targetCustomers = businessData.targetCustomers || 'your target market';
   const businessIdea = businessData.businessIdea || 'your business';
   
+  // Extract key elements for personalization
+  const targetKeywords = targetCustomers.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' ');
+  
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
     title: `Marketing Strategy for ${targetCustomers.substring(0, 25)}`,
@@ -236,9 +273,9 @@ const createMarketingStrategyTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Audience Strategy',
         subtasks: [
-          { id: uuidv4(), title: `Create detailed personas for ${targetCustomers}`, completed: false },
-          { id: uuidv4(), title: 'Map customer journey and touchpoints', completed: false },
-          { id: uuidv4(), title: 'Identify key messaging and value propositions', completed: false },
+          { id: uuidv4(), title: `Create detailed personas for ${targetKeywords || 'customer segments'}`, completed: false },
+          { id: uuidv4(), title: `Map ${targetKeywords || 'customer'} journey and touchpoints`, completed: false },
+          { id: uuidv4(), title: `Identify key messaging for ${targetKeywords || 'target audience'}`, completed: false },
           { id: uuidv4(), title: 'Develop brand positioning statement', completed: false }
         ],
         collapsed: false
@@ -247,11 +284,11 @@ const createMarketingStrategyTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Channel Strategy',
         subtasks: [
-          { id: uuidv4(), title: 'Identify primary marketing channels', completed: false },
+          { id: uuidv4(), title: `Identify top 3 channels to reach ${targetKeywords || 'target customers'}`, completed: false },
           { id: uuidv4(), title: 'Develop content strategy and calendar', completed: false },
           { id: uuidv4(), title: 'Create marketing budget allocation', completed: false },
           { id: uuidv4(), title: 'Set up analytics and tracking systems', completed: false },
-          { id: uuidv4(), title: 'Plan launch campaign', completed: false }
+          { id: uuidv4(), title: `Plan launch campaign for ${businessIdea.substring(0, 20)}`, completed: false }
         ],
         collapsed: false
       }
@@ -278,9 +315,9 @@ const createLegalSetupTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Business Formation',
         subtasks: [
-          { id: uuidv4(), title: 'Determine optimal business structure (LLC, Corp, etc.)', completed: false },
+          { id: uuidv4(), title: `Determine optimal business structure for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Register business name and entity', completed: false },
-          { id: uuidv4(), title: 'Obtain necessary business licenses', completed: false },
+          { id: uuidv4(), title: `Obtain necessary ${industry} business licenses`, completed: false },
           { id: uuidv4(), title: 'Apply for EIN/Tax ID', completed: false }
         ],
         collapsed: false
@@ -289,9 +326,9 @@ const createLegalSetupTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Intellectual Property',
         subtasks: [
-          { id: uuidv4(), title: 'Conduct trademark search for business name', completed: false },
+          { id: uuidv4(), title: `Conduct trademark search for ${businessIdea.substring(0, 20)} name`, completed: false },
           { id: uuidv4(), title: 'File trademark application if appropriate', completed: false },
-          { id: uuidv4(), title: 'Develop intellectual property protection strategy', completed: false },
+          { id: uuidv4(), title: `Develop IP protection strategy for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Create standard contracts and agreements', completed: false }
         ],
         collapsed: false
@@ -305,6 +342,13 @@ const createLegalSetupTask = (businessData: BusinessIdeaData): Task => {
  */
 const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
   const businessIdea = businessData.businessIdea || 'your business';
+  const targetCustomers = businessData.targetCustomers || 'your target market';
+  
+  // Extract key elements for personalization
+  const targetKeywords = targetCustomers.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' ');
   
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
@@ -318,9 +362,9 @@ const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Launch Preparation',
         subtasks: [
-          { id: uuidv4(), title: 'Create detailed launch timeline', completed: false },
+          { id: uuidv4(), title: `Create detailed launch timeline for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Develop launch announcement strategy', completed: false },
-          { id: uuidv4(), title: 'Prepare marketing materials for launch', completed: false },
+          { id: uuidv4(), title: `Prepare marketing materials targeting ${targetKeywords || 'customers'}`, completed: false },
           { id: uuidv4(), title: 'Set up tracking for launch metrics', completed: false }
         ],
         collapsed: false
@@ -329,7 +373,7 @@ const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Launch Execution',
         subtasks: [
-          { id: uuidv4(), title: 'Plan launch event or webinar', completed: false },
+          { id: uuidv4(), title: `Plan launch event or webinar for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Prepare early customer onboarding process', completed: false },
           { id: uuidv4(), title: 'Develop customer feedback collection system', completed: false },
           { id: uuidv4(), title: 'Create post-launch assessment plan', completed: false }
@@ -345,10 +389,17 @@ const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
  */
 const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => {
   const targetCustomers = businessData.targetCustomers || 'your target market';
+  const businessIdea = businessData.businessIdea || 'your business';
+  
+  // Extract key elements for personalization
+  const targetKeywords = targetCustomers.split(' ')
+    .filter(word => word.length > 3)
+    .slice(0, 2)
+    .join(' ');
   
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Customer Acquisition Strategy`,
+    title: `Customer Acquisition Strategy for ${businessIdea.substring(0, 20)}`,
     description: `Develop a sustainable customer acquisition framework to attract ${targetCustomers} to your business.`,
     status: 'pending',
     stepId: 'customer-acquisition',
@@ -358,10 +409,10 @@ const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => 
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Acquisition Channels',
         subtasks: [
-          { id: uuidv4(), title: 'Identify top 3 customer acquisition channels', completed: false },
+          { id: uuidv4(), title: `Identify top 3 channels to acquire ${targetKeywords || 'customers'}`, completed: false },
           { id: uuidv4(), title: 'Create channel-specific acquisition strategies', completed: false },
           { id: uuidv4(), title: 'Set up attribution tracking', completed: false },
-          { id: uuidv4(), title: 'Develop customer acquisition budget', completed: false }
+          { id: uuidv4(), title: `Develop budget to acquire ${targetKeywords || 'customers'}`, completed: false }
         ],
         collapsed: false
       },
@@ -371,7 +422,7 @@ const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => 
         subtasks: [
           { id: uuidv4(), title: 'Set up conversion funnel tracking', completed: false },
           { id: uuidv4(), title: 'Identify and optimize conversion bottlenecks', completed: false },
-          { id: uuidv4(), title: 'Implement A/B testing framework', completed: false },
+          { id: uuidv4(), title: `Implement A/B testing for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Create customer acquisition reporting dashboard', completed: false }
         ],
         collapsed: false
@@ -385,10 +436,11 @@ const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => 
  */
 const createScalingStrategyTask = (businessData: BusinessIdeaData): Task => {
   const businessIdea = businessData.businessIdea || 'your business';
+  const industry = businessData.industry || 'your industry';
   
   return {
     id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Scaling Strategy for Long-term Growth`,
+    title: `Scaling Strategy for ${businessIdea.substring(0, 25)}`,
     description: `Develop a comprehensive plan to scale ${businessIdea.substring(0, 40)} for sustainable long-term growth.`,
     status: 'pending',
     stepId: 'scaling-strategy',
@@ -398,10 +450,10 @@ const createScalingStrategyTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Growth Planning',
         subtasks: [
-          { id: uuidv4(), title: 'Define key growth metrics and targets', completed: false },
-          { id: uuidv4(), title: 'Identify potential new markets or segments', completed: false },
+          { id: uuidv4(), title: `Define key growth metrics for ${businessIdea.substring(0, 20)}`, completed: false },
+          { id: uuidv4(), title: `Identify potential new markets for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Develop product/service expansion strategy', completed: false },
-          { id: uuidv4(), title: 'Create 1-3 year growth roadmap', completed: false }
+          { id: uuidv4(), title: `Create 1-3 year growth roadmap for ${industry} business`, completed: false }
         ],
         collapsed: false
       },
@@ -409,7 +461,7 @@ const createScalingStrategyTask = (businessData: BusinessIdeaData): Task => {
         id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
         title: 'Operational Scaling',
         subtasks: [
-          { id: uuidv4(), title: 'Identify operational bottlenecks', completed: false },
+          { id: uuidv4(), title: `Identify operational bottlenecks for ${businessIdea.substring(0, 20)}`, completed: false },
           { id: uuidv4(), title: 'Develop plan for operational efficiency', completed: false },
           { id: uuidv4(), title: 'Create hiring and team scaling plan', completed: false },
           { id: uuidv4(), title: 'Plan for technology and systems scaling', completed: false }

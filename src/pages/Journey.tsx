@@ -110,9 +110,18 @@ const JourneyPage = () => {
           const journeys = JSON.parse(journeysData);
           const updatedJourneys = journeys.map((journey: Journey) => {
             if (journey.id === selectedJourneyId) {
+              // Store in both formats for compatibility
               return {
                 ...journey,
-                businessIdeaData: data,
+                businessIdeaData: {
+                  ...data,
+                  // Ensure all properties are set for both formats
+                  solution: data.businessIdea || data.solution,
+                  targetMarket: data.targetCustomers || data.targetMarket,
+                  stage: data.teamComposition || data.stage,
+                  industry: data.teamStrengths || data.industry,
+                  problem: data.teamWeaknesses || data.problem
+                },
                 progress: Math.max(journey.progress, 15), // Set progress to at least 15%
                 updatedAt: new Date().toISOString()
               };

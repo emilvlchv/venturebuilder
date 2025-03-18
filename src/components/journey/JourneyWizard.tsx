@@ -55,7 +55,33 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   const createDefaultTasks = (userId: string, journeyId: string) => {
     const tasksKey = `tasks_${userId}_${journeyId}`;
     
-    const standardTasks: Task[] = [
+    // Generate AI tasks based on the user's business data
+    let formattedTasks: Task[] = [];
+    
+    if (businessData.businessIdea) {
+      // Generate personalized AI tasks
+      const aiTasks = generateAITasks(businessData);
+      console.log("Generated AI tasks:", aiTasks);
+      
+      if (aiTasks && aiTasks.length > 0) {
+        formattedTasks = [...aiTasks];
+      } else {
+        // Fallback to standard tasks if AI tasks couldn't be generated
+        console.log("Using standard tasks as fallback");
+        formattedTasks = getStandardTasks();
+      }
+    } else {
+      formattedTasks = getStandardTasks();
+    }
+    
+    // Save tasks to localStorage
+    localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
+    return formattedTasks;
+  };
+  
+  const getStandardTasks = (): Task[] => {
+    // Standard fallback tasks if AI generation fails
+    return [
       {
         id: 'task1',
         title: 'Research Market and Validate Business Idea',
@@ -162,24 +188,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000) // 4 weeks from now
       }
     ];
-    
-    // Generate AI tasks based on the user's business data
-    let formattedTasks: Task[] = [];
-    
-    if (businessData.businessIdea) {
-      // Generate personalized AI tasks
-      const aiTasks = generateAITasks(businessData);
-      console.log("Generated AI tasks:", aiTasks);
-      
-      // Merge standard and AI-generated tasks
-      formattedTasks = [...standardTasks, ...aiTasks];
-    } else {
-      formattedTasks = standardTasks;
-    }
-    
-    // Save tasks to localStorage
-    localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
-    return formattedTasks;
   };
   
   const handleComplete = () => {
@@ -202,19 +210,37 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
           const user = JSON.parse(userData);
           const userId = user.id;
           if (userId) {
+            // Update the user's business data
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const userIndex = users.findIndex((u: any) => u.id === userId);
             if (userIndex !== -1) {
+              // Store business data in user profile
               users[userIndex].businessIdea = businessData.businessIdea;
-              users[userIndex].businessData = businessData;
+              users[userIndex].businessData = {
+                solution: businessData.businessIdea,
+                targetMarket: businessData.targetCustomers,
+                stage: businessData.teamComposition,
+                industry: businessData.teamStrengths,
+                problem: businessData.teamWeaknesses,
+                revenueModel: businessData.revenueModel,
+              };
               localStorage.setItem('users', JSON.stringify(users));
               
+              // Update current user session data
               const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
               currentUser.businessIdea = businessData.businessIdea;
-              currentUser.businessData = businessData;
+              currentUser.businessData = {
+                solution: businessData.businessIdea,
+                targetMarket: businessData.targetCustomers,
+                stage: businessData.teamComposition,
+                industry: businessData.teamStrengths,
+                problem: businessData.teamWeaknesses,
+                revenueModel: businessData.revenueModel,
+              };
               localStorage.setItem('user', JSON.stringify(currentUser));
             }
             
+            // Update journey with business data
             const journeysKey = `journeys_${userId}`;
             const journeysData = localStorage.getItem(journeysKey);
             if (journeysData) {

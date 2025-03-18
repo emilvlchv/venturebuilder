@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -18,7 +19,7 @@ import {
   Bookmark,
   File,
   FileJson,
-  FilePdf,
+  FileType, // Replaced FilePdf with FileType
   BookOpen,
   GraduationCap
 } from 'lucide-react';
@@ -62,7 +63,7 @@ const sampleDocuments = [
     id: 'doc-4',
     name: 'Market Sizing Strategies.pdf',
     type: 'reading',
-    icon: <FilePdf className="h-4 w-4 text-red-500" />,
+    icon: <FileType className="h-4 w-4 text-red-500" />, // Updated to use FileType instead of FilePdf
     description: 'Learn how to accurately estimate your market size',
     size: '1.8 MB'
   },

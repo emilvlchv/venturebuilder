@@ -1,47 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings, Shield, LayoutDashboard, Home } from 'lucide-react';
-import Button from '../shared/Button';
+import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useToast } from '@/hooks/use-toast';
+import NavbarLogo from './NavbarLogo';
+import NavbarLinks from './NavbarLinks';
+import NavbarUserMenu from './NavbarUserMenu';
+import NavbarActions from './NavbarActions';
+import MobileMenu from './MobileMenu';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
-  const { toast } = useToast();
-  const isAdmin = user?.role === 'admin';
+  const { isAuthenticated } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -54,40 +32,6 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  const navLinks = [
-    { name: isAdmin ? 'Admin Panel' : 'Journey', path: isAdmin ? '/admin' : '/journey' },
-    { name: 'Education', path: '/education' },
-    { name: 'Community', path: '/community' },
-    { name: 'Pricing', path: '/pricing' },
-    { name: 'About Us', path: '/about' },
-  ];
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-  };
-
-  const goToProfile = () => {
-    navigate('/profile');
-  };
-
-  const goToAdmin = () => {
-    navigate('/admin');
-  };
-
-  const goToMainSite = () => {
-    navigate('/', { state: { fromAdmin: true } });
-  };
-
-  const getUserInitials = () => {
-    if (!user) return "U";
-    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-  };
-
   return (
     <header
       className={cn(
@@ -97,219 +41,31 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
-              <span className="font-bold text-lg">VW</span>
-            </div>
-            <span className="font-bold text-xl">VentureWayfinder</span>
-          </Link>
-
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-              {navLinks.map((link) => (
-                <NavigationMenuItem key={link.name}>
-                  <Link to={link.path}>
-                    <NavigationMenuLink className={cn(
-                      navigationMenuTriggerStyle(),
-                      location.pathname === link.path && "bg-accent/80 text-accent-foreground font-medium"
-                    )}>
-                      {link.name}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+          <NavbarLogo />
+          <NavbarLinks />
 
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                {isAdmin && location.pathname.startsWith('/admin') && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={goToMainSite}
-                    icon={<Home size={16} />}
-                    className="font-medium"
-                  >
-                    Main Site
-                  </Button>
-                )}
-                {isAdmin && !location.pathname.startsWith('/admin') && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={goToAdmin}
-                    icon={<LayoutDashboard size={16} />}
-                    className="font-medium"
-                  >
-                    Admin Panel
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={goToProfile}
-                  icon={<User size={16} />}
-                  className="font-medium"
-                >
-                  My Account
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="px-2">
-                      <Settings size={16} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md">
-                    <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                      <p className="text-xs text-muted-foreground">@{user?.username}</p>
-                    </div>
-                    <DropdownMenuSeparator />
-                    {isAdmin && (
-                      <DropdownMenuItem onClick={goToAdmin} className="cursor-pointer">
-                        <Shield size={16} className="mr-2" />
-                        Admin Dashboard
-                      </DropdownMenuItem>
-                    )}
-                    {!isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
-                        My Journey
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
-                      <Settings size={16} className="mr-2" />
-                      Profile Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
-                      Subscription
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
-                      <LogOut size={16} className="mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <NavbarUserMenu />
             ) : (
-              <>
-                <Link to="/signin">
-                  <Button variant="outline" size="md">
-                    Sign in
-                  </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    icon={<ChevronRight size={16} />}
-                    iconPosition="right"
-                  >
-                    Get Started
-                  </Button>
-                </Link>
-              </>
+              <NavbarActions />
             )}
           </div>
 
           <div className="md:hidden flex items-center space-x-2">
-            {isAuthenticated && (
-              <>
-                {isAdmin && location.pathname.startsWith('/admin') && (
-                  <Button variant="outline" size="sm" onClick={() => navigate('/')} className="mr-2">
-                    <Home size={16} className="mr-1" />
-                    <span>Main Site</span>
-                  </Button>
-                )}
-                {isAdmin && !location.pathname.startsWith('/admin') && (
-                  <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="mr-2">
-                    <LayoutDashboard size={16} className="mr-1" />
-                    <span>Admin</span>
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
-                  <User size={16} className="mr-1" />
-                  <span>My Account</span>
-                </Button>
-              </>
-            )}
-            <button
-              onClick={toggleMenu}
-              className="focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            <NavbarActions isMobile />
+            <MobileMenu isOpen={isMenuOpen} onToggle={toggleMenu} />
           </div>
         </div>
 
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
-            <nav className="flex flex-col space-y-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={cn(
-                    "px-4 py-3 rounded-lg",
-                    location.pathname === link.path 
-                      ? "bg-accent text-accent-foreground font-medium" 
-                      : "hover:bg-accent/50"
-                  )}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              {isAuthenticated ? (
-                <>
-                  <div className="px-4 py-2 border-t border-border mt-2 pt-4">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <User size={20} />
-                      </div>
-                      <div>
-                        <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-                        <p className="text-sm text-muted-foreground">@{user?.username}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Button 
-                        variant="outline" 
-                        fullWidth 
-                        icon={<Settings size={16} />}
-                        onClick={goToProfile}
-                      >
-                        Profile Settings
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        fullWidth 
-                        onClick={handleLogout}
-                        icon={<LogOut size={16} />}
-                      >
-                        Logout
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="pt-2 space-y-2">
-                  <Link to="/signin">
-                    <Button variant="outline" fullWidth>
-                      Sign in
-                    </Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button variant="primary" fullWidth>
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </nav>
+            <NavbarLinks isMobile />
+            {isAuthenticated ? (
+              <NavbarUserMenu isMobile />
+            ) : (
+              <NavbarActions isMobile />
+            )}
           </div>
         )}
       </div>

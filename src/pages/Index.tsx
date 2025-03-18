@@ -6,15 +6,16 @@ import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
   const location = useLocation();
   const isAdmin = user?.role === 'admin';
   
-  // Only redirect admin users to the admin dashboard if they're not coming from admin panel
-  // This is determined by checking if there's a fromAdmin state in the location
-  const shouldRedirect = isAuthenticated && isAdmin && !location.state?.fromAdmin;
+  // Admin redirect logic
+  const fromAdmin = location.state?.fromAdmin === true;
+  const shouldRedirect = isAuthenticated && isAdmin && !fromAdmin;
   
   if (shouldRedirect) {
     return <Navigate to="/admin" replace />;
@@ -27,14 +28,18 @@ const Index = () => {
         <Hero />
         <Features />
         
-        {/* Admin-specific welcome if the user is an admin coming from admin panel */}
-        {isAdmin && location.state?.fromAdmin && (
-          <div className="bg-primary/5 p-6 my-8 rounded-lg max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-primary mb-2">Welcome to the Main Site, Administrator</h2>
-            <p className="text-muted-foreground">
-              You are currently viewing the main site as an administrator. You can return to your 
-              admin dashboard using the "Admin Panel" button in the navigation bar.
-            </p>
+        {/* Admin welcome message */}
+        {isAdmin && fromAdmin && (
+          <div className="container-padding my-8">
+            <Alert className="bg-primary/5 border-primary/20">
+              <AlertTitle className="text-xl font-bold text-primary">
+                Welcome to the Main Site, Administrator
+              </AlertTitle>
+              <AlertDescription className="text-muted-foreground">
+                You are currently viewing the main site as an administrator. You can return to your
+                admin dashboard using the "Admin Panel" button in the navigation bar.
+              </AlertDescription>
+            </Alert>
           </div>
         )}
       </main>

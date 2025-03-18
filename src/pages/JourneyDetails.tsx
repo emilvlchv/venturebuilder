@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -13,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
-import { BusinessIdeaData, JourneyTask } from '@/components/journey/types';
+import { BusinessIdeaData, JourneyTask, Task } from '@/components/journey/types';
 
 // Helper function to format business data for AI processing
 const formatBusinessDataForAI = (businessData: BusinessIdeaData) => {
@@ -28,7 +27,7 @@ Revenue Model: ${businessData?.revenueModel || 'Not specified'}
 };
 
 // Function to generate personalized tasks using AI (mock implementation)
-const generatePersonalizedTasks = async (businessData: BusinessIdeaData): Promise<JourneyTask[]> => {
+const generatePersonalizedTasks = async (businessData: BusinessIdeaData): Promise<Task[]> => {
   // In a real implementation, this would call an AI API with the formatted business data
   // For now, we'll return mock tasks based on the business data
   console.log("Generating personalized tasks for:", formatBusinessDataForAI(businessData));
@@ -36,7 +35,7 @@ const generatePersonalizedTasks = async (businessData: BusinessIdeaData): Promis
   // Mock delay to simulate API call
   await new Promise(resolve => setTimeout(resolve, 1500));
   
-  const mockTasks: JourneyTask[] = [
+  const mockTasks: Task[] = [
     {
       id: `ai-task-${Date.now()}-1`,
       title: `Validate "${businessData?.businessIdea?.substring(0, 30)}..." with Target Customers`,
@@ -86,6 +85,7 @@ const JourneyDetails = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
   
   const {
     journey,
@@ -93,8 +93,7 @@ const JourneyDetails = () => {
     activeTab,
     setActiveTab,
     isTaskDetailOpen,
-    tasks,
-    setTasks,
+    tasks: initialTasks,
     selectedTask,
     handleTaskStatusChange,
     handleSubtaskToggle,
@@ -108,6 +107,11 @@ const JourneyDetails = () => {
     journeyPhases
   } = useJourneyDetails();
 
+  // Initialize local tasks with tasks from the hook
+  useEffect(() => {
+    setLocalTasks(initialTasks);
+  }, [initialTasks]);
+
   // Adapt businessData to match BusinessIdeaData interface
   const adaptedBusinessData: BusinessIdeaData = businessData ? {
     businessIdea: businessData.solution || '',
@@ -115,6 +119,7 @@ const JourneyDetails = () => {
     teamComposition: businessData.stage || '',
     teamStrengths: businessData.industry || '',
     teamWeaknesses: businessData.problem || '',
+    revenueModel: ''
   } : null;
 
   // Function to handle generating personalized tasks
@@ -133,7 +138,7 @@ const JourneyDetails = () => {
       const personalizedTasks = await generatePersonalizedTasks(adaptedBusinessData);
       
       // Add the new tasks to the existing tasks
-      setTasks(prev => [...prev, ...personalizedTasks]);
+      setLocalTasks(prev => [...prev, ...personalizedTasks]);
       
       toast({
         title: "Personalized tasks generated",
@@ -209,6 +214,11 @@ const JourneyDetails = () => {
     }))
   }));
 
+  // Update getTasksByStepId to use localTasks
+  const getLocalTasksByStepId = (stepId: string) => {
+    return localTasks.filter(task => task.stepId === stepId);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <SkipToContent />
@@ -242,7 +252,7 @@ const JourneyDetails = () => {
                 phases={enhancedJourneyPhases}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                getTasksByStepId={getTasksByStepId}
+                getTasksByStepId={getLocalTasksByStepId}
                 onOpenTaskDetails={handleOpenTaskDetails}
                 journeyId={journeyId}
               />

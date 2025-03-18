@@ -4,7 +4,7 @@ import TaskProgressDisplay from './TaskProgressDisplay';
 import TaskStatusSelector from './TaskStatusSelector';
 import DeadlineSelector from './DeadlineSelector';
 import SubtaskCategory from './SubtaskCategory';
-import { Task } from '../TaskCard';
+import { Task } from '../types';
 
 interface TaskDetailMainSectionProps {
   task: Task;

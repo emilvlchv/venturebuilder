@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,30 +27,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-export interface Subtask {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-export interface TaskCategory {
-  id: string;
-  title: string;
-  subtasks: Subtask[];
-  collapsed?: boolean;
-}
-
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'completed' | 'in-progress' | 'pending';
-  resources: string[];
-  categories: TaskCategory[];
-  deadline?: Date;
-  stepId?: string;
-}
+import { Task, TaskCategory, Subtask } from './types';
 
 interface TaskCardProps {
   task: Task;

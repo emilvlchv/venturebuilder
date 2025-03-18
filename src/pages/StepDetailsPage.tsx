@@ -25,13 +25,12 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useJourneyDetails } from '@/hooks/useJourneyDetails';
-import { Task } from '@/components/journey/TaskCard';
+import { Task, TaskCategory } from '@/components/journey/types';
 import { StepDetail } from '@/components/journey/StepDetailsDialog';
 import { SkipToContent } from '@/components/ui/skip-to-content';
 import { useToast } from '@/components/ui/use-toast';
 import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TaskCategory } from '@/components/journey/TaskCard';
 import { 
   Accordion,
   AccordionContent,

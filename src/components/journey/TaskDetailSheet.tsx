@@ -10,7 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Save, ExternalLink, Maximize2 } from 'lucide-react';
-import { Task } from './TaskCard';
+import { Task } from './types';
 import TaskProgressDisplay, { renderStatusBadge } from './task-details/TaskProgressDisplay';
 import TaskStatusSelector from './task-details/TaskStatusSelector';
 import DeadlineSelector from './task-details/DeadlineSelector';

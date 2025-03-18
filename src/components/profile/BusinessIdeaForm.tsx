@@ -26,23 +26,26 @@ export function BusinessIdeaForm() {
   const { user, updateUserInfo } = useAuth();
   const { toast } = useToast();
 
+  // Extract default values safely from user object
+  const defaultValues = {
+    businessIdea: user?.businessIdea || '',
+    targetCustomers: user?.businessProfileData?.targetCustomers || '',
+    teamComposition: user?.businessProfileData?.teamComposition || '',
+    teamStrengths: user?.businessProfileData?.teamStrengths || '',
+    teamWeaknesses: user?.businessProfileData?.teamWeaknesses || '',
+    revenueModel: user?.businessProfileData?.revenueModel || '',
+  };
+
   const form = useForm<BusinessIdeaFormValues>({
     resolver: zodResolver(businessIdeaSchema),
-    defaultValues: {
-      businessIdea: user?.businessIdea || '',
-      targetCustomers: user?.businessData?.targetCustomers || '',
-      teamComposition: user?.businessData?.teamComposition || '',
-      teamStrengths: user?.businessData?.teamStrengths || '',
-      teamWeaknesses: user?.businessData?.teamWeaknesses || '',
-      revenueModel: user?.businessData?.revenueModel || '',
-    },
+    defaultValues,
   });
 
   const onSubmit = async (data: BusinessIdeaFormValues) => {
     try {
       await updateUserInfo({ 
         businessIdea: data.businessIdea,
-        businessData: {
+        businessProfileData: {
           targetCustomers: data.targetCustomers,
           teamComposition: data.teamComposition,
           teamStrengths: data.teamStrengths,

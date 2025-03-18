@@ -17,6 +17,10 @@ interface StepProps {
   hasActiveTasks?: boolean;
   allTasksCompleted?: boolean;
   journeyId?: string;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+  onViewDetails?: () => void;
+  resourceCount?: number;
 }
 
 const StepCard: React.FC<StepProps> = ({

@@ -51,13 +51,14 @@ const PhaseSection: React.FC<PhaseSectionProps> = ({
   return (
     <div className="phase-section">
       <div className="space-y-6">
-        {steps.map((step, index) => {
+        {steps.map((step) => {
           const isExpanded = expandedSteps[step.id] || false;
           const stepTasks = getTasksByStepId(step.id);
           
           return (
             <div key={step.id} className="space-y-4">
               <StepCard
+                id={step.id}
                 title={step.title}
                 description={step.description}
                 status={step.status}
@@ -67,6 +68,9 @@ const PhaseSection: React.FC<PhaseSectionProps> = ({
                 resourceCount={step.resources?.length || 0}
                 hasActiveTasks={step.hasActiveTasks}
                 allTasksCompleted={step.allTasksCompleted}
+                relatedTasks={stepTasks}
+                onOpenTaskDetails={onOpenTaskDetails}
+                journeyId={journeyId}
               />
               
               {isExpanded && (

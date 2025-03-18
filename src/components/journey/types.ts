@@ -1,4 +1,3 @@
-
 export interface BusinessIdeaData {
   businessIdea: string;
   targetCustomers: string;
@@ -65,4 +64,15 @@ export interface Subtask {
   id: string;
   title: string;
   completed: boolean;
+}
+
+export interface StepDetail {
+  id: string;
+  title: string;
+  description: string;
+  timeEstimate: string;
+  detailedDescription: string;
+  businessIdea?: string;
+  status: string;
+  tasks?: Task[];
 }

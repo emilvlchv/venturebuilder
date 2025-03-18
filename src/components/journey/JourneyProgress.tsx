@@ -26,6 +26,7 @@ interface JourneyProgressProps {
   getTasksByStepId: (stepId: string) => Task[];
   onOpenTaskDetails: (task: Task) => void;
   journeyId?: string;
+  businessIdea?: string;
 }
 
 const JourneyProgress: React.FC<JourneyProgressProps> = ({
@@ -34,7 +35,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
   setActiveTab,
   getTasksByStepId,
   onOpenTaskDetails,
-  journeyId
+  journeyId,
+  businessIdea
 }) => {
   // Calculate phase completion percentages
   const getPhaseCompletionPercentage = (phase: JourneyPhase) => {
@@ -109,6 +111,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
               getTasksByStepId={getTasksByStepId}
               onOpenTaskDetails={onOpenTaskDetails}
               journeyId={journeyId}
+              businessIdea={businessIdea}
             />
           </TabsContent>
         ))}

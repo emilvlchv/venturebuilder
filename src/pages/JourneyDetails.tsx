@@ -38,7 +38,6 @@ const JourneyDetails = () => {
     journeyPhases
   } = useJourneyDetails();
 
-  // Initialize local tasks with tasks from the hook
   useEffect(() => {
     if (initialTasks && initialTasks.length > 0) {
       console.log("Setting local tasks from initialTasks:", initialTasks);
@@ -46,7 +45,6 @@ const JourneyDetails = () => {
     }
   }, [initialTasks]);
 
-  // Adapt businessData to match BusinessIdeaData interface
   const adaptedBusinessData: BusinessIdeaData = businessData ? {
     businessIdea: businessData.solution || businessData.businessIdea || '',
     targetCustomers: businessData.targetMarket || businessData.targetCustomers || '',
@@ -60,13 +58,15 @@ const JourneyDetails = () => {
     solution: businessData.solution || ''
   } : null;
 
-  // Set page title for screen readers
+  const businessIdeaText = adaptedBusinessData?.businessIdea || 
+                          adaptedBusinessData?.solution || 
+                          'your business';
+
   useEffect(() => {
     document.title = journey?.title 
       ? `${journey.title} | Your Entrepreneurial Journey` 
       : 'Your Entrepreneurial Journey';
       
-    // Announce page load to screen readers
     const announcer = document.createElement('div');
     announcer.setAttribute('aria-live', 'polite');
     announcer.setAttribute('class', 'sr-only');
@@ -80,10 +80,8 @@ const JourneyDetails = () => {
     };
   }, [journey?.title]);
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Allow Escape key to close dialogs
       if (e.key === 'Escape') {
         if (isTaskDetailOpen) {
           handleCloseTaskDetail();
@@ -91,7 +89,6 @@ const JourneyDetails = () => {
         }
       }
       
-      // Alt+1-4 for switching tabs
       if (e.altKey && !isNaN(parseInt(e.key)) && parseInt(e.key) >= 1 && parseInt(e.key) <= journeyPhases.length) {
         const index = parseInt(e.key) - 1;
         if (journeyPhases[index]) {
@@ -109,7 +106,6 @@ const JourneyDetails = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isTaskDetailOpen, handleCloseTaskDetail, journeyPhases, setActiveTab, toast]);
 
-  // Add resources property to journeyPhases steps to match JourneyPhase type
   const enhancedJourneyPhases = journeyPhases.map(phase => ({
     ...phase,
     steps: phase.steps.map(step => ({
@@ -118,18 +114,13 @@ const JourneyDetails = () => {
     }))
   }));
 
-  // Update getTasksByStepId to use localTasks
   const getLocalTasksByStepId = (stepId: string) => {
     return localTasks.filter(task => task.stepId === stepId);
   };
 
-  // Handle status change for a task by updating localTasks
   const handleLocalTaskStatusChange = (task: Task, status: 'completed' | 'in-progress' | 'pending') => {
     if (selectedTask) {
-      // Update the selected task in the useJourneyDetails hook
       handleTaskStatusChange(selectedTask, status);
-      
-      // Also update the local tasks
       const updatedTasks = localTasks.map(t => 
         t.id === selectedTask.id ? {...t, status} : t
       );
@@ -137,13 +128,9 @@ const JourneyDetails = () => {
     }
   };
 
-  // Handle subtask toggle 
   const handleLocalSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
     if (selectedTask) {
-      // Update subtask in the hook
       handleSubtaskToggle(taskId, categoryId, subtaskId, completed);
-      
-      // Also update in localTasks
       const updatedTasks = localTasks.map(task => {
         if (task.id === taskId) {
           const updatedCategories = task.categories.map(category => {
@@ -186,9 +173,9 @@ const JourneyDetails = () => {
                 getTasksByStepId={getLocalTasksByStepId}
                 onOpenTaskDetails={handleOpenTaskDetails}
                 journeyId={journeyId}
+                businessIdea={businessIdeaText}
               />
               
-              {/* Keyboard shortcuts help */}
               <div className="mt-8 p-4 bg-muted/20 rounded-lg text-sm">
                 <h2 className="font-medium mb-2">Keyboard Shortcuts</h2>
                 <ul className="space-y-1 text-muted-foreground">

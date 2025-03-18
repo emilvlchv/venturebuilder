@@ -1,95 +1,122 @@
-import React from 'react';
-import StepCard from './StepCard';
-import { Task } from './types';
 
-interface Step {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  resources: string[];
-}
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp, Plus, ArrowRight } from 'lucide-react';
+import StepCard from './StepCard';
+import TaskCard from './TaskCard';
+import { useNavigate } from 'react-router-dom';
+import { Task } from './types';
 
 interface PhaseSectionProps {
   title: string;
-  steps: Step[];
+  steps: {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    hasActiveTasks?: boolean;
+    allTasksCompleted?: boolean;
+    resources?: string[];
+  }[];
   getTasksByStepId: (stepId: string) => Task[];
-  onOpenStepDetails?: (stepId: string) => void;
   onOpenTaskDetails: (task: Task) => void;
   journeyId?: string;
+  businessIdea?: string;
 }
 
-const PhaseSection: React.FC<PhaseSectionProps> = ({ 
-  title, 
-  steps, 
-  getTasksByStepId, 
-  onOpenStepDetails,
+const PhaseSection: React.FC<PhaseSectionProps> = ({
+  title,
+  steps,
+  getTasksByStepId,
   onOpenTaskDetails,
-  journeyId
+  journeyId,
+  businessIdea
 }) => {
-  const checkActiveInProgressTasks = (stepId: string) => {
-    const tasks = getTasksByStepId(stepId);
-    return tasks.some(task => task.status === 'in-progress');
+  const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
+  const navigate = useNavigate();
+
+  const toggleStep = (stepId: string) => {
+    setExpandedSteps(prev => ({
+      ...prev,
+      [stepId]: !prev[stepId]
+    }));
   };
 
-  const checkAllTasksCompleted = (stepId: string) => {
-    const tasks = getTasksByStepId(stepId);
-    return tasks.length > 0 && tasks.every(task => task.status === 'completed');
+  const navigateToStepDetails = (stepId: string) => {
+    if (journeyId) {
+      navigate(`/journey-details/${journeyId}/step/${stepId}`);
+    }
   };
-  
-  // Calculate phase completion percentage
-  const calculatePhaseCompletion = () => {
-    let totalTasks = 0;
-    let completedTasks = 0;
-    
-    steps.forEach(step => {
-      const stepTasks = getTasksByStepId(step.id);
-      totalTasks += stepTasks.length;
-      completedTasks += stepTasks.filter(task => task.status === 'completed').length;
-    });
-    
-    return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  };
-
-  const phaseCompletion = calculatePhaseCompletion();
 
   return (
-    <section aria-labelledby={`phase-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-      <div className="flex justify-between items-center mb-6">
-        <h2 
-          id={`phase-${title.toLowerCase().replace(/\s+/g, '-')}`}
-          className="text-2xl font-bold"
-        >
-          {title}
-        </h2>
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-green-500 rounded-full" 
-              style={{ width: `${phaseCompletion}%` }}
-            ></div>
-          </div>
-          <span className="text-sm font-medium">{phaseCompletion}% Complete</span>
-        </div>
+    <div className="phase-section">
+      <div className="space-y-6">
+        {steps.map((step, index) => {
+          const isExpanded = expandedSteps[step.id] || false;
+          const stepTasks = getTasksByStepId(step.id);
+          
+          return (
+            <div key={step.id} className="space-y-4">
+              <StepCard
+                title={step.title}
+                description={step.description}
+                status={step.status}
+                isExpanded={isExpanded}
+                onToggleExpand={() => toggleStep(step.id)}
+                onViewDetails={() => navigateToStepDetails(step.id)}
+                resourceCount={step.resources?.length || 0}
+                hasActiveTasks={step.hasActiveTasks}
+                allTasksCompleted={step.allTasksCompleted}
+              />
+              
+              {isExpanded && (
+                <div className="pl-8 space-y-4 animate-accordion-down">
+                  {stepTasks.length > 0 ? (
+                    <div className="space-y-6">
+                      {stepTasks.map((task, taskIndex) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          index={taskIndex}
+                          onOpenDetails={() => onOpenTaskDetails(task)}
+                          onTaskStatusChange={() => {}} // These are handled at a higher level
+                          onSubtaskToggle={() => {}}
+                          onCategoryToggle={() => {}}
+                          onDeadlineChange={() => {}}
+                          onViewStep={navigateToStepDetails}
+                          businessIdea={businessIdea}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 bg-muted/10 rounded-lg border border-dashed">
+                      <p className="text-muted-foreground mb-4">No tasks found for this step</p>
+                      <Button 
+                        onClick={() => navigateToStepDetails(step.id)}
+                        className="mx-auto"
+                      >
+                        <Plus className="mr-2 h-4 w-4" /> Create Task
+                      </Button>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigateToStepDetails(step.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                      View Step Details
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {steps.map(step => (
-          <StepCard
-            key={step.id}
-            id={step.id}
-            title={step.title}
-            description={step.description}
-            status={step.status}
-            relatedTasks={getTasksByStepId(step.id)}
-            onOpenTaskDetails={onOpenTaskDetails}
-            hasActiveTasks={checkActiveInProgressTasks(step.id)}
-            allTasksCompleted={checkAllTasksCompleted(step.id)}
-            journeyId={journeyId}
-          />
-        ))}
-      </div>
-    </section>
+    </div>
   );
 };
 

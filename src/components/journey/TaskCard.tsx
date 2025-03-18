@@ -28,6 +28,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Task, TaskCategory, Subtask } from './types';
+import AiAssistancePopover from './AiAssistancePopover';
 
 interface TaskCardProps {
   task: Task;
@@ -38,6 +39,7 @@ interface TaskCardProps {
   onCategoryToggle: (taskId: string, categoryId: string) => void;
   onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
   onViewStep?: (stepId: string) => void;
+  businessIdea?: string;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ 
@@ -48,7 +50,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onSubtaskToggle,
   onCategoryToggle,
   onDeadlineChange,
-  onViewStep
+  onViewStep,
+  businessIdea
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
@@ -171,7 +174,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
   return (
     <Card className="transition-all duration-300 hover:shadow-md border-l-[6px] border-l-primary animate-fade-in shadow-lg">
       <CardContent className="p-8">
-        {/* Header Section */}
         <div className="flex flex-col space-y-5">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -179,6 +181,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 {index + 1}
               </div>
               <h3 className="text-2xl font-semibold">{task.title}</h3>
+              <AiAssistancePopover 
+                taskTitle={task.title} 
+                businessIdea={businessIdea}
+              />
             </div>
             
             <div className="flex items-center gap-2">
@@ -193,7 +199,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           </div>
           
-          {/* Description & Progress Section */}
           <div className="bg-muted/30 p-5 rounded-xl">
             <p className="text-muted-foreground mb-4 text-base">{task.description}</p>
             
@@ -216,7 +221,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           </div>
           
-          {/* Actions Section */}
           <div className="flex flex-wrap gap-3 justify-between items-center">
             <div className="flex flex-wrap gap-3">
               <Button 
@@ -261,7 +265,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </Button>
           </div>
           
-          {/* Subtasks Toggle Button */}
           <Button 
             variant="secondary" 
             size="lg" 
@@ -281,7 +284,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             )}
           </Button>
           
-          {/* Subtasks Expanded Section */}
           {isOpen && (
             <div 
               id="subtasks-section" 
@@ -335,7 +337,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           )}
           
-          {/* Resources Section */}
           {task.resources.length > 0 && (
             <div className="mt-5 p-5 bg-accent/40 rounded-xl">
               <h4 className="text-base font-medium flex items-center gap-2 mb-3">

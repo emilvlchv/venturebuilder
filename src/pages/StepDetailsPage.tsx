@@ -21,7 +21,8 @@ import {
   BookOpen,
   GraduationCap,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Lightbulb
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useJourneyDetails } from '@/hooks/useJourneyDetails';
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import TaskProgressDisplay, { renderStatusBadge } from '@/components/journey/task-details/TaskProgressDisplay';
+import AiAssistancePopover from '@/components/journey/AiAssistancePopover';
 
 const sampleDocuments = [
   {
@@ -111,6 +113,8 @@ const StepDetailsPage = () => {
   
   const stepDetails: StepDetail | undefined = stepId ? stepsDetailsMap[stepId] : undefined;
   const relatedTasks = stepId ? getTasksByStepId(stepId) : [];
+
+  const businessIdeaText = stepDetails?.businessIdea || "your business";
 
   useEffect(() => {
     document.title = stepDetails 
@@ -501,9 +505,15 @@ const StepDetailsPage = () => {
                       <div key={task.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-card">
                         <div className="p-5">
                           <div className="flex justify-between items-start mb-4">
-                            <div>
+                            <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-base">{task.title}</h3>
-                              <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                              <AiAssistancePopover 
+                                taskTitle={task.title}
+                                businessIdea={businessIdeaText}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 {renderStatusBadge(task.status)}
                                 {task.deadline && (
                                   <span className="text-xs flex items-center gap-1 bg-muted/30 px-2 py-1 rounded-full">
@@ -512,15 +522,15 @@ const StepDetailsPage = () => {
                                   </span>
                                 )}
                               </div>
+                              <Button 
+                                variant="default" 
+                                size="sm" 
+                                onClick={() => openTaskDetails(task)}
+                                className="flex items-center"
+                              >
+                                <Edit className="h-4 w-4 mr-1" /> Edit
+                              </Button>
                             </div>
-                            <Button 
-                              variant="default" 
-                              size="sm" 
-                              onClick={() => openTaskDetails(task)}
-                              className="flex items-center"
-                            >
-                              <Edit className="h-4 w-4 mr-1" /> Edit
-                            </Button>
                           </div>
                           
                           <TaskProgressDisplay task={task} />

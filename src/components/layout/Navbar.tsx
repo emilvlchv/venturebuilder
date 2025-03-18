@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings, Shield } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,8 +55,9 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
+  // Updated navLinks to show Admin Panel instead of Journey for admin users
   const navLinks = [
-    { name: 'Journey', path: isAdmin ? '/admin' : '/journey' },
+    { name: isAdmin ? 'Admin Panel' : 'Journey', path: isAdmin ? '/admin' : '/journey' },
     { name: 'Education', path: '/education' },
     { name: 'Community', path: '/community' },
     { name: 'Pricing', path: '/pricing' },
@@ -139,7 +141,14 @@ const Navbar = () => {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate(isAdmin ? '/admin' : '/journey')} className="cursor-pointer">
-                      {isAdmin ? 'Admin Dashboard' : 'My Journey'}
+                      {isAdmin ? (
+                        <div className="flex items-center">
+                          <Shield size={16} className="mr-2" />
+                          Admin Dashboard
+                        </div>
+                      ) : (
+                        'My Journey'
+                      )}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
                       <Settings size={16} className="mr-2" />

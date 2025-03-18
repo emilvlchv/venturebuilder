@@ -29,6 +29,7 @@ import EducationManagement from '@/pages/admin/EducationManagement';
 import CommunityManagement from '@/pages/admin/CommunityManagement';
 import Settings from '@/pages/admin/Settings';
 import Analytics from '@/pages/admin/Analytics';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 const AppRoutes = () => {
   return (
@@ -54,13 +55,17 @@ const AppRoutes = () => {
       <Route path="/journey-details/:journeyId/step/:stepId" element={<ProtectedRoute><StepDetailsPage /></ProtectedRoute>} />
       <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetailPage /></ProtectedRoute>} />
 
-      {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-      <Route path="/admin/education" element={<ProtectedRoute><EducationManagement /></ProtectedRoute>} />
-      <Route path="/admin/community" element={<ProtectedRoute><CommunityManagement /></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="/admin/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+      {/* Admin Routes - Wrapped in AdminLayout */}
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="education" element={<EducationManagement />} />
+        <Route path="community" element={<CommunityManagement />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="security" element={<NotFound />} />
+        <Route path="database" element={<NotFound />} />
+      </Route>
 
       {/* 404 Page */}
       <Route path="*" element={<NotFound />} />

@@ -11,7 +11,12 @@ import {
   FileText,
   BookOpen,
   ChevronRight,
-  Bell
+  Bell,
+  Shield,
+  ShieldAlert,
+  Database,
+  PanelRight,
+  Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -119,7 +124,7 @@ const AdminLayout: React.FC = () => {
               isActive={isActive('overview')} 
               icon={<LayoutDashboard size={18} className="text-white/70 group-hover:text-white" />}
             >
-              Overview
+              Dashboard
             </SidebarLink>
             
             <SidebarLink 
@@ -166,6 +171,22 @@ const AdminLayout: React.FC = () => {
               icon={<Settings size={18} className="text-white/70 group-hover:text-white" />}
             >
               Settings
+            </SidebarLink>
+            
+            <SidebarLink 
+              to="/admin/security" 
+              isActive={isActive('security')} 
+              icon={<ShieldAlert size={18} className="text-white/70 group-hover:text-white" />}
+            >
+              Security
+            </SidebarLink>
+            
+            <SidebarLink 
+              to="/admin/database" 
+              isActive={isActive('database')} 
+              icon={<Database size={18} className="text-white/70 group-hover:text-white" />}
+            >
+              Database
             </SidebarLink>
           </div>
         </nav>

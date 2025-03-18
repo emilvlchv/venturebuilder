@@ -51,7 +51,11 @@ const JourneyDetails = () => {
     teamComposition: businessData.stage || '',
     teamStrengths: businessData.industry || '',
     teamWeaknesses: businessData.problem || '',
-    revenueModel: ''
+    revenueModel: '',
+    industry: businessData.industry || '',
+    stage: businessData.stage || '',
+    problem: businessData.problem || '',
+    solution: businessData.solution || ''
   } : null;
 
   // Set page title for screen readers

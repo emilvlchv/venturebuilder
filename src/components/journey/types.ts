@@ -6,6 +6,10 @@ export interface BusinessIdeaData {
   teamStrengths: string;
   teamWeaknesses: string;
   revenueModel?: string;
+  industry?: string;
+  stage?: string;
+  problem?: string;
+  solution?: string;
 }
 
 export interface Journey {

@@ -6,6 +6,7 @@ import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
 import { BusinessIdeaData, Journey, Task, TaskCategory, Subtask } from './types';
 import { useNavigate } from 'react-router-dom';
+import { generateAITasks } from '@/utils/aiTaskGenerator';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
 
@@ -48,76 +49,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         description: "Your personalized business journey with AI-generated tasks is ready to view.",
       });
     }, 3000);
-  };
-  
-  const generatePersonalizedTasks = (businessData: BusinessIdeaData): Task[] => {
-    console.log("Generating personalized tasks for:", businessData);
-    
-    const personalizedTasks: Task[] = [
-      {
-        id: `ai-task-${Date.now()}-1`,
-        title: `Validate "${businessData?.businessIdea?.substring(0, 30)}..." with Target Customers`,
-        description: `Create a validation strategy specifically for ${businessData?.targetCustomers || 'your target customers'} to ensure your business idea resonates with them.`,
-        status: 'pending',
-        stepId: 'market-research',
-        resources: ['Customer Interview Template', 'Validation Framework'],
-        categories: [
-          {
-            id: `ai-cat-${Date.now()}-1`,
-            title: 'Validation Strategy',
-            subtasks: [
-              { id: `ai-subtask-${Date.now()}-1`, title: 'Create customer interview questions', completed: false },
-              { id: `ai-subtask-${Date.now()}-2`, title: 'Identify 5-10 potential customers to interview', completed: false },
-              { id: `ai-subtask-${Date.now()}-3`, title: 'Schedule and conduct interviews', completed: false },
-              { id: `ai-subtask-${Date.now()}-4`, title: 'Analyze feedback and identify patterns', completed: false }
-            ],
-            collapsed: false
-          }
-        ]
-      },
-      {
-        id: `ai-task-${Date.now()}-2`,
-        title: `Leverage Team Strengths in ${businessData?.teamStrengths?.substring(0, 20) || 'Your Area'}`,
-        description: `Create a strategy to maximize your team's strengths: "${businessData?.teamStrengths || 'your unique abilities'}" while addressing weaknesses in "${businessData?.teamWeaknesses || 'areas of improvement'}"`,
-        status: 'pending',
-        stepId: 'idea-validation',
-        resources: ['Team Assessment Template', 'Skill Gap Analysis Framework'],
-        categories: [
-          {
-            id: `ai-cat-${Date.now()}-2`,
-            title: 'Team Optimization',
-            subtasks: [
-              { id: `ai-subtask-${Date.now()}-5`, title: 'Document team strengths and assign roles accordingly', completed: false },
-              { id: `ai-subtask-${Date.now()}-6`, title: 'Identify skill gaps and create development plan', completed: false },
-              { id: `ai-subtask-${Date.now()}-7`, title: 'Establish communication protocols based on team dynamics', completed: false }
-            ],
-            collapsed: false
-          }
-        ]
-      },
-      {
-        id: `ai-task-${Date.now()}-3`,
-        title: `Customer Targeting for ${businessData?.targetCustomers?.substring(0, 25) || 'Your Market'}`,
-        description: `Develop a detailed customer profile and acquisition strategy for "${businessData?.targetCustomers || 'your target market'}"`,
-        status: 'pending',
-        stepId: 'customer-interviews',
-        resources: ['Customer Persona Template', 'Market Segmentation Guide'],
-        categories: [
-          {
-            id: `ai-cat-${Date.now()}-3`,
-            title: 'Customer Profiling',
-            subtasks: [
-              { id: `ai-subtask-${Date.now()}-8`, title: 'Create detailed customer personas', completed: false },
-              { id: `ai-subtask-${Date.now()}-9`, title: 'Map customer journey touchpoints', completed: false },
-              { id: `ai-subtask-${Date.now()}-10`, title: 'Identify key customer pain points', completed: false }
-            ],
-            collapsed: false
-          }
-        ]
-      }
-    ];
-    
-    return personalizedTasks;
   };
   
   const createDefaultTasks = (userId: string, journeyId: string) => {
@@ -231,10 +162,14 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       }
     ];
     
+    // Generate AI tasks based on the user's business data
     let formattedTasks: Task[] = standardTasks;
     if (businessData.businessIdea) {
-      const personalizedTasks = generatePersonalizedTasks(businessData);
-      formattedTasks = [...standardTasks, ...personalizedTasks];
+      // Generate personalized AI tasks
+      const aiTasks = generateAITasks(businessData);
+      formattedTasks = [...standardTasks, ...aiTasks];
+      
+      console.log("Generated AI tasks:", aiTasks);
     }
     
     localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
@@ -374,7 +309,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               <div className="w-3 h-3 rounded-full bg-primary"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-75"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-150"></div>
-              <div className="text-sm text-muted-foreground ml-2">Analyzing your business idea and generating your personalized journey with detailed tasks...</div>
+              <div className="text-sm text-muted-foreground ml-2">Analyzing your business idea and generating your personalized journey with AI-customized tasks...</div>
             </div>
           </div>
         );
@@ -383,7 +318,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         console.log("Rendering complete step content with View My Journey button");
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Your roadmap now includes detailed tasks tailored to your specific business idea and team composition.")}
+            {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Your roadmap now includes detailed tasks customized specifically to your business idea, team composition, and target market.")}
             <div className="ml-11">
               <Button 
                 onClick={handleComplete}

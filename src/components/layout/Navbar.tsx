@@ -75,6 +75,14 @@ const Navbar = () => {
     navigate('/profile');
   };
 
+  const goToAdmin = () => {
+    navigate('/admin');
+  };
+
+  const goToMainSite = () => {
+    navigate('/', { state: { fromAdmin: true } });
+  };
+
   const getUserInitials = () => {
     if (!user) return "U";
     return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
@@ -120,7 +128,7 @@ const Navbar = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => navigate('/')}
+                    onClick={goToMainSite}
                     icon={<Home size={16} />}
                     className="font-medium"
                   >
@@ -131,7 +139,7 @@ const Navbar = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => navigate('/admin')}
+                    onClick={goToAdmin}
                     icon={<LayoutDashboard size={16} />}
                     className="font-medium"
                   >
@@ -161,7 +169,7 @@ const Navbar = () => {
                     </div>
                     <DropdownMenuSeparator />
                     {isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+                      <DropdownMenuItem onClick={goToAdmin} className="cursor-pointer">
                         <Shield size={16} className="mr-2" />
                         Admin Dashboard
                       </DropdownMenuItem>

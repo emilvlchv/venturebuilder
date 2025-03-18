@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback, memo } from 'react';
 import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +27,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-// Memoized sidebar link component to prevent unnecessary re-renders
 const SidebarLink = memo(({ 
   to, 
   isActive, 
@@ -67,16 +65,13 @@ const AdminLayout: React.FC = () => {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("");
 
-  // Check if user has admin role
   const isAdmin = user?.role === 'admin';
 
-  // Set active section based on current path
   useEffect(() => {
     const path = location.pathname.split('/')[2] || '';
     setActiveSection(path || 'overview');
   }, [location.pathname]);
 
-  // Memoize the logout handler to prevent unnecessary re-renders
   const handleLogout = useCallback(() => {
     logout();
     navigate('/');
@@ -86,8 +81,11 @@ const AdminLayout: React.FC = () => {
     });
   }, [logout, navigate, toast]);
 
+  const navigateToMainSite = useCallback(() => {
+    navigate('/', { state: { fromAdmin: true } });
+  }, [navigate]);
+
   useEffect(() => {
-    // Redirect non-admin users
     if (isAuthenticated && !isAdmin) {
       toast({
         title: "Access Denied",
@@ -110,7 +108,6 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar - optimized rendering */}
       <aside className="w-64 bg-gradient-to-b from-primary/90 to-primary/100 text-white shadow-lg flex flex-col">
         <div className="p-6 flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
@@ -122,7 +119,7 @@ const AdminLayout: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={navigateToMainSite}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white"
             title="Return to main site"
           >
@@ -230,7 +227,7 @@ const AdminLayout: React.FC = () => {
               <Button 
                 variant="secondary" 
                 size="sm" 
-                onClick={() => navigate('/')}
+                onClick={navigateToMainSite}
                 className="w-full bg-white/20 hover:bg-white/30 text-white"
               >
                 <Home size={16} className="mr-2" />
@@ -250,7 +247,6 @@ const AdminLayout: React.FC = () => {
         </div>
       </aside>
       
-      {/* Main content */}
       <div className="flex-1 overflow-auto">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -264,7 +260,7 @@ const AdminLayout: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => navigate('/')}
+                onClick={navigateToMainSite}
                 className="font-medium"
               >
                 <Home size={16} className="mr-2" />

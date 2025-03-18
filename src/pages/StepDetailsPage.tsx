@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -25,7 +24,6 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { v4 as uuidv4 } from 'uuid';
 import { useJourneyDetails } from '@/hooks/useJourneyDetails';
 import { Task } from '@/components/journey/TaskCard';
 import { StepDetail } from '@/components/journey/StepDetailsDialog';
@@ -40,6 +38,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
+import TaskProgressDisplay, { renderStatusBadge } from '@/components/journey/task-details/TaskProgressDisplay';
 
 const sampleDocuments = [
   {
@@ -258,9 +258,9 @@ const StepDetailsPage = () => {
           <div className="pb-5 mb-8 border-b">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold" id="step-details-title">{stepDetails.title}</h1>
-              <div className="bg-primary/10 px-4 py-2 rounded-xl flex items-center gap-2">
-                <CalendarClock className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium">Est. time: <strong>{stepDetails.timeEstimate}</strong></span>
+              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                <span>Est. time: {stepDetails.timeEstimate}</span>
               </div>
             </div>
             <p className="text-lg mt-2 text-muted-foreground">
@@ -269,14 +269,14 @@ const StepDetailsPage = () => {
           </div>
 
           <div className="space-y-6 mb-8">
-            <div className="bg-white p-4 rounded-xl shadow-sm border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
               <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
                 <Info className="h-5 w-5 text-primary" /> Step Information
               </h2>
               <p className="text-base leading-relaxed text-muted-foreground">{stepDetails.detailedDescription}</p>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
               <div 
                 className="flex justify-between items-center mb-4 cursor-pointer"
                 onClick={() => setMaterialsCollapsed(!materialsCollapsed)}
@@ -308,7 +308,7 @@ const StepDetailsPage = () => {
                       <AccordionContent>
                         <div className="space-y-2">
                           {sampleDocuments.filter(doc => doc.type === 'reading').map(doc => (
-                            <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border">
+                            <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border hover:bg-muted/20 transition-colors">
                               <div className="flex items-center gap-3">
                                 {doc.icon}
                                 <div>
@@ -342,7 +342,7 @@ const StepDetailsPage = () => {
                       <AccordionContent>
                         <div className="space-y-2">
                           {sampleDocuments.filter(doc => doc.type === 'assignment').map(doc => (
-                            <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border">
+                            <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border hover:bg-muted/20 transition-colors">
                               <div className="flex items-center gap-3">
                                 {doc.icon}
                                 <div>
@@ -437,9 +437,9 @@ const StepDetailsPage = () => {
             </div>
           </div>
             
-          <div className="bg-white p-4 rounded-xl shadow-sm border">
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div 
-              className="flex justify-between items-center mb-4 cursor-pointer"
+              className="flex justify-between items-center mb-6 cursor-pointer"
               onClick={() => setResourcesCollapsed(!resourcesCollapsed)}
               role="button"
               aria-expanded={!resourcesCollapsed}
@@ -474,7 +474,7 @@ const StepDetailsPage = () => {
             {!resourcesCollapsed && (
               <>
                 {showTaskForm && (
-                  <div className="mb-6 p-4 border rounded-lg bg-muted/10">
+                  <div className="mb-6 p-5 border rounded-lg bg-muted/5 shadow-sm">
                     <h4 className="font-medium mb-3 text-base">Create a new task</h4>
                     <div className="space-y-3">
                       <div>
@@ -497,14 +497,14 @@ const StepDetailsPage = () => {
                 )}
                 
                 {relatedTasks.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {relatedTasks.map((task) => (
                       <div key={task.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-card">
-                        <div className="p-4">
-                          <div className="flex justify-between items-start mb-3">
+                        <div className="p-5">
+                          <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="font-semibold text-base">{task.title}</h3>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                 {renderStatusBadge(task.status)}
                                 {task.deadline && (
                                   <span className="text-xs flex items-center gap-1 bg-muted/30 px-2 py-1 rounded-full">
@@ -524,62 +524,60 @@ const StepDetailsPage = () => {
                             </Button>
                           </div>
                           
-                          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                            <div 
-                              className="bg-green-500 h-2 rounded-full" 
-                              style={{ width: `${getCompletionPercentage(task)}%` }}
-                              role="progressbar"
-                              aria-valuenow={getCompletionPercentage(task)}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
-                            ></div>
-                          </div>
-                          <div className="text-xs text-muted-foreground mb-3">
-                            <strong>{getCompletionPercentage(task)}%</strong> complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
-                          </div>
+                          <TaskProgressDisplay task={task} />
                           
-                          {/* Simple Subtasks Display */}
                           {task.categories.length > 0 && (
-                            <div className="mt-3 pt-3 border-t">
+                            <div className="mt-4 pt-3 border-t">
                               <Accordion type="multiple" className="w-full">
-                                {task.categories.map(category => (
-                                  <AccordionItem key={category.id} value={category.id} className="border-b-0">
-                                    <AccordionTrigger className="py-2 hover:no-underline">
-                                      <div className="flex items-center gap-2 text-sm">
-                                        <Bookmark className="h-3.5 w-3.5 text-primary" />
-                                        <span>{category.title}</span>
-                                        <span className="text-xs ml-2 bg-muted/40 px-2 py-0.5 rounded-full">
-                                          {getCategoryCompletionPercentage(category)}% • {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
-                                        </span>
-                                      </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6">
-                                        {category.subtasks.map(subtask => (
-                                          <div 
-                                            key={subtask.id} 
-                                            className={`flex items-start gap-2 p-2 rounded ${subtask.completed ? 'bg-green-50' : 'bg-muted/10'}`}
-                                          >
-                                            <Checkbox 
-                                              id={`task-${task.id}-subtask-${subtask.id}`}
-                                              checked={subtask.completed}
-                                              onCheckedChange={(checked) => {
-                                                handleSubtaskToggle(task.id, category.id, subtask.id, checked === true);
-                                              }}
-                                              className="mt-0.5"
-                                            />
-                                            <label 
-                                              htmlFor={`task-${task.id}-subtask-${subtask.id}`}
-                                              className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
+                                {task.categories.map(category => {
+                                  const completedCount = category.subtasks.filter(s => s.completed).length;
+                                  const totalCount = category.subtasks.length;
+                                  const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                                  
+                                  return (
+                                    <AccordionItem key={category.id} value={category.id} className="border-b-0 py-1">
+                                      <AccordionTrigger className="py-2 hover:no-underline">
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <Bookmark className="h-3.5 w-3.5 text-primary" />
+                                          <span>{category.title}</span>
+                                          <Badge className={`text-xs ml-1 px-2 py-0.5 rounded-full ${
+                                            percentage === 100 ? 'bg-green-100 text-green-800' : 
+                                            percentage > 0 ? 'bg-blue-100 text-blue-800' : 'bg-muted/40'
+                                          }`}>
+                                            {percentage}% • {completedCount}/{totalCount}
+                                          </Badge>
+                                        </div>
+                                      </AccordionTrigger>
+                                      <AccordionContent>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6">
+                                          {category.subtasks.map(subtask => (
+                                            <div 
+                                              key={subtask.id} 
+                                              className={`flex items-start gap-2 p-3 rounded ${
+                                                subtask.completed ? 'bg-green-50 border border-green-100' : 'bg-muted/10 border border-muted/30'
+                                              }`}
                                             >
-                                              {subtask.title}
-                                            </label>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </AccordionContent>
-                                  </AccordionItem>
-                                ))}
+                                              <Checkbox 
+                                                id={`task-${task.id}-subtask-${subtask.id}`}
+                                                checked={subtask.completed}
+                                                onCheckedChange={(checked) => {
+                                                  handleSubtaskToggle(task.id, category.id, subtask.id, checked === true);
+                                                }}
+                                                className={`mt-0.5 ${subtask.completed ? 'bg-green-500 border-green-500' : ''}`}
+                                              />
+                                              <label 
+                                                htmlFor={`task-${task.id}-subtask-${subtask.id}`}
+                                                className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : 'font-medium'}`}
+                                              >
+                                                {subtask.title}
+                                              </label>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </AccordionContent>
+                                    </AccordionItem>
+                                  );
+                                })}
                               </Accordion>
                             </div>
                           )}
@@ -588,7 +586,7 @@ const StepDetailsPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center p-6 bg-muted/10 rounded-lg">
+                  <div className="text-center p-8 bg-muted/5 rounded-lg border border-dashed">
                     <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
                     <Button 
                       onClick={() => setShowTaskForm(true)}

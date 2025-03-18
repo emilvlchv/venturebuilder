@@ -29,22 +29,29 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
   newSubtaskValue
 }) => {
   return (
-    <div className="border rounded-lg overflow-hidden shadow-sm">
-      <div className="bg-muted/30 p-4 flex items-center justify-between">
+    <div className="border rounded-lg overflow-hidden shadow-sm bg-white hover:shadow-md transition-shadow">
+      <div className="bg-muted/20 p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bookmark className="h-5 w-5 text-primary" />
           <h4 className="font-medium text-base">{category.title}</h4>
         </div>
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-sm bg-primary/10">
           {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
         </Badge>
       </div>
       
       <div className="p-4 space-y-4">
         {category.subtasks.length > 0 ? (
-          <div className="space-y-3 max-h-72 overflow-y-auto">
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {category.subtasks.map(subtask => (
-              <div key={subtask.id} className="flex items-center justify-between gap-2 p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors">
+              <div 
+                key={subtask.id} 
+                className={`flex items-center justify-between gap-2 p-3 rounded-lg transition-colors ${
+                  subtask.completed 
+                    ? 'bg-green-50 border border-green-100' 
+                    : 'bg-muted/10 border border-muted/30 hover:bg-muted/20'
+                }`}
+              >
                 <div className="flex items-start gap-3 flex-1">
                   <Checkbox 
                     id={`edit-subtask-${subtask.id}`}
@@ -52,7 +59,7 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
                     onCheckedChange={(checked) => {
                       onSubtaskToggle(taskId, category.id, subtask.id, checked === true);
                     }}
-                    className="mt-0.5"
+                    className={`mt-0.5 ${subtask.completed ? 'bg-green-500 border-green-500' : ''}`}
                   />
                   <label 
                     htmlFor={`edit-subtask-${subtask.id}`}
@@ -64,7 +71,7 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-9 w-9 p-0 rounded-full" 
+                  className="h-9 w-9 p-0 rounded-full opacity-70 hover:opacity-100" 
                   onClick={() => onRemoveSubtask(category.id, subtask.id)}
                   aria-label="Remove subtask"
                 >
@@ -74,7 +81,7 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-base text-muted-foreground text-center py-4">No subtasks yet. Add one below.</p>
+          <p className="text-base text-muted-foreground text-center py-4 bg-muted/5 rounded-lg">No subtasks yet. Add one below.</p>
         )}
         
         <div className="pt-3">
@@ -83,7 +90,7 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
               placeholder="Add new subtask..." 
               value={newSubtaskValue}
               onChange={(e) => onNewSubtaskChange(category.id, e.target.value)}
-              className="text-base"
+              className="text-base border-primary/30 focus:border-primary"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   onAddSubtask(category.id);
@@ -91,10 +98,10 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
               }}
             />
             <Button 
-              variant="secondary" 
+              variant="default" 
               size="lg"
               onClick={() => onAddSubtask(category.id)}
-              className="shrink-0"
+              className="shrink-0 bg-primary hover:bg-primary/90"
             >
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>

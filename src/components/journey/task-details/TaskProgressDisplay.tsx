@@ -18,7 +18,7 @@ export const renderStatusBadge = (status: string) => {
       return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
     case 'pending':
     default:
-      return <Badge className="bg-muted text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
+      return <Badge className="bg-muted/80 text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
   }
 };
 
@@ -39,17 +39,11 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
 
   const progress = calculateProgress(task);
 
-  // Get color based on task status
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-500';
-      case 'in-progress':
-        return 'bg-blue-500';
-      case 'pending':
-      default:
-        return 'bg-muted';
-    }
+  // Get color based on task status or progress
+  const getProgressColor = (progress: number) => {
+    if (progress >= 100) return 'bg-green-500';
+    if (progress > 0) return 'bg-blue-500';
+    return 'bg-muted';
   };
 
   return (
@@ -57,8 +51,8 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
       <div className="flex justify-between items-center">
         <div>
           {task.categories && 
-            <span className="text-sm text-muted-foreground">
-              <strong>{progress}%</strong> Complete
+            <span className="text-sm font-medium">
+              <strong className="text-primary">{progress}%</strong> Complete
             </span>
           }
         </div>
@@ -66,7 +60,7 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
           {renderStatusBadge(task.status)}
         </div>
       </div>
-      <Progress value={progress} className={`h-2 ${getStatusColor(task.status)}`} />
+      <Progress value={progress} className={`h-2.5 ${getProgressColor(progress)}`} />
       <div className="text-xs text-muted-foreground">
         {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks completed
       </div>

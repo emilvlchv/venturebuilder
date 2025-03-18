@@ -16,7 +16,8 @@ import {
   ShieldAlert,
   Database,
   PanelRight,
-  Layers
+  Layers,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,13 +107,22 @@ const AdminLayout: React.FC = () => {
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar - optimized rendering */}
       <aside className="w-64 bg-gradient-to-b from-primary/90 to-primary/100 text-white shadow-lg flex flex-col">
-        <div className="p-6">
+        <div className="p-6 flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg bg-white text-primary flex items-center justify-center">
               <span className="font-bold text-lg">VW</span>
             </div>
             <span className="font-bold text-xl text-white">Admin</span>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white"
+            title="Return to main site"
+          >
+            <Home size={16} />
+          </Button>
         </div>
         
         <nav className="flex-1 px-3 py-2 overflow-y-auto">
@@ -202,15 +212,26 @@ const AdminLayout: React.FC = () => {
                 <p className="text-xs text-white/70">Administrator</p>
               </div>
             </div>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={handleLogout}
-              className="w-full bg-white hover:bg-white/90 text-primary"
-            >
-              <LogOut size={16} className="mr-2" />
-              Sign Out
-            </Button>
+            <div className="space-y-2">
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="w-full bg-white/20 hover:bg-white/30 text-white"
+              >
+                <Home size={16} className="mr-2" />
+                Main Site
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={handleLogout}
+                className="w-full bg-white hover:bg-white/90 text-primary"
+              >
+                <LogOut size={16} className="mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </aside>

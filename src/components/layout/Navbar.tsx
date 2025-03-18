@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings, Shield } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, MessageSquare, Settings, Shield, LayoutDashboard, Home } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -55,7 +54,6 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Updated navLinks to show Admin Panel instead of Journey for admin users
   const navLinks = [
     { name: isAdmin ? 'Admin Panel' : 'Journey', path: isAdmin ? '/admin' : '/journey' },
     { name: 'Education', path: '/education' },
@@ -118,6 +116,28 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
+                {isAdmin && location.pathname.startsWith('/admin') && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/')}
+                    icon={<Home size={16} />}
+                    className="font-medium"
+                  >
+                    Main Site
+                  </Button>
+                )}
+                {isAdmin && !location.pathname.startsWith('/admin') && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/admin')}
+                    icon={<LayoutDashboard size={16} />}
+                    className="font-medium"
+                  >
+                    Admin Panel
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -140,16 +160,17 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground">@{user?.username}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(isAdmin ? '/admin' : '/journey')} className="cursor-pointer">
-                      {isAdmin ? (
-                        <div className="flex items-center">
-                          <Shield size={16} className="mr-2" />
-                          Admin Dashboard
-                        </div>
-                      ) : (
-                        'My Journey'
-                      )}
-                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+                        <Shield size={16} className="mr-2" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    )}
+                    {!isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
+                        My Journey
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
                       <Settings size={16} className="mr-2" />
                       Profile Settings
@@ -188,10 +209,24 @@ const Navbar = () => {
 
           <div className="md:hidden flex items-center space-x-2">
             {isAuthenticated && (
-              <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
-                <User size={16} className="mr-1" />
-                <span>My Account</span>
-              </Button>
+              <>
+                {isAdmin && location.pathname.startsWith('/admin') && (
+                  <Button variant="outline" size="sm" onClick={() => navigate('/')} className="mr-2">
+                    <Home size={16} className="mr-1" />
+                    <span>Main Site</span>
+                  </Button>
+                )}
+                {isAdmin && !location.pathname.startsWith('/admin') && (
+                  <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="mr-2">
+                    <LayoutDashboard size={16} className="mr-1" />
+                    <span>Admin</span>
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={goToProfile} className="mr-2">
+                  <User size={16} className="mr-1" />
+                  <span>My Account</span>
+                </Button>
+              </>
             )}
             <button
               onClick={toggleMenu}

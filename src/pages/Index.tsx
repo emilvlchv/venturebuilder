@@ -11,7 +11,7 @@ const Index = () => {
   const { user, isAuthenticated } = useAuth();
   const isAdmin = user?.role === 'admin';
   
-  // Redirect admin users to the admin dashboard
+  // Redirect admin users to the admin dashboard instead of journey
   if (isAuthenticated && isAdmin) {
     return <Navigate to="/admin" replace />;
   }

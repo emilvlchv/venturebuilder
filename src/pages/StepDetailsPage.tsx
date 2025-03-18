@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -16,7 +15,12 @@ import {
   ArrowLeft,
   Upload,
   FileText,
-  Bookmark
+  Bookmark,
+  File,
+  FileJson,
+  FilePdf,
+  BookOpen,
+  GraduationCap
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,13 +33,55 @@ import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TaskCategory } from '@/components/journey/TaskCard';
 
+const sampleDocuments = [
+  {
+    id: 'doc-1',
+    name: 'Market Research Handbook.pdf',
+    type: 'reading',
+    icon: <BookOpen className="h-4 w-4 text-orange-500" />,
+    description: 'Comprehensive guide to conducting effective market research',
+    size: '2.4 MB'
+  },
+  {
+    id: 'doc-2',
+    name: 'Competitor Analysis Template.xlsx',
+    type: 'assignment',
+    icon: <FileJson className="h-4 w-4 text-green-500" />,
+    description: 'Template to track and analyze your competitors',
+    size: '340 KB'
+  },
+  {
+    id: 'doc-3',
+    name: 'Customer Interview Questions.docx',
+    type: 'assignment',
+    icon: <File className="h-4 w-4 text-blue-500" />,
+    description: 'Sample questions to ask during customer interviews',
+    size: '215 KB'
+  },
+  {
+    id: 'doc-4',
+    name: 'Market Sizing Strategies.pdf',
+    type: 'reading',
+    icon: <FilePdf className="h-4 w-4 text-red-500" />,
+    description: 'Learn how to accurately estimate your market size',
+    size: '1.8 MB'
+  },
+  {
+    id: 'doc-5',
+    name: 'Research Methods for Entrepreneurs.pdf',
+    type: 'reading',
+    icon: <GraduationCap className="h-4 w-4 text-purple-500" />,
+    description: 'Academic guide to research methodologies',
+    size: '3.2 MB'
+  }
+];
+
 const StepDetailsPage = () => {
   const { journeyId, stepId } = useParams<{ journeyId: string; stepId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
@@ -55,17 +101,14 @@ const StepDetailsPage = () => {
     handleRemoveSubtask
   } = useJourneyDetails();
   
-  // Get step details from the step ID
   const stepDetails: StepDetail | undefined = stepId ? stepsDetailsMap[stepId] : undefined;
   const relatedTasks = stepId ? getTasksByStepId(stepId) : [];
 
   useEffect(() => {
-    // Set page title for accessibility
     document.title = stepDetails 
       ? `${stepDetails.title} | Journey Step Details` 
       : 'Step Details';
       
-    // Announce page load to screen readers
     const announcer = document.createElement('div');
     announcer.setAttribute('aria-live', 'polite');
     announcer.setAttribute('class', 'sr-only');
@@ -109,7 +152,6 @@ const StepDetailsPage = () => {
 
   const handleCreateTask = () => {
     if (handleCreateTaskFromStep && stepId && newTaskTitle.trim()) {
-      // Create a deadline 2 weeks from now for the new task
       const deadline = new Date();
       deadline.setDate(deadline.getDate() + 14); // Add 14 days
 
@@ -144,18 +186,15 @@ const StepDetailsPage = () => {
     navigate(`/journey-details/${journeyId}`);
   };
 
-  // Handle opening task details
   const openTaskDetails = (task: Task) => {
     setSelectedTask(task);
     setIsTaskDetailOpen(true);
   };
 
-  // Handle closing task details
   const closeTaskDetails = () => {
     setIsTaskDetailOpen(false);
   };
 
-  // Format date safely
   const formatDate = (date: Date | undefined | string) => {
     if (!date) return 'No deadline';
     
@@ -176,6 +215,13 @@ const StepDetailsPage = () => {
     } else {
       setExpandedTaskId(taskId);
     }
+  };
+
+  const downloadDocument = (docName: string) => {
+    toast({
+      title: "Download started",
+      description: `Downloading ${docName}...`,
+    });
   };
 
   if (!stepDetails) {
@@ -208,7 +254,6 @@ const StepDetailsPage = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Journey
           </Button>
           
-          {/* Step Header */}
           <div className="pb-5 mb-8 border-b">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold" id="step-details-title">{stepDetails.title}</h1>
@@ -222,58 +267,109 @@ const StepDetailsPage = () => {
             </p>
           </div>
 
-          {/* Information Section */}
           <div className="space-y-6 mb-8">
-            {/* Step Information Box - Now more compact */}
             <div className="bg-white p-4 rounded-xl shadow-sm border">
-              <details open>
-                <summary className="cursor-pointer mb-2">
-                  <h2 className="text-xl font-semibold inline-flex items-center gap-2">
-                    <Info className="h-5 w-5 text-primary" /> Step Information
-                  </h2>
-                </summary>
-                <p className="text-base leading-relaxed text-muted-foreground">{stepDetails.detailedDescription}</p>
-              </details>
+              <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" /> Step Information
+              </h2>
+              <p className="text-base leading-relaxed text-muted-foreground">{stepDetails.detailedDescription}</p>
             </div>
 
-            {/* Examples Box - Now more compact */}
             {stepDetails.examples && stepDetails.examples.length > 0 && (
               <div className="bg-white p-4 rounded-xl shadow-sm border">
-                <details open>
-                  <summary className="cursor-pointer mb-2">
-                    <h2 className="text-xl font-semibold inline-flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5 text-primary" /> Examples
-                    </h2>
-                  </summary>
-                  <div className="bg-muted/20 p-4 rounded-lg space-y-2">
-                    {stepDetails.examples.map((example, index) => (
-                      <p key={index} className="text-sm italic">{example}</p>
-                    ))}
-                  </div>
-                </details>
+                <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-primary" /> Examples
+                </h2>
+                <div className="bg-muted/20 p-4 rounded-lg space-y-2">
+                  {stepDetails.examples.map((example, index) => (
+                    <p key={index} className="text-sm italic">{example}</p>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Document Upload Box - Now more compact */}
             <div className="bg-white p-4 rounded-xl shadow-sm border">
-              <details open>
-                <summary className="cursor-pointer mb-2">
-                  <h2 className="text-xl font-semibold inline-flex items-center gap-2">
-                    <Upload className="h-5 w-5 text-primary" /> Documents
-                  </h2>
-                </summary>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" /> Materials & Resources
+              </h2>
+              
+              <div className="mb-4">
+                <h3 className="font-medium text-base mb-2 flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-primary" /> Reading Materials
+                </h3>
+                <div className="space-y-2">
+                  {sampleDocuments.filter(doc => doc.type === 'reading').map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        {doc.icon}
+                        <div>
+                          <p className="font-medium text-sm">{doc.name}</p>
+                          <p className="text-xs text-muted-foreground">{doc.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{doc.size}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => downloadDocument(doc.name)}
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-base mb-2 flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-primary" /> Assignments
+                </h3>
+                <div className="space-y-2">
+                  {sampleDocuments.filter(doc => doc.type === 'assignment').map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/10 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        {doc.icon}
+                        <div>
+                          <p className="font-medium text-sm">{doc.name}</p>
+                          <p className="text-xs text-muted-foreground">{doc.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{doc.size}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => downloadDocument(doc.name)}
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-medium text-base flex items-center gap-2">
+                    <Upload className="h-4 w-4 text-primary" /> Your Uploaded Documents
+                  </h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowTaskForm(!showTaskForm)}
+                    className="text-xs"
+                  >
+                    <Upload className="h-3 w-3 mr-1" /> Upload
+                  </Button>
+                </div>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="mb-3"
-                  onClick={() => setShowUploadForm(!showUploadForm)}
-                >
-                  <Upload className="h-4 w-4 mr-2" /> Upload Documents
-                </Button>
-                
-                {showUploadForm && (
-                  <div className="mb-3 p-3 border rounded-lg">
+                {showTaskForm && (
+                  <div className="mb-4 p-3 border rounded-lg">
                     <label 
                       htmlFor="file-upload" 
                       className="block w-full cursor-pointer text-center py-3 px-3 border-2 border-dashed rounded-lg hover:bg-muted/20 transition-colors"
@@ -296,34 +392,34 @@ const StepDetailsPage = () => {
                 )}
                 
                 {uploadedFiles.length > 0 ? (
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Uploaded Files</h3>
-                    <ul className="space-y-1">
-                      {uploadedFiles.map((file, index) => (
-                        <li key={index} className="flex justify-between items-center p-2 bg-muted/10 rounded text-sm">
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-muted/10 rounded-lg border text-sm">
+                        <div className="flex items-center gap-2">
+                          <File className="h-4 w-4 text-blue-500" />
                           <span className="truncate">{file.name}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => removeFile(file.name)}
-                            aria-label={`Remove file ${file.name}`}
-                          >
-                            Remove
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => removeFile(file.name)}
+                          aria-label={`Remove file ${file.name}`}
+                          className="text-xs"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-2">
+                  <p className="text-sm text-muted-foreground text-center py-2 bg-muted/10 rounded-lg">
                     No documents uploaded yet
                   </p>
                 )}
-              </details>
+              </div>
             </div>
           </div>
             
-          {/* Tasks Section */}
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -367,7 +463,6 @@ const StepDetailsPage = () => {
               <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
                 {relatedTasks.map((task) => (
                   <div key={task.id} className="border rounded-xl overflow-hidden hover:shadow-md transition-shadow bg-card">
-                    {/* Task Header */}
                     <div className="p-4 border-b">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -385,7 +480,6 @@ const StepDetailsPage = () => {
                         </div>
                       </div>
                       
-                      {/* Progress bar */}
                       <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                         <div 
                           className="bg-green-500 h-2 rounded-full" 
@@ -400,7 +494,6 @@ const StepDetailsPage = () => {
                         {getCompletionPercentage(task)}% complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
                       </div>
                       
-                      {/* Task Actions */}
                       <div className="flex flex-wrap gap-2 justify-between">
                         <Button 
                           variant={task.status === 'completed' ? 'default' : 'outline'}
@@ -434,82 +527,78 @@ const StepDetailsPage = () => {
                       </div>
                     </div>
                     
-                    {/* Expanded Content - Subtasks & Resources */}
                     {expandedTaskId === task.id && (
                       <div className="p-4 bg-muted/10">
-                        {/* Subtasks */}
-                        {task.categories.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="font-medium text-base mb-3">Subtasks</h4>
-                            <div className="space-y-3">
-                              {task.categories.map((category) => (
-                                <div key={category.id} className="border rounded-lg overflow-hidden bg-white">
-                                  <div className="bg-muted/30 p-2 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <Bookmark className="h-4 w-4 text-primary" />
-                                      <h5 className="font-medium text-sm">{category.title}</h5>
-                                    </div>
-                                    <Badge variant="outline" className="text-xs">
-                                      {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
-                                    </Badge>
+                        <div className="mb-4">
+                          <h4 className="font-medium text-base mb-3">Subtasks</h4>
+                          <div className="space-y-3">
+                            {task.categories.map((category) => (
+                              <div key={category.id} className="border rounded-lg overflow-hidden bg-white">
+                                <div className="bg-muted/30 p-2 flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Bookmark className="h-4 w-4 text-primary" />
+                                    <h5 className="font-medium text-sm">{category.title}</h5>
                                   </div>
-                                  
-                                  {/* Category progress bar */}
-                                  <div className="w-full bg-gray-200 h-1">
-                                    <div 
-                                      className="bg-green-500 h-1" 
-                                      style={{ width: `${getCategoryCompletionPercentage(category)}%` }}
-                                    ></div>
-                                  </div>
-                                  
-                                  <div className="p-2 space-y-1">
-                                    {category.subtasks.length > 0 ? (
-                                      category.subtasks.map(subtask => (
-                                        <div key={subtask.id} className="flex items-start gap-2 p-1 rounded hover:bg-muted/20">
-                                          <Checkbox 
-                                            id={`inline-subtask-${subtask.id}`}
-                                            checked={subtask.completed}
-                                            onCheckedChange={(checked) => {
-                                              handleSubtaskToggle(task.id, category.id, subtask.id, checked === true);
-                                            }}
-                                            className="mt-0.5"
-                                          />
-                                          <label 
-                                            htmlFor={`inline-subtask-${subtask.id}`}
-                                            className={`text-xs ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
-                                          >
-                                            {subtask.title}
-                                          </label>
-                                        </div>
-                                      ))
-                                    ) : (
-                                      <p className="text-xs text-muted-foreground text-center p-1">No subtasks</p>
-                                    )}
-                                  </div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
+                                  </Badge>
                                 </div>
-                              ))}
-                            </div>
+                                
+                                <div className="w-full bg-gray-200 h-1">
+                                  <div 
+                                    className="bg-green-500 h-1" 
+                                    style={{ width: `${getCategoryCompletionPercentage(category)}%` }}
+                                  ></div>
+                                </div>
+                                
+                                <div className="p-2 space-y-1">
+                                  {category.subtasks.length > 0 ? (
+                                    category.subtasks.map(subtask => (
+                                      <div key={subtask.id} className="flex items-start gap-2 p-1 rounded hover:bg-muted/20">
+                                        <Checkbox 
+                                          id={`inline-subtask-${subtask.id}`}
+                                          checked={subtask.completed}
+                                          onCheckedChange={(checked) => {
+                                            handleSubtaskToggle(task.id, category.id, subtask.id, checked === true);
+                                          }}
+                                          className="mt-0.5"
+                                        />
+                                        <label 
+                                          htmlFor={`inline-subtask-${subtask.id}`}
+                                          className={`text-xs ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
+                                        >
+                                          {subtask.title}
+                                        </label>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground text-center p-1">No subtasks</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        )}
+                        </div>
                         
-                        {/* Resources */}
-                        {task.resources && task.resources.length > 0 && (
-                          <div>
-                            <h4 className="font-medium text-base mb-2 flex items-center gap-2">
-                              <FileText className="h-4 w-4" /> Resources
-                            </h4>
-                            <div className="p-3 bg-accent/30 rounded-lg">
-                              <ul className="space-y-1">
-                                {task.resources.map((resource, i) => (
+                        <div>
+                          <h4 className="font-medium text-base mb-2 flex items-center gap-2">
+                            <FileText className="h-4 w-4" /> Resources
+                          </h4>
+                          <div className="p-3 bg-accent/30 rounded-lg">
+                            <ul className="space-y-1">
+                              {task.resources && task.resources.length > 0 ? (
+                                task.resources.map((resource, i) => (
                                   <li key={i} className="text-xs flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-primary/70 flex-shrink-0"></div>
                                     <span>{resource}</span>
                                   </li>
-                                ))}
-                              </ul>
-                            </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-muted-foreground text-center p-1">No resources available</p>
+                              )}
+                            </ul>
                           </div>
-                        )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -531,7 +620,6 @@ const StepDetailsPage = () => {
       </main>
       <Footer />
       
-      {/* Task Detail Sheet */}
       {selectedTask && (
         <TaskDetailSheet
           isOpen={isTaskDetailOpen}

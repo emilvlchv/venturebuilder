@@ -45,7 +45,7 @@ const JourneyHeader: React.FC<JourneyHeaderProps> = ({
             <CardTitle>Your Business Idea</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium">Business Concept</h3>
                 <p className="text-muted-foreground">{businessData.businessIdea || "Not specified"}</p>

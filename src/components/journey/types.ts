@@ -5,7 +5,7 @@ export interface BusinessIdeaData {
   teamComposition: string;
   teamStrengths: string;
   teamWeaknesses: string;
-  revenueModel?: string; // Added this property which was missing
+  revenueModel?: string;
 }
 
 export interface Journey {

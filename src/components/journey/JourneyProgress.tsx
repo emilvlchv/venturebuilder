@@ -4,14 +4,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PhaseSection from './PhaseSection';
 import { Task } from './TaskCard';
 
-interface JourneyPhase {
+export interface JourneyPhase {
   id: string;
   title: string;
+  description: string;
   steps: {
     id: string;
     title: string;
     description: string;
     status: string;
+    hasActiveTasks?: boolean;
+    allTasksCompleted?: boolean;
     resources: string[];
   }[];
 }

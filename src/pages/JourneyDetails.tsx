@@ -11,6 +11,7 @@ import { useJourneyDetails } from '@/hooks/useJourneyDetails';
 import { SkipToContent } from '@/components/ui/skip-to-content';
 import { useToast } from '@/components/ui/use-toast';
 import { useParams } from 'react-router-dom';
+import { BusinessIdeaData } from '@/components/journey/types';
 
 const JourneyDetails = () => {
   const { journeyId } = useParams<{ journeyId: string }>();
@@ -35,6 +36,15 @@ const JourneyDetails = () => {
     handleCloseTaskDetail,
     journeyPhases
   } = useJourneyDetails();
+
+  // Adapt businessData to match BusinessIdeaData interface
+  const adaptedBusinessData: BusinessIdeaData = businessData ? {
+    businessIdea: businessData.solution || '',
+    targetCustomers: businessData.targetMarket || '',
+    teamComposition: businessData.stage || '',
+    teamStrengths: '',
+    teamWeaknesses: '',
+  } : null;
 
   // Set page title for screen readers
   useEffect(() => {
@@ -85,6 +95,15 @@ const JourneyDetails = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isTaskDetailOpen, handleCloseTaskDetail, journeyPhases, setActiveTab, toast]);
 
+  // Add resources property to journeyPhases steps to match JourneyPhase type
+  const enhancedJourneyPhases = journeyPhases.map(phase => ({
+    ...phase,
+    steps: phase.steps.map(step => ({
+      ...step,
+      resources: step.resources || []
+    }))
+  }));
+
   return (
     <div className="min-h-screen flex flex-col">
       <SkipToContent />
@@ -97,12 +116,12 @@ const JourneyDetails = () => {
                 <JourneyHeader
                   title={journey?.title || 'Your Entrepreneurial Journey'}
                   description={journey?.description || 'Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.'}
-                  businessData={businessData}
+                  businessData={adaptedBusinessData}
                 />
               </div>
 
               <JourneyProgress
-                phases={journeyPhases}
+                phases={enhancedJourneyPhases}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 getTasksByStepId={getTasksByStepId}

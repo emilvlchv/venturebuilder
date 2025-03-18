@@ -48,15 +48,15 @@ const JourneyHeader: React.FC<JourneyHeaderProps> = ({
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium">Business Concept</h3>
-                <p className="text-muted-foreground">{businessData.businessIdea}</p>
+                <p className="text-muted-foreground">{businessData.businessIdea || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Target Customers</h3>
-                <p className="text-muted-foreground">{businessData.targetCustomers}</p>
+                <p className="text-muted-foreground">{businessData.targetCustomers || "Not specified"}</p>
               </div>
               <div>
                 <h3 className="font-medium">Team Composition</h3>
-                <p className="text-muted-foreground">{businessData.teamComposition}</p>
+                <p className="text-muted-foreground">{businessData.teamComposition || "Not specified"}</p>
               </div>
             </div>
           </CardContent>

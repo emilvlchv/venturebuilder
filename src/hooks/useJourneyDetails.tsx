@@ -17,6 +17,7 @@ const journeyPhasesData = [
         status: 'in-progress',
         hasActiveTasks: true,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'idea-validation',
@@ -25,6 +26,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'customer-interviews',
@@ -33,6 +35,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       }
     ]
   },
@@ -48,6 +51,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'financial-projection',
@@ -56,6 +60,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'competitive-analysis',
@@ -64,6 +69,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       }
     ]
   },
@@ -79,6 +85,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'marketing-plan',
@@ -87,6 +94,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'launch-preparation',
@@ -95,6 +103,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       }
     ]
   },
@@ -110,6 +119,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'business-operations',
@@ -118,6 +128,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       },
       {
         id: 'scaling-strategy',
@@ -126,6 +137,7 @@ const journeyPhasesData = [
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
+        resources: []
       }
     ]
   }

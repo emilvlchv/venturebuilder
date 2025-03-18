@@ -3,7 +3,7 @@ import React from 'react';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Task } from '../TaskCard';
+import { Task } from '../types';
 
 interface TaskProgressDisplayProps {
   task: Task;
@@ -13,12 +13,12 @@ interface TaskProgressDisplayProps {
 export const renderStatusBadge = (status: string) => {
   switch (status) {
     case 'completed':
-      return <Badge className="bg-green-500"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
+      return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" /> Completed</Badge>;
     case 'in-progress':
-      return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
+      return <Badge className="bg-blue-500 hover:bg-blue-600"><Clock className="h-3 w-3 mr-1" /> In Progress</Badge>;
     case 'pending':
     default:
-      return <Badge className="bg-muted/80 text-foreground"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
+      return <Badge className="bg-muted/80 text-foreground hover:bg-muted"><AlertCircle className="h-3 w-3 mr-1" /> Not Started</Badge>;
   }
 };
 
@@ -42,7 +42,9 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
   // Get color based on task status or progress
   const getProgressColor = (progress: number) => {
     if (progress >= 100) return 'bg-green-500';
-    if (progress > 0) return 'bg-blue-500';
+    if (progress > 66) return 'bg-emerald-500';
+    if (progress > 33) return 'bg-blue-500';
+    if (progress > 0) return 'bg-amber-500';
     return 'bg-muted';
   };
 

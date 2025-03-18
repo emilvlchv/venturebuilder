@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -116,6 +117,46 @@ const JourneyDetails = () => {
     return localTasks.filter(task => task.stepId === stepId);
   };
 
+  // Handle status change for a task by updating localTasks
+  const handleLocalTaskStatusChange = (status: 'completed' | 'in-progress' | 'pending') => {
+    if (selectedTask) {
+      // Update the selected task in the useJourneyDetails hook
+      handleTaskStatusChange(selectedTask, status);
+      
+      // Also update the local tasks
+      const updatedTasks = localTasks.map(task => 
+        task.id === selectedTask.id ? {...task, status} : task
+      );
+      setLocalTasks(updatedTasks);
+    }
+  };
+
+  // Handle subtask toggle with corrected parameters
+  const handleLocalSubtaskToggle = (categoryId: string, subtaskId: string, completed: boolean) => {
+    if (selectedTask) {
+      // Update subtask in the hook
+      handleSubtaskToggle(selectedTask.id, categoryId, subtaskId, completed);
+      
+      // Also update in localTasks
+      const updatedTasks = localTasks.map(task => {
+        if (task.id === selectedTask.id) {
+          const updatedCategories = task.categories.map(category => {
+            if (category.id === categoryId) {
+              const updatedSubtasks = category.subtasks.map(subtask => 
+                subtask.id === subtaskId ? {...subtask, completed} : subtask
+              );
+              return {...category, subtasks: updatedSubtasks};
+            }
+            return category;
+          });
+          return {...task, categories: updatedCategories};
+        }
+        return task;
+      });
+      setLocalTasks(updatedTasks);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <SkipToContent />
@@ -162,37 +203,11 @@ const JourneyDetails = () => {
           isOpen={isTaskDetailOpen}
           onClose={handleCloseTaskDetail}
           task={selectedTask}
-          onStatusChange={(status) => {
-            handleTaskStatusChange(status);
-            // Update the local task state as well
-            if (selectedTask) {
-              const updatedTasks = localTasks.map(task => 
-                task.id === selectedTask.id ? {...task, status} : task
-              );
-              setLocalTasks(updatedTasks);
-            }
+          onStatusChange={(task, status) => {
+            handleLocalTaskStatusChange(status);
           }}
-          onSubtaskToggle={(categoryId, subtaskId, completed) => {
-            handleSubtaskToggle(categoryId, subtaskId, completed);
-            // Update local tasks
-            if (selectedTask) {
-              const updatedTasks = localTasks.map(task => {
-                if (task.id === selectedTask.id) {
-                  const updatedCategories = task.categories.map(category => {
-                    if (category.id === categoryId) {
-                      const updatedSubtasks = category.subtasks.map(subtask => 
-                        subtask.id === subtaskId ? {...subtask, completed} : subtask
-                      );
-                      return {...category, subtasks: updatedSubtasks};
-                    }
-                    return category;
-                  });
-                  return {...task, categories: updatedCategories};
-                }
-                return task;
-              });
-              setLocalTasks(updatedTasks);
-            }
+          onSubtaskToggle={(taskId, categoryId, subtaskId, completed) => {
+            handleLocalSubtaskToggle(categoryId, subtaskId, completed);
           }}
           onCategoryToggle={handleCategoryToggle}
           onDeadlineChange={handleDeadlineChange}

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Send, User, ArrowRight, Info } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
-import { BusinessIdeaData, Journey, JourneyTask } from './types';
+import { BusinessIdeaData, Journey, Task } from './types';
 import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
@@ -27,7 +26,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Debug: Monitor step changes
   useEffect(() => {
     console.log("Current step changed to:", currentStep);
   }, [currentStep]);
@@ -42,7 +40,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     setBusinessData(data);
     setCurrentStep('generating');
     
-    // Simulate AI generating the journey
     setTimeout(() => {
       console.log("Setting step to complete");
       setCurrentStep('complete');
@@ -53,11 +50,9 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     }, 3000);
   };
   
-  // Create default tasks for a journey
   const createDefaultTasks = (userId: string, journeyId: string) => {
     const tasksKey = `tasks_${userId}_${journeyId}`;
     
-    // Convert to the expected format with categories for each task
     const formattedTasks = [
       {
         id: 'task1',
@@ -167,7 +162,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     return formattedTasks;
   };
   
-  // Function to handle completion of the initial chat
   const handleComplete = () => {
     console.log("handleComplete called with journeyId:", journeyId);
     
@@ -182,14 +176,12 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     }
     
     try {
-      // Store in local storage for demo purposes
       if (businessData.businessIdea) {
         const userData = localStorage.getItem('user');
         if (userData) {
           const user = JSON.parse(userData);
           const userId = user.id;
           if (userId) {
-            // Update user's business idea and other data
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const userIndex = users.findIndex((u: any) => u.id === userId);
             if (userIndex !== -1) {
@@ -197,14 +189,12 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               users[userIndex].businessData = businessData;
               localStorage.setItem('users', JSON.stringify(users));
               
-              // Update current user
               const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
               currentUser.businessIdea = businessData.businessIdea;
               currentUser.businessData = businessData;
               localStorage.setItem('user', JSON.stringify(currentUser));
             }
             
-            // Update the journey with the business data
             const journeysKey = `journeys_${userId}`;
             const journeysData = localStorage.getItem(journeysKey);
             if (journeysData) {
@@ -212,28 +202,24 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
               if (journeyIndex !== -1) {
                 journeys[journeyIndex].businessIdeaData = businessData;
-                journeys[journeyIndex].progress = 15; // Update progress
+                journeys[journeyIndex].progress = 15;
                 journeys[journeyIndex].updatedAt = new Date().toISOString();
                 localStorage.setItem(journeysKey, JSON.stringify(journeys));
                 
-                // Create default tasks for this journey
                 createDefaultTasks(userId, journeyId);
                 
-                // Navigate to journey details page with proper formatting
                 const journeyDetailsPath = `/journey-details/${journeyId}`;
                 console.log("Navigating to:", journeyDetailsPath);
                 
-                // Use setTimeout to ensure state updates have processed
                 setTimeout(() => {
                   navigate(journeyDetailsPath);
                 }, 100);
                 
-                // Call the onComplete callback if provided
                 if (onComplete) {
                   onComplete(businessData);
                 }
                 
-                return; // Exit after successful completion
+                return;
               } else {
                 console.error("Journey not found with ID:", journeyId);
               }
@@ -244,14 +230,12 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         }
       }
       
-      // If we reached here, something went wrong
       console.error("Failed to update journey data");
       toast({
         title: "Error",
         description: "An error occurred while saving your journey data.",
         variant: "destructive"
       });
-      
     } catch (error) {
       console.error('Error saving business idea:', error);
       toast({
@@ -263,12 +247,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   };
 
   useEffect(() => {
-    // If we're on the complete step, call handleComplete
     if (currentStep === 'complete') {
       console.log("Current step is complete, calling handleComplete");
       handleComplete();
     }
-  }, [currentStep, journeyId]); // Added journeyId to dependencies
+  }, [currentStep, journeyId]);
 
   const renderAssistantMessage = (message: string) => {
     return (

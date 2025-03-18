@@ -58,6 +58,20 @@ const JourneyHeader: React.FC<JourneyHeaderProps> = ({
                 <h3 className="font-medium">Team Composition</h3>
                 <p className="text-muted-foreground">{businessData.teamComposition || "Not specified"}</p>
               </div>
+              <div>
+                <h3 className="font-medium">Team Strengths</h3>
+                <p className="text-muted-foreground">{businessData.teamStrengths || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium">Team Weaknesses</h3>
+                <p className="text-muted-foreground">{businessData.teamWeaknesses || "Not specified"}</p>
+              </div>
+              {businessData.revenueModel && (
+                <div>
+                  <h3 className="font-medium">Revenue Model</h3>
+                  <p className="text-muted-foreground">{businessData.revenueModel}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, AlertTriangle } from 'lucide-react';
 import Button from '../shared/Button';

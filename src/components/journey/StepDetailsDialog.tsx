@@ -17,9 +17,10 @@ import {
   Edit, 
   ListChecks, 
   Info, 
-  Lightbulb,
   FileText,
-  Bookmark
+  Bookmark,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task, TaskCategory } from './TaskCard';
@@ -99,23 +100,23 @@ const TaskCreationForm = ({
   newTaskTitle: string; 
   setNewTaskTitle: (value: string) => void;
 }) => (
-  <div className="mb-6 p-5 border rounded-lg bg-muted/10">
-    <h4 className="font-medium mb-4 text-lg">Create a new task</h4>
-    <div className="space-y-4">
+  <div className="mb-4 p-4 border rounded-lg bg-muted/10">
+    <h4 className="font-medium mb-2 text-base">Create a new task</h4>
+    <div className="space-y-3">
       <div>
-        <label htmlFor="newTaskTitle" className="block text-sm mb-2 font-medium">Task Title</label>
+        <label htmlFor="newTaskTitle" className="block text-sm mb-1 font-medium">Task Title</label>
         <input
           id="newTaskTitle"
-          className="w-full p-3 border rounded-lg text-base"
+          className="w-full p-2 border rounded-lg text-sm"
           value={newTaskTitle}
           onChange={(e) => setNewTaskTitle(e.target.value)}
           placeholder="Enter task title..."
           aria-label="New task title"
         />
       </div>
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" size="lg" onClick={onCancel}>Cancel</Button>
-        <Button size="lg" onClick={onCreate}>Create Task</Button>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button size="sm" onClick={onCreate}>Create Task</Button>
       </div>
     </div>
   </div>
@@ -131,6 +132,8 @@ const StepDetailsDialog = ({
 }: StepDetailsDialogProps) => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [infoCollapsed, setInfoCollapsed] = useState(false);
+  const [tasksCollapsed, setTasksCollapsed] = useState(false);
   
   if (!stepDetails) return null;
 
@@ -144,131 +147,153 @@ const StepDetailsDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl mx-auto p-8" role="dialog" aria-labelledby="step-details-title">
-        <DialogHeader className="pb-5 mb-6 border-b">
-          <DialogTitle id="step-details-title" className="text-3xl font-bold">{stepDetails.title}</DialogTitle>
-          <DialogDescription className="text-lg mt-2">
+      <DialogContent className="max-w-3xl mx-auto p-6" role="dialog" aria-labelledby="step-details-title">
+        <DialogHeader className="pb-4 mb-4 border-b">
+          <DialogTitle id="step-details-title" className="text-2xl font-bold">{stepDetails.title}</DialogTitle>
+          <DialogDescription className="text-base mt-2">
             {stepDetails.description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mb-6 bg-primary/10 p-5 rounded-xl flex items-center gap-4">
-          <CalendarClock className="h-8 w-8 text-primary" />
-          <span className="text-base">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
+        <div className="mb-4 bg-primary/10 p-4 rounded-lg flex items-center gap-3">
+          <CalendarClock className="h-6 w-6 text-primary" />
+          <span className="text-sm">Estimated time: <strong>{stepDetails.timeEstimate}</strong></span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Step Information */}
-          <div className="space-y-6">
-            {/* Overview */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Info className="h-5 w-5 text-primary" /> Overview
+        <div className="space-y-4">
+          {/* Step Information */}
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div 
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => setInfoCollapsed(!infoCollapsed)}
+              role="button"
+              aria-expanded={!infoCollapsed}
+              tabIndex={0}
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" /> Step Information
               </h3>
-              <p className="text-base leading-relaxed">{stepDetails.detailedDescription}</p>
+              <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                {infoCollapsed ? (
+                  <ChevronDown className="h-5 w-5" />
+                ) : (
+                  <ChevronUp className="h-5 w-5" />
+                )}
+              </Button>
             </div>
-
-            {/* Key Tasks */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <ListChecks className="h-5 w-5 text-primary" /> Key Tasks
-              </h3>
-              <ul className="space-y-3">
-                {stepDetails.tasks.map((task, index) => (
-                  <li key={index} className="flex gap-3 items-start">
-                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                    <span className="text-base">{task}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Examples */}
-            {stepDetails.examples && stepDetails.examples.length > 0 && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-primary" /> Examples
-                </h3>
-                <div className="bg-muted/20 p-5 rounded-lg space-y-4">
-                  {stepDetails.examples.map((example, index) => (
-                    <p key={index} className="text-base italic">{example}</p>
-                  ))}
+            
+            {!infoCollapsed && (
+              <div className="mt-3">
+                <p className="text-sm leading-relaxed">{stepDetails.detailedDescription}</p>
+                
+                <div className="mt-4 pt-3 border-t">
+                  <h4 className="text-base font-semibold mb-2 flex items-center gap-2">
+                    <ListChecks className="h-4 w-4 text-primary" /> Key Tasks
+                  </h4>
+                  <ul className="space-y-2 pl-2">
+                    {stepDetails.tasks.map((task, index) => (
+                      <li key={index} className="flex gap-2 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{task}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             )}
           </div>
           
-          {/* Right Column: User Tasks */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold flex items-center gap-2">
+          {/* User Tasks */}
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div 
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => setTasksCollapsed(!tasksCollapsed)}
+              role="button"
+              aria-expanded={!tasksCollapsed}
+              tabIndex={0}
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
                 <ListChecks className="h-5 w-5 text-primary" /> Your Tasks
               </h3>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={() => setShowTaskForm(!showTaskForm)}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Task
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowTaskForm(!showTaskForm);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Task
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                  {tasksCollapsed ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronUp className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
             </div>
             
-            {/* Task Creation Form */}
-            {showTaskForm && (
-              <TaskCreationForm 
-                onCancel={() => setShowTaskForm(false)}
-                onCreate={handleCreateTask}
-                newTaskTitle={newTaskTitle}
-                setNewTaskTitle={setNewTaskTitle}
-              />
-            )}
-            
-            {/* Task List */}
-            {tasks.length > 0 ? (
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                {tasks.map((task) => (
-                  <div key={task.id} className="border rounded-xl p-5 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-lg">{task.title}</h4>
-                          <StatusBadge status={task.status} />
+            {!tasksCollapsed && (
+              <div className="mt-3">
+                {/* Task Creation Form */}
+                {showTaskForm && (
+                  <TaskCreationForm 
+                    onCancel={() => setShowTaskForm(false)}
+                    onCreate={handleCreateTask}
+                    newTaskTitle={newTaskTitle}
+                    setNewTaskTitle={setNewTaskTitle}
+                  />
+                )}
+                
+                {/* Task List */}
+                {tasks.length > 0 ? (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    {tasks.map((task) => (
+                      <div key={task.id} className="border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-medium text-base">{task.title}</h4>
+                            <StatusBadge status={task.status} />
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => onTaskOpen && onTaskOpen(task)}
+                            className="ml-2"
+                            aria-label={`Edit task: ${task.title}`}
+                          >
+                            <Edit className="h-4 w-4 mr-1" /> Edit
+                          </Button>
                         </div>
-                        <p className="text-muted-foreground">{task.description}</p>
+                        
+                        {/* Progress */}
+                        <TaskProgressBar task={task} />
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        onClick={() => onTaskOpen && onTaskOpen(task)}
-                        className="ml-2"
-                        aria-label={`Edit task: ${task.title}`}
-                      >
-                        <Edit className="h-4 w-4 mr-2" /> Edit
-                      </Button>
-                    </div>
-                    
-                    {/* Progress */}
-                    <TaskProgressBar task={task} />
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-8 bg-muted/10 rounded-lg">
-                <p className="text-muted-foreground mb-4">No tasks created for this step yet.</p>
-                <Button 
-                  onClick={() => setShowTaskForm(true)}
-                  className="flex items-center mx-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Create Your First Task
-                </Button>
+                ) : (
+                  <div className="text-center p-6 bg-muted/10 rounded-lg">
+                    <p className="text-muted-foreground mb-3">No tasks created for this step yet.</p>
+                    <Button 
+                      onClick={() => setShowTaskForm(true)}
+                      size="sm"
+                      className="flex items-center mx-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-1" /> Create Your First Task
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        <DialogFooter className="mt-8">
+        <DialogFooter className="mt-4">
           <Button variant="outline" size="lg" onClick={onClose}>Close</Button>
         </DialogFooter>
       </DialogContent>

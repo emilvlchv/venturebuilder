@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -6,85 +7,16 @@ import SubscriptionCheck from '@/components/auth/SubscriptionCheck';
 import TaskDetailSheet from '@/components/journey/TaskDetailSheet';
 import JourneyHeader from '@/components/journey/JourneyHeader';
 import JourneyProgress from '@/components/journey/JourneyProgress';
-import { useJourneyDetails } from '@/hooks/useJourneyDetails';
 import { SkipToContent } from '@/components/ui/skip-to-content';
 import { useToast } from '@/components/ui/use-toast';
 import { useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
-import { BusinessIdeaData, JourneyTask, Task } from '@/components/journey/types';
-
-// Helper function to format business data for AI processing
-const formatBusinessDataForAI = (businessData: BusinessIdeaData) => {
-  return `
-Business Idea: ${businessData?.businessIdea || 'Not specified'}
-Target Customers: ${businessData?.targetCustomers || 'Not specified'}
-Team Composition: ${businessData?.teamComposition || 'Not specified'}
-Team Strengths: ${businessData?.teamStrengths || 'Not specified'}
-Team Weaknesses: ${businessData?.teamWeaknesses || 'Not specified'}
-Revenue Model: ${businessData?.revenueModel || 'Not specified'}
-  `.trim();
-};
-
-// Function to generate personalized tasks using AI (mock implementation)
-const generatePersonalizedTasks = async (businessData: BusinessIdeaData): Promise<Task[]> => {
-  // In a real implementation, this would call an AI API with the formatted business data
-  // For now, we'll return mock tasks based on the business data
-  console.log("Generating personalized tasks for:", formatBusinessDataForAI(businessData));
-  
-  // Mock delay to simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  const mockTasks: Task[] = [
-    {
-      id: `ai-task-${Date.now()}-1`,
-      title: `Validate "${businessData?.businessIdea?.substring(0, 30)}..." with Target Customers`,
-      description: `Create a validation strategy specifically for ${businessData?.targetCustomers || 'your target customers'} to ensure your business idea resonates with them.`,
-      status: 'pending',
-      stepId: 'market-research',
-      resources: ['Customer Interview Template', 'Validation Framework'],
-      categories: [
-        {
-          id: `ai-cat-${Date.now()}-1`,
-          title: 'Validation Strategy',
-          subtasks: [
-            { id: `ai-subtask-${Date.now()}-1`, title: 'Create customer interview questions', completed: false },
-            { id: `ai-subtask-${Date.now()}-2`, title: 'Identify 5-10 potential customers to interview', completed: false },
-            { id: `ai-subtask-${Date.now()}-3`, title: 'Schedule and conduct interviews', completed: false },
-            { id: `ai-subtask-${Date.now()}-4`, title: 'Analyze feedback and identify patterns', completed: false }
-          ]
-        }
-      ]
-    },
-    {
-      id: `ai-task-${Date.now()}-2`,
-      title: `Leverage Team Strengths in ${businessData?.teamStrengths?.substring(0, 20) || 'Your Area'}`,
-      description: `Create a strategy to maximize your team's strengths: "${businessData?.teamStrengths || 'your unique abilities'}" while addressing weaknesses in "${businessData?.teamWeaknesses || 'areas of improvement'}"`,
-      status: 'pending',
-      stepId: 'idea-validation',
-      resources: ['Team Assessment Template', 'Skill Gap Analysis Framework'],
-      categories: [
-        {
-          id: `ai-cat-${Date.now()}-2`,
-          title: 'Team Optimization',
-          subtasks: [
-            { id: `ai-subtask-${Date.now()}-5`, title: 'Document team strengths and assign roles accordingly', completed: false },
-            { id: `ai-subtask-${Date.now()}-6`, title: 'Identify skill gaps and create development plan', completed: false },
-            { id: `ai-subtask-${Date.now()}-7`, title: 'Establish communication protocols based on team dynamics', completed: false }
-          ]
-        }
-      ]
-    }
-  ];
-  
-  return mockTasks;
-};
+import { BusinessIdeaData, Task } from '@/components/journey/types';
+import { useJourneyDetails } from '@/hooks/useJourneyDetails';
 
 const JourneyDetails = () => {
   const { journeyId } = useParams<{ journeyId: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
   
   const {
@@ -121,40 +53,6 @@ const JourneyDetails = () => {
     teamWeaknesses: businessData.problem || '',
     revenueModel: ''
   } : null;
-
-  // Function to handle generating personalized tasks
-  const handleGeneratePersonalizedTasks = async () => {
-    if (!adaptedBusinessData) {
-      toast({
-        title: "Missing business information",
-        description: "Please complete your business profile to generate personalized tasks.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      setIsGeneratingTasks(true);
-      const personalizedTasks = await generatePersonalizedTasks(adaptedBusinessData);
-      
-      // Add the new tasks to the existing tasks
-      setLocalTasks(prev => [...prev, ...personalizedTasks]);
-      
-      toast({
-        title: "Personalized tasks generated",
-        description: `${personalizedTasks.length} new tasks have been created based on your business profile.`,
-      });
-    } catch (error) {
-      console.error("Error generating personalized tasks:", error);
-      toast({
-        title: "Error generating tasks",
-        description: "An error occurred while generating personalized tasks. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGeneratingTasks(false);
-    }
-  };
 
   // Set page title for screen readers
   useEffect(() => {
@@ -233,19 +131,6 @@ const JourneyDetails = () => {
                   description={journey?.description || 'Follow this personalized roadmap to turn your business idea into reality. Each phase contains actionable steps and resources to help you succeed.'}
                   businessData={adaptedBusinessData}
                 />
-              </div>
-
-              {/* AI Task Generation Button */}
-              <div className="mb-8 flex justify-end">
-                <Button 
-                  onClick={handleGeneratePersonalizedTasks} 
-                  className="gap-2"
-                  disabled={isGeneratingTasks || !adaptedBusinessData}
-                  aria-label="Generate personalized tasks based on your business profile"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {isGeneratingTasks ? "Generating..." : "Generate Personalized Tasks"}
-                </Button>
               </div>
 
               <JourneyProgress

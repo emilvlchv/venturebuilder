@@ -39,13 +39,12 @@ export interface JourneyTask {
   }[];
 }
 
-// Task type definition - making stepId optional to match TaskCard.tsx
 export interface Task {
   id: string;
   title: string;
   description: string;
   status: 'completed' | 'in-progress' | 'pending';
-  stepId?: string;  // Making stepId optional
+  stepId?: string;  // Make stepId optional to match requirements
   deadline?: Date;
   resources: string[];
   categories: TaskCategory[];

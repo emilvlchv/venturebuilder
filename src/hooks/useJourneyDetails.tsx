@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskCategory, Subtask } from '@/components/journey/TaskCard';
+import { Task, TaskCategory, Subtask } from '@/components/journey/types';
 import { StepDetail } from '@/components/journey/StepDetailsDialog';
 
 // Sample journey phases for the demo

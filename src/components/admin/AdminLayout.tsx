@@ -17,7 +17,12 @@ import {
   Database,
   PanelRight,
   Layers,
-  Home
+  Home,
+  Activity,
+  TrendingUp,
+  MousePointer,
+  Eye,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -144,6 +149,15 @@ const AdminLayout: React.FC = () => {
             >
               User Management
             </SidebarLink>
+
+            <SidebarLink 
+              to="/admin/behavior" 
+              isActive={isActive('behavior')} 
+              icon={<Activity size={18} className="text-white/70 group-hover:text-white" />}
+              badge={<Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>}
+            >
+              Behavioral Analysis
+            </SidebarLink>
             
             <p className="text-xs uppercase font-semibold text-white/70 px-3 py-2 mt-6 border-b border-white/10">Content</p>
             
@@ -245,6 +259,16 @@ const AdminLayout: React.FC = () => {
               <Button variant="ghost" size="icon" className="relative">
                 <Bell size={20} />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">3</span>
+              </Button>
+              <div className="h-6 w-px bg-gray-200"></div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="font-medium"
+              >
+                <Home size={16} className="mr-2" />
+                Main Site
               </Button>
               <div className="h-6 w-px bg-gray-200"></div>
               <span className="text-sm text-gray-500">Welcome back, {user?.firstName}!</span>

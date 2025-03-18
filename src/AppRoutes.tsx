@@ -29,6 +29,7 @@ import EducationManagement from '@/pages/admin/EducationManagement';
 import CommunityManagement from '@/pages/admin/CommunityManagement';
 import Settings from '@/pages/admin/Settings';
 import Analytics from '@/pages/admin/Analytics';
+import BehavioralAnalysis from '@/pages/admin/BehavioralAnalysis';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 const AppRoutes = () => {
@@ -59,6 +60,7 @@ const AppRoutes = () => {
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="behavior" element={<BehavioralAnalysis />} />
         <Route path="education" element={<EducationManagement />} />
         <Route path="community" element={<CommunityManagement />} />
         <Route path="settings" element={<Settings />} />

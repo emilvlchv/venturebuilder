@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -496,11 +497,11 @@ const StepDetailsPage = () => {
                 )}
                 
                 {relatedTasks.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {relatedTasks.map((task) => (
                       <div key={task.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-card">
-                        <div className="p-3">
-                          <div className="flex justify-between items-start mb-2">
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-3">
                             <div>
                               <h3 className="font-semibold text-base">{task.title}</h3>
                               <div className="flex items-center gap-2 mt-1">
@@ -523,7 +524,7 @@ const StepDetailsPage = () => {
                             </Button>
                           </div>
                           
-                          <div className="w-full bg-gray-200 rounded-full h-2 my-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                             <div 
                               className="bg-green-500 h-2 rounded-full" 
                               style={{ width: `${getCompletionPercentage(task)}%` }}
@@ -533,9 +534,55 @@ const StepDetailsPage = () => {
                               aria-valuemax={100}
                             ></div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {getCompletionPercentage(task)}% complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
+                          <div className="text-xs text-muted-foreground mb-3">
+                            <strong>{getCompletionPercentage(task)}%</strong> complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
                           </div>
+                          
+                          {/* Simple Subtasks Display */}
+                          {task.categories.length > 0 && (
+                            <div className="mt-3 pt-3 border-t">
+                              <Accordion type="multiple" className="w-full">
+                                {task.categories.map(category => (
+                                  <AccordionItem key={category.id} value={category.id} className="border-b-0">
+                                    <AccordionTrigger className="py-2 hover:no-underline">
+                                      <div className="flex items-center gap-2 text-sm">
+                                        <Bookmark className="h-3.5 w-3.5 text-primary" />
+                                        <span>{category.title}</span>
+                                        <span className="text-xs ml-2 bg-muted/40 px-2 py-0.5 rounded-full">
+                                          {getCategoryCompletionPercentage(category)}% • {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
+                                        </span>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-6">
+                                        {category.subtasks.map(subtask => (
+                                          <div 
+                                            key={subtask.id} 
+                                            className={`flex items-start gap-2 p-2 rounded ${subtask.completed ? 'bg-green-50' : 'bg-muted/10'}`}
+                                          >
+                                            <Checkbox 
+                                              id={`task-${task.id}-subtask-${subtask.id}`}
+                                              checked={subtask.completed}
+                                              onCheckedChange={(checked) => {
+                                                handleSubtaskToggle(task.id, category.id, subtask.id, checked === true);
+                                              }}
+                                              className="mt-0.5"
+                                            />
+                                            <label 
+                                              htmlFor={`task-${task.id}-subtask-${subtask.id}`}
+                                              className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}
+                                            >
+                                              {subtask.title}
+                                            </label>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                ))}
+                              </Accordion>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

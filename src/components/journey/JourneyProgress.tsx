@@ -43,8 +43,34 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     
     phase.steps.forEach(step => {
       const stepTasks = getTasksByStepId(step.id);
-      totalTasks += stepTasks.length;
-      completedTasks += stepTasks.filter(task => task.status === 'completed').length;
+      
+      if (stepTasks.length === 0) {
+        // If no tasks, count the step itself based on its status
+        totalTasks += 1;
+        if (step.status === 'completed') {
+          completedTasks += 1;
+        } else if (step.status === 'in-progress') {
+          completedTasks += 0.5; // Count in-progress as half completed
+        }
+      } else {
+        // Count based on tasks
+        stepTasks.forEach(task => {
+          const allSubtasks = task.categories.flatMap(c => c.subtasks);
+          if (allSubtasks.length === 0) {
+            // If no subtasks, count the task itself
+            totalTasks += 1;
+            if (task.status === 'completed') {
+              completedTasks += 1;
+            } else if (task.status === 'in-progress') {
+              completedTasks += 0.5;
+            }
+          } else {
+            // Count based on subtasks
+            totalTasks += allSubtasks.length;
+            completedTasks += allSubtasks.filter(s => s.completed).length;
+          }
+        });
+      }
     });
     
     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -68,7 +94,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
                   </div>
                 </div>
                 <span className="absolute -bottom-5 text-xs font-medium text-muted-foreground">
-                  {completion}%
+                  <strong>{completion}%</strong>
                 </span>
               </TabsTrigger>
             );

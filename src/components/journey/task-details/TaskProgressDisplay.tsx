@@ -58,7 +58,7 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
         <div>
           {task.categories && 
             <span className="text-sm text-muted-foreground">
-              {progress}% Complete
+              <strong>{progress}%</strong> Complete
             </span>
           }
         </div>
@@ -67,6 +67,9 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
         </div>
       </div>
       <Progress value={progress} className={`h-2 ${getStatusColor(task.status)}`} />
+      <div className="text-xs text-muted-foreground">
+        {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks completed
+      </div>
     </div>
   );
 };

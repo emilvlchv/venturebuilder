@@ -25,6 +25,12 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task, TaskCategory } from './TaskCard';
 import { Badge } from '@/components/ui/badge';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export interface StepDetail {
   title: string;
@@ -70,7 +76,7 @@ const TaskProgressBar = ({ task }: { task: Task }) => {
         ></div>
       </div>
       <div className="text-sm text-muted-foreground">
-        {percentage}% complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
+        <strong>{percentage}%</strong> complete • {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks
       </div>
     </>
   );
@@ -121,6 +127,13 @@ const TaskCreationForm = ({
     </div>
   </div>
 );
+
+const getCategoryCompletionPercentage = (category: TaskCategory) => {
+  if (category.subtasks.length === 0) return 0;
+  
+  const completedCount = category.subtasks.filter(subtask => subtask.completed).length;
+  return Math.round((completedCount / category.subtasks.length) * 100);
+};
 
 const StepDetailsDialog = ({ 
   isOpen, 
@@ -252,9 +265,9 @@ const StepDetailsDialog = ({
                 
                 {/* Task List */}
                 {tasks.length > 0 ? (
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                     {tasks.map((task) => (
-                      <div key={task.id} className="border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                      <div key={task.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h4 className="font-medium text-base">{task.title}</h4>
@@ -273,6 +286,46 @@ const StepDetailsDialog = ({
                         
                         {/* Progress */}
                         <TaskProgressBar task={task} />
+                        
+                        {/* Simple Subtasks Display */}
+                        {task.categories.length > 0 && (
+                          <div className="mt-3 pt-3 border-t">
+                            <Accordion type="multiple" className="w-full">
+                              {task.categories.map(category => (
+                                <AccordionItem key={category.id} value={category.id} className="border-b-0">
+                                  <AccordionTrigger className="py-2 hover:no-underline">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <Bookmark className="h-3.5 w-3.5 text-primary" />
+                                      <span>{category.title}</span>
+                                      <span className="text-xs ml-2 bg-muted/40 px-2 py-0.5 rounded-full">
+                                        {getCategoryCompletionPercentage(category)}% • {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
+                                      </span>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="grid grid-cols-1 gap-2 pl-6">
+                                      {category.subtasks.map(subtask => (
+                                        <div 
+                                          key={subtask.id} 
+                                          className={`flex items-start gap-2 p-2 rounded ${subtask.completed ? 'bg-green-50' : 'bg-muted/10'}`}
+                                        >
+                                          <Checkbox 
+                                            checked={subtask.completed}
+                                            className="mt-0.5"
+                                            disabled
+                                          />
+                                          <span className={`text-sm ${subtask.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                            {subtask.title}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              ))}
+                            </Accordion>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

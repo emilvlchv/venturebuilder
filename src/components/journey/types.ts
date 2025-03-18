@@ -44,7 +44,7 @@ export interface Task {
   title: string;
   description: string;
   status: 'completed' | 'in-progress' | 'pending';
-  stepId?: string;  // Make stepId optional to match requirements
+  stepId?: string;
   deadline?: Date;
   resources: string[];
   categories: TaskCategory[];
@@ -54,7 +54,7 @@ export interface TaskCategory {
   id: string;
   title: string;
   subtasks: Subtask[];
-  collapsed?: boolean; // Make sure this is optional to match the error about collapsed property
+  collapsed?: boolean;
 }
 
 export interface Subtask {

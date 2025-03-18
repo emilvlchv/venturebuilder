@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { BusinessProfileData } from '@/utils/businessProfileUtils';
 
 type User = {
   id: string;
@@ -8,6 +8,7 @@ type User = {
   username: string;
   email: string;
   businessIdea?: string;
+  businessProfileData?: BusinessProfileData;
   role?: 'admin' | 'user';
 };
 
@@ -45,12 +46,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize admin user and regular user
   const initializeUsers = () => {
     console.log('Initializing users');
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     
-    // Check if admin user already exists
     const adminExists = users.some((u: any) => u.email === 'admin@example.com');
     
     if (!adminExists) {
@@ -71,7 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Admin user already exists');
     }
     
-    // Check if regular user exists
     const regularUserExists = users.some((u: any) => u.email === 'user@example.com');
     
     if (!regularUserExists) {
@@ -97,13 +95,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     
-    // Initialize users for demo purposes
     initializeUsers();
     
     setIsLoading(false);
@@ -114,7 +110,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       console.log(`Attempting to login with email: ${email}`);
       
-      // This is a mock login - in a real app, you would call an API
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       console.log(`Found ${users.length} users in localStorage`);
       
@@ -144,10 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (userData: SignupData) => {
     try {
       setIsLoading(true);
-      // This is a mock signup - in a real app, you would call an API
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       
-      // Check if user already exists
       if (users.some((u: any) => u.email === userData.email)) {
         throw new Error('User with this email already exists');
       }
@@ -156,17 +149,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Username is already taken');
       }
       
-      // Create new user with ID and default role
       const newUser = {
         ...userData,
         id: `user_${Date.now()}`,
-        role: userData.role || 'user' // Default to 'user' role if not specified
+        role: userData.role || 'user'
       };
       
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Log user in after signup
       const { password: _, ...userWithoutPassword } = newUser;
       setUser(userWithoutPassword);
       localStorage.setItem('user', JSON.stringify(userWithoutPassword));
@@ -184,13 +175,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       if (!user) throw new Error('Not authenticated');
       
-      // Update user in localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const userIndex = users.findIndex((u: any) => u.id === user.id);
       
       if (userIndex === -1) throw new Error('User not found');
       
-      // Check if username is being updated and is already taken
       if (data.username && data.username !== user.username) {
         const usernameExists = users.some((u: any) => 
           u.id !== user.id && u.username === data.username
@@ -198,7 +187,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (usernameExists) throw new Error('Username is already taken');
       }
       
-      // Check if email is being updated and is already taken
       if (data.email && data.email !== user.email) {
         const emailExists = users.some((u: any) => 
           u.id !== user.id && u.email === data.email
@@ -206,12 +194,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (emailExists) throw new Error('Email is already in use');
       }
       
-      // Update user data while preserving the password
       const updatedUser = { ...users[userIndex], ...data };
       users[userIndex] = updatedUser;
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Update current user state and localStorage
       const { password: _, ...userWithoutPassword } = updatedUser;
       setUser({ ...user, ...data });
       localStorage.setItem('user', JSON.stringify({ ...user, ...data }));
@@ -229,18 +215,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       if (!user) throw new Error('Not authenticated');
       
-      // Get users from localStorage
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const userIndex = users.findIndex((u: any) => u.id === user.id);
       
       if (userIndex === -1) throw new Error('User not found');
       
-      // Verify current password
       if (users[userIndex].password !== currentPassword) {
         throw new Error('Current password is incorrect');
       }
       
-      // Update password
       users[userIndex].password = newPassword;
       localStorage.setItem('users', JSON.stringify(users));
       

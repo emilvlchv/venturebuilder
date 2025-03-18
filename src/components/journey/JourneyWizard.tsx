@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Send, User, ArrowRight, Info } from 'lucide-react';
 import Button from '../shared/Button';
 import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
-import { BusinessIdeaData, Journey, Task } from './types';
+import { BusinessIdeaData, Journey, Task, TaskCategory, Subtask } from './types';
 import { useNavigate } from 'react-router-dom';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
@@ -51,11 +50,9 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     }, 3000);
   };
   
-  // Function to generate personalized tasks using AI (based on business data)
   const generatePersonalizedTasks = (businessData: BusinessIdeaData): Task[] => {
     console.log("Generating personalized tasks for:", businessData);
     
-    // Create tasks based on business idea data
     const personalizedTasks: Task[] = [
       {
         id: `ai-task-${Date.now()}-1`,
@@ -73,7 +70,8 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               { id: `ai-subtask-${Date.now()}-2`, title: 'Identify 5-10 potential customers to interview', completed: false },
               { id: `ai-subtask-${Date.now()}-3`, title: 'Schedule and conduct interviews', completed: false },
               { id: `ai-subtask-${Date.now()}-4`, title: 'Analyze feedback and identify patterns', completed: false }
-            ]
+            ],
+            collapsed: false
           }
         ]
       },
@@ -92,7 +90,8 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               { id: `ai-subtask-${Date.now()}-5`, title: 'Document team strengths and assign roles accordingly', completed: false },
               { id: `ai-subtask-${Date.now()}-6`, title: 'Identify skill gaps and create development plan', completed: false },
               { id: `ai-subtask-${Date.now()}-7`, title: 'Establish communication protocols based on team dynamics', completed: false }
-            ]
+            ],
+            collapsed: false
           }
         ]
       },
@@ -111,7 +110,8 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               { id: `ai-subtask-${Date.now()}-8`, title: 'Create detailed customer personas', completed: false },
               { id: `ai-subtask-${Date.now()}-9`, title: 'Map customer journey touchpoints', completed: false },
               { id: `ai-subtask-${Date.now()}-10`, title: 'Identify key customer pain points', completed: false }
-            ]
+            ],
+            collapsed: false
           }
         ]
       }
@@ -123,13 +123,13 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   const createDefaultTasks = (userId: string, journeyId: string) => {
     const tasksKey = `tasks_${userId}_${journeyId}`;
     
-    // Generate standard tasks
-    const standardTasks = [
+    const standardTasks: Task[] = [
       {
         id: 'task1',
         title: 'Research Market and Validate Business Idea',
         description: 'Conduct thorough market research to validate your business concept.',
         status: 'pending',
+        stepId: 'market-research',
         resources: [
           'Use online surveys to gather customer feedback',
           'Analyze industry reports for market trends',
@@ -164,6 +164,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         title: 'Develop Business Plan',
         description: 'Create a comprehensive business plan that outlines your strategy, operations, and financials.',
         status: 'pending',
+        stepId: 'business-plan',
         resources: [
           'Business plan templates',
           'Financial forecasting tools',
@@ -198,6 +199,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         title: 'Create Branding and Marketing Strategy',
         description: 'Develop your brand identity and marketing approach to reach your target audience.',
         status: 'pending',
+        stepId: 'marketing',
         resources: [
           'Brand identity guidelines',
           'Marketing channel comparison',
@@ -229,8 +231,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       }
     ];
     
-    // Generate personalized tasks if business data is available
-    let formattedTasks = standardTasks;
+    let formattedTasks: Task[] = standardTasks;
     if (businessData.businessIdea) {
       const personalizedTasks = generatePersonalizedTasks(businessData);
       formattedTasks = [...standardTasks, ...personalizedTasks];

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -163,8 +162,38 @@ const JourneyDetails = () => {
           isOpen={isTaskDetailOpen}
           onClose={handleCloseTaskDetail}
           task={selectedTask}
-          onStatusChange={handleTaskStatusChange}
-          onSubtaskToggle={handleSubtaskToggle}
+          onStatusChange={(status) => {
+            handleTaskStatusChange(status);
+            // Update the local task state as well
+            if (selectedTask) {
+              const updatedTasks = localTasks.map(task => 
+                task.id === selectedTask.id ? {...task, status} : task
+              );
+              setLocalTasks(updatedTasks);
+            }
+          }}
+          onSubtaskToggle={(categoryId, subtaskId, completed) => {
+            handleSubtaskToggle(categoryId, subtaskId, completed);
+            // Update local tasks
+            if (selectedTask) {
+              const updatedTasks = localTasks.map(task => {
+                if (task.id === selectedTask.id) {
+                  const updatedCategories = task.categories.map(category => {
+                    if (category.id === categoryId) {
+                      const updatedSubtasks = category.subtasks.map(subtask => 
+                        subtask.id === subtaskId ? {...subtask, completed} : subtask
+                      );
+                      return {...category, subtasks: updatedSubtasks};
+                    }
+                    return category;
+                  });
+                  return {...task, categories: updatedCategories};
+                }
+                return task;
+              });
+              setLocalTasks(updatedTasks);
+            }
+          }}
           onCategoryToggle={handleCategoryToggle}
           onDeadlineChange={handleDeadlineChange}
           onAddSubtask={handleAddSubtask}

@@ -12,8 +12,18 @@ Revenue Model: ${businessData?.revenueModel || 'Not specified'}
   `.trim();
 };
 
+// This type defines the business profile data structure
+export interface BusinessProfileData {
+  solution?: string;
+  targetMarket?: string;
+  stage?: string;
+  industry?: string;
+  problem?: string;
+  revenueModel?: string;
+}
+
 // Helper function to convert user business data to the standard format
-export const adaptBusinessDataFromProfile = (profileData: any): BusinessIdeaData => {
+export const adaptBusinessDataFromProfile = (profileData: BusinessProfileData): BusinessIdeaData => {
   return {
     businessIdea: profileData?.solution || '',
     targetCustomers: profileData?.targetMarket || '',
@@ -24,17 +34,7 @@ export const adaptBusinessDataFromProfile = (profileData: any): BusinessIdeaData
   };
 };
 
-// This type is used to update the User type with the business data field
-export interface BusinessProfileData {
-  solution?: string;
-  targetMarket?: string;
-  stage?: string;
-  industry?: string;
-  problem?: string;
-  revenueModel?: string;
-}
-
-// Add this type to extend the User type in your contexts
+// This interface extends the User type with the business data field
 export interface UserWithBusinessData {
   id: string;
   email: string;

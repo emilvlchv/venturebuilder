@@ -54,7 +54,7 @@ export interface TaskCategory {
   id: string;
   title: string;
   subtasks: Subtask[];
-  collapsed?: boolean;
+  collapsed?: boolean; // Make sure this is optional to match the error about collapsed property
 }
 
 export interface Subtask {

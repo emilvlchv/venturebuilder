@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft, CheckCircle2, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import ResourcesList from './ResourcesList';
-import { Task } from '../TaskCard';
+import { Task } from '../types';
 
 interface TaskDetailSidebarProps {
   task: Task;

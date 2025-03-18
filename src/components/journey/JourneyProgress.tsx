@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PhaseSection from './PhaseSection';
-import { Task } from './TaskCard';
+import { Task } from './types';
 
 export interface JourneyPhase {
   id: string;

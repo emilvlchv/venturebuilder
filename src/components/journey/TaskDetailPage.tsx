@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Task } from './TaskCard';
+import { Task } from './types';
 import { useToast } from '@/hooks/use-toast';
 import TaskDetailPageHeader from './task-details/TaskDetailPageHeader';
 import TaskDetailMainSection from './task-details/TaskDetailMainSection';

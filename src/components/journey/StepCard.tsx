@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle2, Clock, Info, ExternalLink } from 'lucide-react';
-import { Task } from './TaskCard';
+import { Task } from './types';
 import { useNavigate } from 'react-router-dom';
 
 interface StepProps {

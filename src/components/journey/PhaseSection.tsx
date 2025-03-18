@@ -1,7 +1,6 @@
-
 import React from 'react';
 import StepCard from './StepCard';
-import { Task } from './TaskCard';
+import { Task } from './types';
 
 interface Step {
   id: string;

@@ -23,7 +23,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Task, TaskCategory } from './TaskCard';
+import { Task, TaskCategory } from './types';
 import { Badge } from '@/components/ui/badge';
 import {
   Accordion,

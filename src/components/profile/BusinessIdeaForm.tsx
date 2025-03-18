@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { BusinessProfileData } from '@/utils/businessProfileUtils';
 
 const businessIdeaSchema = z.object({
   businessIdea: z.string().min(10, { message: 'Please provide more details about your business idea.' }),
@@ -29,10 +29,10 @@ export function BusinessIdeaForm() {
   // Extract default values safely from user object
   const defaultValues = {
     businessIdea: user?.businessIdea || '',
-    targetCustomers: user?.businessProfileData?.targetCustomers || '',
-    teamComposition: user?.businessProfileData?.teamComposition || '',
-    teamStrengths: user?.businessProfileData?.teamStrengths || '',
-    teamWeaknesses: user?.businessProfileData?.teamWeaknesses || '',
+    targetCustomers: user?.businessProfileData?.targetMarket || '',
+    teamComposition: user?.businessProfileData?.stage || '',
+    teamStrengths: user?.businessProfileData?.industry || '',
+    teamWeaknesses: user?.businessProfileData?.problem || '',
     revenueModel: user?.businessProfileData?.revenueModel || '',
   };
 
@@ -46,12 +46,12 @@ export function BusinessIdeaForm() {
       await updateUserInfo({ 
         businessIdea: data.businessIdea,
         businessProfileData: {
-          targetCustomers: data.targetCustomers,
-          teamComposition: data.teamComposition,
-          teamStrengths: data.teamStrengths,
-          teamWeaknesses: data.teamWeaknesses,
+          targetMarket: data.targetCustomers,
+          stage: data.teamComposition,
+          industry: data.teamStrengths,
+          problem: data.teamWeaknesses,
           revenueModel: data.revenueModel,
-        }
+        } as BusinessProfileData
       });
       toast({
         title: "Business information saved",

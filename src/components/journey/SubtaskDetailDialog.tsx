@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -12,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Save, CheckCircle2, Trash2 } from 'lucide-react';
-import { Subtask } from './TaskCard';
+import { Subtask } from './types';
 
 interface SubtaskDetailDialogProps {
   isOpen: boolean;

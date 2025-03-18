@@ -1,4 +1,3 @@
-
 import { BusinessIdeaData } from '@/components/journey/types';
 
 // Function to format business data for AI processing
@@ -33,4 +32,14 @@ export interface BusinessProfileData {
   industry?: string;
   problem?: string;
   revenueModel?: string;
+}
+
+// Add this type to extend the User type in your contexts
+export interface UserWithBusinessData {
+  id: string;
+  email: string;
+  displayName?: string;
+  businessIdea?: string;
+  businessProfileData?: BusinessProfileData;
+  // Other user properties...
 }

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, LogOut, Settings, Shield, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/shared/Button';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 

@@ -1,23 +1,25 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Save, ExternalLink, Maximize2 } from 'lucide-react';
+  SheetDescription,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from 'date-fns';
+import { cn } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { CalendarIcon, CheckCheck, Plus, Trash2 } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 import { Task } from './types';
-import TaskProgressDisplay, { renderStatusBadge } from './task-details/TaskProgressDisplay';
-import TaskStatusSelector from './task-details/TaskStatusSelector';
-import DeadlineSelector from './task-details/DeadlineSelector';
-import SubtaskCategory from './task-details/SubtaskCategory';
-import ResourcesList from './task-details/ResourcesList';
-import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
 interface TaskDetailSheetProps {
   isOpen: boolean;
@@ -25,13 +27,13 @@ interface TaskDetailSheetProps {
   task: Task;
   onStatusChange: (task: Task, status: 'completed' | 'in-progress' | 'pending') => void;
   onSubtaskToggle: (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => void;
-  onCategoryToggle: (taskId: string, categoryId: string) => void;
-  onDeadlineChange: (taskId: string, deadline: Date | undefined) => void;
-  onAddSubtask: (categoryId: string, title: string) => void;
-  onRemoveSubtask: (categoryId: string, subtaskId: string) => void;
+  onCategoryToggle: (taskId: string, categoryId: string, collapsed: boolean) => void;
+  onDeadlineChange: (taskId: string, deadline: Date | null) => void;
+  onAddSubtask: (taskId: string, categoryId: string, subtaskTitle: string) => void;
+  onRemoveSubtask: (taskId: string, categoryId: string, subtaskId: string) => void;
 }
 
-const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
+const TaskDetailSheet = ({
   isOpen,
   onClose,
   task,
@@ -41,153 +43,199 @@ const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
   onDeadlineChange,
   onAddSubtask,
   onRemoveSubtask
-}) => {
-  const [newSubtasks, setNewSubtasks] = useState<{[key: string]: string}>({});
-  const [isFullscreenMode, setIsFullscreenMode] = useState(false);
-  const navigate = useNavigate();
+}: TaskDetailSheetProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [status, setStatus] = useState(task.status);
 
-  const handleAddSubtask = (categoryId: string) => {
-    const subtaskTitle = newSubtasks[categoryId]?.trim();
-    if (subtaskTitle) {
-      onAddSubtask(categoryId, subtaskTitle);
-      // Reset input field
-      setNewSubtasks(prev => ({
-        ...prev,
-        [categoryId]: ''
-      }));
-    }
+  const saveStatusToast = () => {
+    toast({
+      title: "Status saved",
+      description: "Task status has been updated.",
+    })
+  }
+
+  const saveProgressToast = () => {
+    toast({
+      title: "Progress saved",
+      description: "Task progress has been updated.",
+    })
+  }
+
+  const saveDeadlineToast = () => {
+    toast({
+      title: "Deadline saved",
+      description: "Task deadline has been updated.",
+    })
+  }
+
+  const handleStatusChange = (newStatus: 'completed' | 'in-progress' | 'pending') => {
+    onStatusChange(task, newStatus);
+    saveStatusToast();
   };
 
-  const handleNewSubtaskChange = (categoryId: string, value: string) => {
-    setNewSubtasks(prev => ({
-      ...prev,
-      [categoryId]: value
-    }));
-  };
-
-  const handleStatusChange = (status: 'completed' | 'in-progress' | 'pending') => {
-    onStatusChange(task, status);
-  };
-  
-  const handleDeadlineChange = (date: Date | undefined) => {
+  const handleDeadlineChange = (date: Date | null) => {
     onDeadlineChange(task.id, date);
+    saveDeadlineToast();
   };
 
-  const openInFullPage = () => {
-    navigate(`/task/${task.id}`, { state: { task } });
+  const handleSubtaskToggle = (categoryId: string, subtaskId: string, completed: boolean) => {
+    onSubtaskToggle(task.id, categoryId, subtaskId, completed);
+    saveProgressToast();
   };
 
-  const renderContent = () => (
-    <>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <TaskProgressDisplay task={task} />
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsFullscreenMode(true)}
-              className="hidden md:flex items-center"
-              aria-label="Expand to fullscreen view"
-            >
-              <Maximize2 className="h-4 w-4 mr-2" /> Expand
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={openInFullPage}
-              className="flex items-center"
-              aria-label="Open in dedicated page"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" /> Open Page
-            </Button>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="text-sm font-medium mb-2" id={`task-status-${task.id}`}>Task Status</h3>
-          <TaskStatusSelector 
-            status={task.status} 
-            onStatusChange={handleStatusChange} 
-            taskId={task.id}
-          />
-        </div>
+  const handleAddSubtask = (categoryId: string, subtaskTitle: string) => {
+    onAddSubtask(task.id, categoryId, subtaskTitle);
+    toast({
+      title: "Subtask added",
+      description: "New subtask has been added to the task.",
+    });
+  };
 
-        <DeadlineSelector 
-          deadline={task.deadline} 
-          onDeadlineChange={handleDeadlineChange}
-          taskId={task.id}
-        />
+  const handleRemoveSubtask = (categoryId: string, subtaskId: string) => {
+    onRemoveSubtask(task.id, categoryId, subtaskId);
+    toast({
+      title: "Subtask removed",
+      description: "Subtask has been removed from the task.",
+    });
+  };
 
-        <Separator />
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium" id={`subtasks-heading-${task.id}`}>Task Breakdown</h3>
-          {task.categories?.map(category => (
-            <SubtaskCategory
-              key={category.id}
-              category={category}
-              taskId={task.id}
-              newSubtaskValue={newSubtasks[category.id] || ''}
-              onSubtaskToggle={onSubtaskToggle}
-              onCategoryToggle={onCategoryToggle}
-              onAddSubtask={handleAddSubtask}
-              onRemoveSubtask={onRemoveSubtask}
-              onNewSubtaskChange={handleNewSubtaskChange}
-            />
-          ))}
-        </div>
-
-        {task.resources && task.resources.length > 0 && (
-          <>
-            <Separator />
-            <ResourcesList resources={task.resources} />
-          </>
-        )}
-
-        <div className="pt-4">
-          <Button 
-            onClick={onClose} 
-            className="w-full"
-            aria-label="Save changes and close dialog"
-          >
-            <Save className="mr-2 h-4 w-4" /> Close and Save Changes
-          </Button>
-        </div>
-      </div>
-    </>
-  );
+  // Convert string deadline to Date if needed
+  const taskDeadline = task.deadline 
+    ? typeof task.deadline === 'string' 
+      ? new Date(task.deadline) 
+      : task.deadline
+    : null;
 
   return (
-    <>
-      <Sheet open={isOpen && !isFullscreenMode} onOpenChange={open => !open && onClose()}>
-        <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-2xl overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
-            <SheetDescription className="text-muted-foreground">
-              {task.description}
-            </SheetDescription>
-          </SheetHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="sm:max-w-[525px]" side="right">
+        <SheetHeader>
+          <SheetTitle>{task.title}</SheetTitle>
+          <SheetDescription>
+            {task.description}
+          </SheetDescription>
+        </SheetHeader>
 
-          {renderContent()}
-        </SheetContent>
-      </Sheet>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="status" className="text-right text-sm font-medium leading-none text-right">
+              Status
+            </label>
+            <select 
+              id="status" 
+              className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value as 'completed' | 'in-progress' | 'pending');
+                handleStatusChange(e.target.value as 'completed' | 'in-progress' | 'pending');
+              }}
+            >
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
 
-      <Dialog open={isFullscreenMode} onOpenChange={open => !open && setIsFullscreenMode(false)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">{task.title}</DialogTitle>
-            <DialogDescription className="text-muted-foreground mt-2">
-              {task.description}
-            </DialogDescription>
-          </DialogHeader>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="deadline" className="text-right text-sm font-medium leading-none">
+              Deadline
+            </label>
+            <div className="col-span-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !taskDeadline && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {taskDeadline ? format(taskDeadline, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={taskDeadline}
+                    onSelect={(date) => {
+                      handleDeadlineChange(date);
+                    }}
+                    disabled={(date) =>
+                      date < new Date()
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
 
-          {renderContent()}
-        </DialogContent>
-      </Dialog>
-    </>
+          <div>
+            <h4 className="mb-2 text-sm font-semibold">Categories</h4>
+            {task.categories && task.categories.map((category) => (
+              <div key={category.id} className="mb-3 rounded-md border">
+                <div className="flex items-center justify-between p-3">
+                  <label
+                    htmlFor={category.id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {category.title}
+                  </label>
+                  <Button variant="ghost" size="sm" onClick={() => onCategoryToggle(task.id, category.id, !category.collapsed)}>
+                    {category.collapsed ? "Show" : "Hide"} Subtasks
+                  </Button>
+                </div>
+                {!category.collapsed && (
+                  <div className="px-4 pb-3">
+                    {category.subtasks && category.subtasks.map((subtask) => (
+                      <div key={subtask.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={subtask.id}
+                          checked={subtask.completed}
+                          onCheckedChange={(checked) => {
+                            handleSubtaskToggle(task.id, category.id, subtask.id, !!checked);
+                          }}
+                        />
+                        <label
+                          htmlFor={subtask.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {subtask.title}
+                        </label>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSubtask(task.id, category.id, subtask.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="mt-2 flex items-center space-x-2">
+                      <Input
+                        type="text"
+                        placeholder="New Subtask"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleAddSubtask(task.id, category.id, e.target.value);
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }}
+                      />
+                      <Button variant="outline" size="icon" onClick={(e) => {
+                        const input = (e.target as HTMLButtonElement).previousElementSibling as HTMLInputElement;
+                        handleAddSubtask(task.id, category.id, input.value);
+                        input.value = '';
+                      }}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

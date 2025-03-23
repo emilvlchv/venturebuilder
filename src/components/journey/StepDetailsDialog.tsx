@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -23,7 +24,7 @@ import {
 interface StepDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  stepDetails: StepDetail;
+  stepDetails: StepDetail | null;
   onTaskSelect?: (task: Task) => void;
   onTaskOpen?: (task: Task) => void;
 }
@@ -60,13 +61,27 @@ const StepDetailsDialog: React.FC<StepDetailsDialogProps> = ({
       const taskObject: Task = {
         id: `task-${Date.now()}`,
         title: taskName,
-        description: `Task related to ${stepDetails.title}`,
+        description: `Task related to ${stepDetails?.title || "unknown step"}`,
         status: 'pending',
         categories: []
       };
       onTaskSelect(taskObject);
     }
   };
+
+  // If stepDetails is null, don't render the dialog content
+  if (!stepDetails) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Step Details</DialogTitle>
+            <DialogDescription>No step information available</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

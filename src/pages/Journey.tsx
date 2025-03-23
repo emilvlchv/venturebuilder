@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -26,14 +25,12 @@ const JourneyPage = () => {
 
   useEffect(() => {
     if (user?.id) {
-      // Check if user has any journeys
       const journeysKey = `journeys_${user.id}`;
       const journeysData = localStorage.getItem(journeysKey);
       
       if (journeysData) {
         try {
           const journeys = JSON.parse(journeysData);
-          // If there are journeys, set the selected journey to the first one
           if (journeys.length > 0) {
             const latestJourney = journeys.sort((a: Journey, b: Journey) => 
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -50,11 +47,9 @@ const JourneyPage = () => {
           console.error("Error loading journeys:", error);
         }
       } else {
-        // Check if user has completed the initial chat previously (legacy support)
         const completedChat = localStorage.getItem(`journey_initial_chat_${user.id}`) === 'completed';
         setHasCompletedInitialChat(completedChat);
         
-        // If completed chat but no journeys, we need to migrate the data
         if (completedChat) {
           try {
             const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -100,7 +95,6 @@ const JourneyPage = () => {
     console.log("Journey complete callback triggered with data:", data);
     setHasCompletedInitialChat(true);
     
-    // Update the selected journey with the business data
     if (selectedJourneyId && user?.id) {
       const journeysKey = `journeys_${user.id}`;
       const journeysData = localStorage.getItem(journeysKey);
@@ -110,19 +104,17 @@ const JourneyPage = () => {
           const journeys = JSON.parse(journeysData);
           const updatedJourneys = journeys.map((journey: Journey) => {
             if (journey.id === selectedJourneyId) {
-              // Store in both formats for compatibility
               return {
                 ...journey,
                 businessIdeaData: {
                   ...data,
-                  // Ensure all properties are set for both formats
                   solution: data.businessIdea || data.solution,
                   targetMarket: data.targetCustomers || data.targetMarket,
                   stage: data.teamComposition || data.stage,
                   industry: data.teamStrengths || data.industry,
                   problem: data.teamWeaknesses || data.problem
                 },
-                progress: Math.max(journey.progress, 15), // Set progress to at least 15%
+                progress: Math.max(journey.progress, 15),
                 updatedAt: new Date().toISOString()
               };
             }
@@ -131,13 +123,11 @@ const JourneyPage = () => {
           
           localStorage.setItem(journeysKey, JSON.stringify(updatedJourneys));
           
-          // Update the selected journey
           const updatedJourney = updatedJourneys.find((j: Journey) => j.id === selectedJourneyId);
           if (updatedJourney) {
             setSelectedJourney(updatedJourney);
           }
           
-          // Navigate to journey details with formatted URL
           if (selectedJourneyId) {
             const journeyDetailsPath = `/journey-details/${selectedJourneyId}`;
             console.log("Navigating to:", journeyDetailsPath);
@@ -193,7 +183,6 @@ const JourneyPage = () => {
           
           <SubscriptionCheck>
             <div className="max-w-6xl mx-auto">
-              {/* Show journey manager or specific journey content */}
               {!selectedJourneyId || !selectedJourney ? (
                 <div className="mb-10">
                   <JourneyManager onSelectJourney={handleJourneySelect} />
@@ -213,7 +202,6 @@ const JourneyPage = () => {
                     <h2 className="text-2xl font-bold mb-2">{selectedJourney.title}</h2>
                     <p className="text-muted-foreground mb-4">{selectedJourney.description}</p>
                     
-                    {/* Journey progress bar */}
                     <div className="w-full bg-muted rounded-full h-2 mb-1 max-w-md">
                       <div 
                         className="bg-primary h-2 rounded-full" 

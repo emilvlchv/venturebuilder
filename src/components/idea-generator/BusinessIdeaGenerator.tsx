@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -21,7 +20,6 @@ import { generateBusinessIdeas, IdeaInputs } from '@/utils/ideaGenerator';
 import { CategorySelector } from './CategorySelector';
 import { BusinessIdeaCard } from './BusinessIdeaCard';
 
-// Define form schema with Zod
 const formSchema = z.object({
   passions: z.array(z.string()).min(1, { message: "Select at least one passion" }),
   timePerWeek: z.number().min(1).max(40),
@@ -50,9 +48,7 @@ const BusinessIdeaGenerator = () => {
     setIsGenerating(true);
     setIsResultVisible(false);
     
-    // Simulate API call delay
     setTimeout(() => {
-      // Ensure all required fields are present before calling generateBusinessIdeas
       const inputValues: IdeaInputs = {
         passions: values.passions,
         timePerWeek: values.timePerWeek,
@@ -95,8 +91,8 @@ const BusinessIdeaGenerator = () => {
         personalized business ideas that match your profile.
       </p>
 
-      <Card className="flex-grow">
-        <CardContent className="pt-6">
+      <Card className="flex-grow border-0 shadow-none p-0">
+        <CardContent className="p-0">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

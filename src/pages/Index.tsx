@@ -9,6 +9,7 @@ import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
@@ -41,15 +42,20 @@ const Index = () => {
               </p>
             </div>
             
-            {/* Grid layout for the two components side by side */}
+            {/* Grid layout for the two components side by side with clear visual separation */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Entrepreneur Type Quiz Section */}
-              <div id="entrepreneur-quiz" className="scroll-mt-20">
+              <div id="entrepreneur-quiz" className="scroll-mt-20 bg-white p-6 rounded-xl shadow-sm border border-border/50">
                 <EntrepreneurTypeSection />
               </div>
               
+              {/* Visual separator for mobile view */}
+              <div className="block lg:hidden my-4">
+                <Separator className="bg-border/50" />
+              </div>
+              
               {/* Business Idea Generator Section */}
-              <div id="idea-generator" className="scroll-mt-20">
+              <div id="idea-generator" className="scroll-mt-20 bg-white p-6 rounded-xl shadow-sm border border-border/50">
                 <BusinessIdeaGenerator />
               </div>
             </div>

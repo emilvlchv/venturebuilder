@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Sheet,
@@ -5,7 +6,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -158,7 +158,7 @@ const TaskDetailSheet = ({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={taskDeadline}
+                    selected={taskDeadline || undefined}
                     onSelect={(date) => {
                       handleDeadlineChange(date);
                     }}
@@ -195,7 +195,7 @@ const TaskDetailSheet = ({
                           id={subtask.id}
                           checked={subtask.completed}
                           onCheckedChange={(checked) => {
-                            handleSubtaskToggle(task.id, category.id, subtask.id, !!checked);
+                            handleSubtaskToggle(category.id, subtask.id, !!checked);
                           }}
                         />
                         <label
@@ -204,7 +204,7 @@ const TaskDetailSheet = ({
                         >
                           {subtask.title}
                         </label>
-                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSubtask(task.id, category.id, subtask.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSubtask(category.id, subtask.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -214,16 +214,18 @@ const TaskDetailSheet = ({
                         type="text"
                         placeholder="New Subtask"
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleAddSubtask(task.id, category.id, e.target.value);
-                            (e.target as HTMLInputElement).value = '';
+                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                            handleAddSubtask(category.id, e.currentTarget.value);
+                            e.currentTarget.value = '';
                           }
                         }}
                       />
                       <Button variant="outline" size="icon" onClick={(e) => {
-                        const input = (e.target as HTMLButtonElement).previousElementSibling as HTMLInputElement;
-                        handleAddSubtask(task.id, category.id, input.value);
-                        input.value = '';
+                        const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                        if (input && input.value.trim()) {
+                          handleAddSubtask(category.id, input.value);
+                          input.value = '';
+                        }
                       }}>
                         <Plus className="h-4 w-4" />
                       </Button>

@@ -1,3 +1,4 @@
+
 export interface BusinessIdeaData {
   businessIdea: string;
   targetCustomers: string;
@@ -73,6 +74,6 @@ export interface StepDetail {
   timeEstimate: string;
   detailedDescription: string;
   businessIdea?: string;
-  status: string;
+  status: 'completed' | 'in-progress' | 'pending';
   tasks?: Task[];
 }

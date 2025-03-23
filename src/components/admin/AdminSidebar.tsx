@@ -48,11 +48,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-primary/90 to-primary/100 text-white shadow-lg flex flex-col">
+    <aside className="w-64 bg-brand-main text-white shadow-lg flex flex-col">
       <div className="p-6 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-lg bg-white text-primary flex items-center justify-center">
-            <span className="font-bold text-lg">VW</span>
+          <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/397b5fd1-2dde-4adf-b3cf-9ae9e5f2a93e.png" 
+              alt="VentureWay Logo" 
+              className="w-8 h-8 object-contain"
+            />
           </div>
           <span className="font-bold text-xl text-white">Admin</span>
         </Link>
@@ -91,7 +95,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
             to="/admin/behavior" 
             isActive={isActive('behavior')} 
             icon={<Activity size={18} className="text-white/70 group-hover:text-white" />}
-            badge={<Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>}
+            badge={<Badge className="bg-brand-accent hover:bg-brand-accent/90 text-[10px]">New</Badge>}
           >
             Behavioral Analysis
           </AdminSidebarLink>
@@ -102,7 +106,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
             to="/admin/community" 
             isActive={isActive('community')} 
             icon={<FileText size={18} className="text-white/70 group-hover:text-white" />}
-            badge={<Badge className="bg-green-500 hover:bg-green-600 text-[10px]">New</Badge>}
+            badge={<Badge className="bg-brand-accent hover:bg-brand-accent/90 text-[10px]">New</Badge>}
           >
             Community
           </AdminSidebarLink>
@@ -155,7 +159,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
       <div className="p-4 border-t border-white/10">
         <div className="bg-white/10 p-4 rounded-lg mb-4">
           <div className="flex items-center space-x-2 mb-2">
-            <div className="bg-white text-primary rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
+            <div className="bg-white text-brand-main rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
               {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
             </div>
             <div>
@@ -177,7 +181,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
               variant="secondary" 
               size="sm" 
               onClick={handleLogout}
-              className="w-full bg-white hover:bg-white/90 text-primary"
+              className="w-full bg-white hover:bg-white/90 text-brand-main"
             >
               <LogOut size={16} className="mr-2" />
               Sign Out

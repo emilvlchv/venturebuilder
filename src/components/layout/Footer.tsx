@@ -25,23 +25,27 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-secondary/50">
+    <footer className="bg-brand-secondary">
       <div className="container-padding py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Branding and Description */}
           <div className="md:col-span-4">
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center">
-                <span className="font-bold text-sm">VW</span>
+              <div className="w-8 h-8 rounded-lg overflow-hidden">
+                <img 
+                  src="/lovable-uploads/397b5fd1-2dde-4adf-b3cf-9ae9e5f2a93e.png" 
+                  alt="VentureWay Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="font-bold text-lg">VentureWayfinder</span>
+              <span className="font-bold text-lg text-brand-main">VentureWay</span>
             </Link>
             <p className="text-muted-foreground mb-6">
               Guiding young entrepreneurs through their business journey with personalized
               assistance, education, and community support.
             </p>
             <p className="text-sm text-muted-foreground">
-              © {currentYear} VentureWayfinder. All rights reserved.
+              © {currentYear} VentureWay. All rights reserved.
             </p>
           </div>
 
@@ -51,13 +55,13 @@ const Footer = () => {
           {/* Links */}
           {footerLinks.map((group) => (
             <div key={group.title} className="md:col-span-3">
-              <h4 className="font-medium text-sm mb-4">{group.title}</h4>
+              <h4 className="font-medium text-sm mb-4 text-brand-main">{group.title}</h4>
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.name}>
                     <Link
                       to={link.path}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-muted-foreground hover:text-brand-main transition-colors"
                     >
                       {link.name}
                     </Link>

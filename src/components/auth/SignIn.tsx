@@ -14,10 +14,10 @@ const SignIn = () => {
   
   // If user is already authenticated, redirect to journey page
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoading) {
       navigate('/journey');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, isLoading]);
   
   return (
     <div className="max-w-md w-full mx-auto p-6 space-y-6">
@@ -33,7 +33,7 @@ const SignIn = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
-            redirectTo={window.location.origin + '/journey'}
+            redirectTo={`${window.location.origin}/journey`}
             view="sign_in"
           />
         </CardContent>

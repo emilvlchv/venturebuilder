@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,16 +38,6 @@ type SignupData = {
   role?: 'admin' | 'user';
 };
 
-type Profile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  username: string | null;
-  business_idea: string | null;
-  avatar_url: string | null;
-  role: string;
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
@@ -82,7 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               title: "Successfully signed in",
               description: "Welcome to VentureWayfinder!",
             });
-            navigate('/journey');
+            
+            // Get redirect URL from query params or default to journey
+            const params = new URLSearchParams(window.location.search);
+            const redirectTo = params.get('redirectTo') || '/journey';
+            navigate(redirectTo);
           }
         } else {
           setUser(null);
@@ -94,6 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             navigate('/');
           }
+        }
+
+        if (event !== 'INITIAL_SESSION') {
+          setIsLoading(false);
         }
       }
     );

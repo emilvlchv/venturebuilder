@@ -41,7 +41,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
+    // Preserve the current URL to redirect back after login
+    return <Navigate to={`/signin?redirectTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   if (adminOnly && user?.role !== 'admin') {

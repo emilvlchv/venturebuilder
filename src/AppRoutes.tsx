@@ -19,6 +19,7 @@ import Journey from '@/pages/Journey';
 import JourneyDetails from '@/pages/JourneyDetails';
 import StepDetailsPage from '@/pages/StepDetailsPage';
 import TaskDetailPage from '@/components/journey/TaskDetailPage';
+import BusinessIdeaGeneratorPage from '@/pages/BusinessIdeaGenerator';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import NotFound from '@/pages/NotFound';
 
@@ -43,6 +44,7 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:postId" element={<BlogPost />} />
+      <Route path="/business-idea-generator" element={<BusinessIdeaGeneratorPage />} />
       
       {/* Protected Routes */}
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

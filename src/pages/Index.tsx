@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
+import Testimonials from '@/components/home/Testimonials';
 import BusinessIdeaGenerator from '@/components/idea-generator/BusinessIdeaGenerator';
 import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,6 +31,7 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <Features />
+        <Testimonials />
         
         {/* Interactive Tools Section */}
         <section className="py-16 md:py-24 bg-secondary/30">

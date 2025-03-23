@@ -17,6 +17,8 @@ const SubscriptionCheck: React.FC<SubscriptionCheckProps> = ({ children }) => {
   // For this demo, we'll simulate subscription status with localStorage
   // In a real app, this would come from a backend API or user object
   const hasSubscription = React.useMemo(() => {
+    if (!user?.id) return false;
+    
     // Check if user has an active subscription or is in trial period
     const subscriptionData = localStorage.getItem('userSubscription');
     if (!subscriptionData) return false;

@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { X, Menu } from 'lucide-react';
 import NavbarLinks from './NavbarLinks';
 import NavbarUserMenu from './NavbarUserMenu';
-import NavbarActions from './NavbarActions';
 import { useAuth } from '@/contexts/AuthContext';
+import { Menu, X } from 'lucide-react';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -14,37 +13,35 @@ interface MobileMenuProps {
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
   const { isAuthenticated } = useAuth();
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={onToggle}
-        className="md:hidden focus:outline-none"
-        aria-label="Toggle menu"
-      >
-        <Menu size={24} />
-      </button>
-    );
-  }
-
   return (
-    <>
+    <div className="md:hidden">
       <button
         onClick={onToggle}
-        className="md:hidden focus:outline-none"
-        aria-label="Close menu"
+        className="p-2 -mr-2 transition-all rounded-md hover:bg-muted focus:outline-none"
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
       >
-        <X size={24} />
+        {isOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Menu className="w-6 h-6" />
+        )}
       </button>
 
-      <div className="md:hidden py-4 animate-fade-in">
-        <NavbarLinks isMobile />
-        {isAuthenticated ? (
-          <NavbarUserMenu isMobile />
-        ) : (
-          <NavbarActions isMobile />
-        )}
-      </div>
-    </>
+      {isOpen && (
+        <div id="mobile-menu" className="absolute top-full left-0 right-0 p-4 mt-2 bg-background border-t shadow-lg animate-in slide-in-from-top-5">
+          <div className="space-y-3">
+            <NavbarLinks isMobile />
+            {isAuthenticated && (
+              <div className="pt-2 mt-2 border-t">
+                <NavbarUserMenu isMobile={true} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

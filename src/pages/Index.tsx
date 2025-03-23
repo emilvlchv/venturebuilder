@@ -30,9 +30,9 @@ const Index = () => {
         <Hero />
         <Features />
         
-        {/* Interactive Tools Section - Both components side by side */}
+        {/* Interactive Tools Section */}
         <section className="py-16 md:py-24 bg-secondary/30">
-          <div className="container-padding">
+          <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
               <h2 className="h2 mb-4">Interactive Tools for Entrepreneurs</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -41,6 +41,7 @@ const Index = () => {
               </p>
             </div>
             
+            {/* Grid layout for the two components side by side */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Entrepreneur Type Quiz Section */}
               <div id="entrepreneur-quiz" className="scroll-mt-20">
@@ -57,7 +58,7 @@ const Index = () => {
         
         {/* Admin welcome message */}
         {isAdmin && fromAdmin && (
-          <div className="container-padding my-8">
+          <div className="container mx-auto px-4 sm:px-6 my-8">
             <Alert className="bg-primary/5 border-primary/20">
               <AlertTitle className="text-xl font-bold text-primary">
                 Welcome to the Main Site, Administrator

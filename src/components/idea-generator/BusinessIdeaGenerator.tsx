@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -83,7 +84,7 @@ const BusinessIdeaGenerator = () => {
   ];
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
         <Lightbulb size={16} className="mr-2" />
         Find Your Perfect Business Idea
@@ -94,7 +95,7 @@ const BusinessIdeaGenerator = () => {
         personalized business ideas that match your profile.
       </p>
 
-      <Card>
+      <Card className="flex-grow">
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -7,6 +7,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { quizQuestions, entrepreneurTypes } from './quizData';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface QuizState {
   currentStep: number;
@@ -16,6 +18,8 @@ interface QuizState {
 }
 
 const EntrepreneurQuiz = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [quizState, setQuizState] = useState<QuizState>({
     currentStep: 0, // 0 is start screen, 1-5 are questions, 6 is results
     answers: {},
@@ -111,6 +115,22 @@ const EntrepreneurQuiz = () => {
     });
   };
   
+  const handleGenerateRoadmap = () => {
+    if (quizState.result) {
+      // Store the entrepreneur type in local storage to use it in the journey
+      localStorage.setItem('entrepreneurType', quizState.result);
+      
+      // Navigate to the Journey page
+      navigate('/journey');
+      
+      // Show a toast notification
+      toast({
+        title: "Entrepreneur Type Saved",
+        description: "We'll use this to customize your business journey.",
+      });
+    }
+  };
+  
   const renderStep = () => {
     // Start screen (step 0)
     if (quizState.currentStep === 0) {
@@ -185,7 +205,7 @@ const EntrepreneurQuiz = () => {
               <Button variant="outline" onClick={handleRestart}>
                 Retake Quiz
               </Button>
-              <Button>
+              <Button onClick={handleGenerateRoadmap}>
                 Generate Personalized Roadmap
               </Button>
             </CardFooter>

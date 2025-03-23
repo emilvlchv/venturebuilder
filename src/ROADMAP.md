@@ -21,6 +21,7 @@ This roadmap outlines the planned development of VentureWayfinder, a platform de
 - [x] Create AI-driven task generation based on business profile
 - [x] Enhance business data model with additional industry and stage information
 - [x] Build Business Idea Generator tool to help users explore startup opportunities
+- [x] Integrate Business Idea Generator on the homepage for improved accessibility
 
 ## Phase 3: Enhanced Journey Management
 - [ ] Dynamic journey generation based on AI conversation

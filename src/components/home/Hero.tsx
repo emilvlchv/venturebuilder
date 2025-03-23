@@ -41,9 +41,9 @@ const Hero = () => {
                 Start Your Journey
               </Button>
             </Link>
-            <Link to="/education">
+            <Link to="#idea-generator">
               <Button variant="outline" size="lg">
-                Explore Resources
+                Generate Business Ideas
               </Button>
             </Link>
           </div>

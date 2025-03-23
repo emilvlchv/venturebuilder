@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, Bot, X, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,9 +47,10 @@ const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
       
       // Artificial delay to simulate typing
       const timeout = setTimeout(() => {
+        const userName = user ? `${user.firstName}` : '';
         const initialMessage = {
           id: `assistant-${Date.now()}`,
-          content: `Hi${user?.displayName ? ` ${user.displayName}` : ''}! I'm your AI business assistant. I can answer questions about your journey, provide guidance on business concepts, or help you overcome any blockers you're facing. How can I help you today?`,
+          content: `Hi${userName ? ` ${userName}` : ''}! I'm your AI business assistant. I can answer questions about your journey, provide guidance on business concepts, or help you overcome any blockers you're facing. How can I help you today?`,
           sender: 'assistant' as const,
           timestamp: new Date()
         };
@@ -62,7 +62,7 @@ const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
       
       return () => clearTimeout(timeout);
     }
-  }, [hasGreeted, isMinimized, user?.displayName]);
+  }, [hasGreeted, isMinimized, user]);
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;

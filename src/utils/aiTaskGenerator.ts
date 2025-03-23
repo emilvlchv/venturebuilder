@@ -12,7 +12,7 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
   // Personalization variables from business data
   const industry = businessData.industry || businessData.teamStrengths || '';
   const stage = businessData.stage || businessData.teamComposition || '';
-  const targetMarket = businessData.targetCustomers || businessData.targetMarket || '';
+  const targetMarket = businessData.targetCustomers || ''; // Fixed: removed reference to targetMarket
   const problem = businessData.problem || businessData.teamWeaknesses || '';
   const solution = businessData.solution || businessData.businessIdea || '';
   

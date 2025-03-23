@@ -61,8 +61,9 @@ const UserProfile = () => {
     );
   }
 
-  if (!user) {
-    return null; // This should not happen as useEffect will redirect
+  // This additional check ensures component doesn't try to render with null user
+  if (!isAuthenticated || !user) {
+    return null;
   }
 
   return (

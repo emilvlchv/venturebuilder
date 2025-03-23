@@ -9,6 +9,9 @@ export interface StepDetail {
   tasks: string[];
   businessIdea?: string;
   examples?: string[];
+  progress?: number;
+  categories?: string[];
+  resources?: { title: string; url: string }[];
 }
 
 export interface Task {

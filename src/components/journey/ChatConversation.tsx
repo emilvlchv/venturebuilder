@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, AlertTriangle } from 'lucide-react';
 import Button from '../shared/Button';
@@ -26,15 +27,24 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     teamWeaknesses: '',
     targetCustomers: '',
     revenueModel: '',
+    industry: '',
+    problem: '',
+    stage: '',
+    solution: '',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Enhanced question set for more comprehensive information gathering
   const questions = [
     "What's your business idea? Please describe it in detail.",
-    "Who is on your team for this business?",
+    "What problem does your business solve for customers?",
+    "Who is your target market? Be as specific as possible about demographics, behaviors, and needs.",
+    "What's your industry or market sector?",
+    "What stage is your business in? (Idea, planning, started, growing, etc.)",
+    "Who is on your team and what roles do they play?",
     "What are the key strengths of you and your team?",
-    "What areas might you need help with?",
-    "Who are your target customers or clients?"
+    "What areas might you and your team need help with?",
+    "What's your planned revenue model or monetization strategy?"
   ];
 
   useEffect(() => {
@@ -46,6 +56,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessages([
+        { sender: 'assistant', text: "Hi there! I'm your AI business guide. I'll ask you some questions to understand your business idea better, so I can create a personalized journey for you." },
         { sender: 'assistant', text: questions[0] }
       ]);
     }, 500);
@@ -63,18 +74,31 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     switch (currentQuestion) {
       case 0:
         updatedBusinessData.businessIdea = currentInput;
+        updatedBusinessData.solution = currentInput;
         break;
       case 1:
-        updatedBusinessData.teamComposition = currentInput;
+        updatedBusinessData.problem = currentInput;
         break;
       case 2:
-        updatedBusinessData.teamStrengths = currentInput;
+        updatedBusinessData.targetCustomers = currentInput;
         break;
       case 3:
-        updatedBusinessData.teamWeaknesses = currentInput;
+        updatedBusinessData.industry = currentInput;
         break;
       case 4:
-        updatedBusinessData.targetCustomers = currentInput;
+        updatedBusinessData.stage = currentInput;
+        break;
+      case 5:
+        updatedBusinessData.teamComposition = currentInput;
+        break;
+      case 6:
+        updatedBusinessData.teamStrengths = currentInput;
+        break;
+      case 7:
+        updatedBusinessData.teamWeaknesses = currentInput;
+        break;
+      case 8:
+        updatedBusinessData.revenueModel = currentInput;
         break;
     }
     
@@ -90,7 +114,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       } else {
         setMessages(prev => [...prev, { 
           sender: 'assistant' as const, 
-          text: "Thank you for sharing this information about your business idea! I'll create a personalized journey with tasks tailored to your needs." 
+          text: "Thank you for all this great information! I now have a comprehensive understanding of your business idea. I'll create a personalized journey with tasks and resources tailored specifically to your needs." 
         }]);
         
         setTimeout(() => {
@@ -111,6 +135,10 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       teamWeaknesses: 'Finance, legal',
       targetCustomers: 'Small businesses',
       revenueModel: 'SaaS subscription model',
+      industry: 'Software',
+      problem: 'Inefficient workflow processes',
+      stage: 'Early startup',
+      solution: 'AI-powered workflow automation platform',
     };
     
     console.log("Skipping to end, sending data:", updatedBusinessData);

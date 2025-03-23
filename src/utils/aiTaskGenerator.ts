@@ -1,473 +1,169 @@
 
-import { v4 as uuidv4 } from 'uuid';
-import { BusinessIdeaData, Task, TaskCategory, Subtask } from '@/components/journey/types';
+import { Task, TaskCategory, Subtask, BusinessIdeaData } from '@/components/journey/types';
+import { formatBusinessDataForAI } from './businessProfileUtils';
 
-/**
- * Generates a set of AI-customized tasks based on the user's business idea data
- */
+// Sample personalized tasks based on business data
 export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
-  if (!businessData || !businessData.businessIdea) {
-    return [];
-  }
-
+  console.log("Generating AI tasks based on business data:", businessData);
+  
+  // Default tasks that will be customized based on business data
   const tasks: Task[] = [];
   
-  // Discovery Phase Tasks
-  if (businessData.targetCustomers) {
-    tasks.push(createMarketValidationTask(businessData));
-  }
+  // Personalization variables from business data
+  const industry = businessData.industry || businessData.teamStrengths || '';
+  const stage = businessData.stage || businessData.teamComposition || '';
+  const targetMarket = businessData.targetCustomers || businessData.targetMarket || '';
+  const problem = businessData.problem || businessData.teamWeaknesses || '';
+  const solution = businessData.solution || businessData.businessIdea || '';
   
-  if (businessData.teamStrengths || businessData.teamWeaknesses) {
-    tasks.push(createTeamOptimizationTask(businessData));
-  }
+  // Task 1: Market Research & Validation - Customized based on target market and industry
+  const marketResearchTask: Task = {
+    id: `task-mr-${Date.now()}`,
+    title: `Market Research & Validation for ${industry ? industry + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business Idea'}`,
+    description: `Conduct thorough market research to validate your ${industry || 'business'} concept${targetMarket ? ' for ' + targetMarket : ''}.`,
+    status: 'pending',
+    stepId: 'market-research',
+    resources: [
+      targetMarket ? `Conduct surveys with ${targetMarket}` : 'Conduct customer surveys',
+      `Analyze ${industry || 'industry'} reports for market trends`,
+      `Interview potential customers${targetMarket ? ' in the ' + targetMarket + ' segment' : ''}`
+    ],
+    categories: [
+      {
+        id: 'cat-mr-1',
+        title: 'Market Analysis',
+        subtasks: [
+          { id: 'subtask-mr-1', title: `Define ${targetMarket ? targetMarket + ' as your' : 'your'} target market`, completed: false },
+          { id: 'subtask-mr-2', title: `Research competitors in the ${industry || 'industry'}`, completed: false },
+          { id: 'subtask-mr-3', title: 'Identify market gaps and opportunities', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: 'cat-mr-2',
+        title: 'Validation Methods',
+        subtasks: [
+          { id: 'subtask-mr-4', title: `Create surveys for ${targetMarket || 'potential customers'}`, completed: false },
+          { id: 'subtask-mr-5', title: 'Conduct customer interviews', completed: false },
+          { id: 'subtask-mr-6', title: `Test your ${solution ? solution.substring(0, 20) + '...' : 'concept'} with focus groups`, completed: false }
+        ],
+        collapsed: false
+      }
+    ],
+    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
+  };
+  tasks.push(marketResearchTask);
   
-  // Planning Phase Tasks
-  if (businessData.businessIdea && businessData.problem) {
-    tasks.push(createProductDevelopmentTask(businessData));
-  } else if (businessData.businessIdea) {
-    tasks.push(createProductDevelopmentTask(businessData));
-  }
+  // Task 2: Business Plan Development - Customized based on business stage and problem/solution
+  const businessPlanTask: Task = {
+    id: `task-bp-${Date.now()}`,
+    title: `Develop Business Plan for ${stage ? stage + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business'}`,
+    description: `Create a comprehensive business plan that outlines your strategy for ${problem ? 'solving ' + problem : 'your business concept'}.`,
+    status: 'pending',
+    stepId: 'business-plan',
+    resources: [
+      'Business plan templates',
+      `Financial forecasting tools for ${stage || 'startups'}`,
+      `${industry || 'Industry'} benchmark data`
+    ],
+    categories: [
+      {
+        id: 'cat-bp-1',
+        title: 'Strategic Planning',
+        subtasks: [
+          { id: 'subtask-bp-1', title: 'Define vision and mission statements', completed: false },
+          { id: 'subtask-bp-2', title: `Set goals and objectives for ${stage || 'your business'}`, completed: false },
+          { id: 'subtask-bp-3', title: 'Outline growth strategy', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: 'cat-bp-2',
+        title: 'Financial Projections',
+        subtasks: [
+          { id: 'subtask-bp-4', title: `Create sales forecast based on ${targetMarket || 'market research'}`, completed: false },
+          { id: 'subtask-bp-5', title: `Determine startup costs for ${industry || 'your business'}`, completed: false },
+          { id: 'subtask-bp-6', title: 'Project cash flow for first year', completed: false }
+        ],
+        collapsed: false
+      }
+    ],
+    deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) // 3 weeks from now
+  };
+  tasks.push(businessPlanTask);
   
-  if (businessData.revenueModel || businessData.businessIdea) {
-    tasks.push(createFinancialPlanningTask(businessData));
-  }
-  
-  // Launch Phase Tasks
-  if (businessData.targetCustomers) {
-    tasks.push(createMarketingStrategyTask(businessData));
-  }
-  
-  if (businessData.businessIdea) {
-    tasks.push(createLegalSetupTask(businessData));
-    tasks.push(createLaunchPlanTask(businessData));
-  }
-  
-  // Growth Phase Tasks
-  if (businessData.businessIdea && businessData.targetCustomers) {
-    tasks.push(createCustomerAcquisitionTask(businessData));
-    tasks.push(createScalingStrategyTask(businessData));
-  }
+  // Task 3: Marketing Strategy - Customized based on target market and solution
+  const marketingTask: Task = {
+    id: `task-mkt-${Date.now()}`,
+    title: `Marketing Strategy for ${targetMarket ? targetMarket + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business'}`,
+    description: `Develop your brand identity and marketing approach to reach ${targetMarket || 'your target audience'} with your ${solution ? solution.substring(0, 20) + '...' : 'solution'}.`,
+    status: 'pending',
+    stepId: 'marketing',
+    resources: [
+      'Brand identity guidelines',
+      `Marketing channel comparison for ${targetMarket || 'your target market'}`,
+      'Content strategy templates'
+    ],
+    categories: [
+      {
+        id: 'cat-mkt-1',
+        title: 'Brand Development',
+        subtasks: [
+          { id: 'subtask-mkt-1', title: `Design logo and visual elements for ${solution ? solution.substring(0, 20) + '...' : 'your brand'}`, completed: false },
+          { id: 'subtask-mkt-2', title: 'Create brand messaging that resonates with your audience', completed: false },
+          { id: 'subtask-mkt-3', title: 'Develop brand guidelines', completed: false }
+        ],
+        collapsed: false
+      },
+      {
+        id: 'cat-mkt-2',
+        title: 'Marketing Channels',
+        subtasks: [
+          { id: 'subtask-mkt-4', title: `Identify primary marketing channels for ${targetMarket || 'your audience'}`, completed: false },
+          { id: 'subtask-mkt-5', title: 'Create content calendar', completed: false },
+          { id: 'subtask-mkt-6', title: 'Set marketing budget', completed: false }
+        ],
+        collapsed: false
+      }
+    ],
+    deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000) // 4 weeks from now
+  };
+  tasks.push(marketingTask);
   
   return tasks;
 };
 
-/**
- * Creates a market validation task customized to the user's target customers
- */
-const createMarketValidationTask = (businessData: BusinessIdeaData): Task => {
-  const targetMarket = businessData.targetCustomers || 'target market';
-  const businessIdea = businessData.businessIdea || 'business idea';
-  const industry = businessData.industry || 'your industry';
+// Generate AI response for the chatbot
+export const generateAIChatResponse = (
+  userMessage: string, 
+  businessData?: BusinessIdeaData
+): string => {
+  // Basic intent detection
+  const message = userMessage.toLowerCase();
   
-  // Extract key elements from the target market to create more specific subtasks
-  const targetKeywords = targetMarket.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 3)
-    .join(', ');
+  if (message.includes('hello') || message.includes('hi')) {
+    return "Hello! How can I help you with your business journey today?";
+  }
   
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Validate Your Idea with ${targetMarket.substring(0, 30)}`,
-    description: `Create a validation strategy specifically for ${targetMarket} to ensure your business idea "${businessIdea.substring(0, 50)}..." resonates with them in the ${industry} space.`,
-    status: 'pending',
-    stepId: 'market-research',
-    resources: ['Customer Interview Template', 'Validation Framework', 'Market Research Guide'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Customer Validation',
-        subtasks: [
-          { id: uuidv4(), title: `Create interview questions specific to ${targetMarket}`, completed: false },
-          { id: uuidv4(), title: `Identify 8-10 potential ${targetKeywords || 'customers'} for interviews`, completed: false },
-          { id: uuidv4(), title: 'Schedule and conduct customer interviews', completed: false },
-          { id: uuidv4(), title: 'Document and analyze feedback patterns', completed: false },
-          { id: uuidv4(), title: `Prepare a validation summary report for ${businessIdea.substring(0, 30)}`, completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Competitive Analysis',
-        subtasks: [
-          { id: uuidv4(), title: `Identify 5 main competitors serving ${targetMarket}`, completed: false },
-          { id: uuidv4(), title: 'Analyze competitor strengths and weaknesses', completed: false },
-          { id: uuidv4(), title: `Identify market gaps and opportunities in the ${industry} space`, completed: false },
-          { id: uuidv4(), title: `Define your unique value proposition compared to competitors`, completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a team optimization task based on team strengths and weaknesses
- */
-const createTeamOptimizationTask = (businessData: BusinessIdeaData): Task => {
-  const strengths = businessData.teamStrengths || 'your team strengths';
-  const weaknesses = businessData.teamWeaknesses || 'areas for improvement';
-  const composition = businessData.teamComposition || 'your current team';
+  if (message.includes('business idea') || message.includes('concept')) {
+    if (businessData?.businessIdea) {
+      return `I see your business idea is about ${businessData.businessIdea}. This is interesting! What specific aspect would you like to explore further?`;
+    }
+    return "I'd be happy to discuss your business idea. Could you share more details about what you're thinking?";
+  }
   
-  // Extract key elements from strengths/weaknesses for personalization
-  const strengthKeywords = strengths.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' and ');
+  if (message.includes('market research')) {
+    return "Market research is critical for validation. Consider these methods: surveys, competitor analysis, interviews, focus groups, and industry reports. Which would you like to know more about?";
+  }
   
-  const weaknessKeywords = weaknesses.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' and ');
+  if (message.includes('funding') || message.includes('investment')) {
+    return "For funding, you could explore bootstrapping, friends & family, angel investors, venture capital, crowdfunding, loans, or grants. Each has pros and cons depending on your business stage.";
+  }
   
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Team Optimization Strategy`,
-    description: `Develop a plan to leverage "${strengths.substring(0, 40)}..." while addressing "${weaknesses.substring(0, 40)}..." with your ${composition} team structure.`,
-    status: 'pending',
-    stepId: 'idea-validation',
-    resources: ['Team Assessment Template', 'Skill Gap Analysis Framework', 'Team Building Resources'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Team Assessment',
-        subtasks: [
-          { id: uuidv4(), title: `Document detailed team strengths in ${strengthKeywords || 'key areas'}`, completed: false },
-          { id: uuidv4(), title: `Create improvement plan for ${weaknessKeywords || 'weak areas'}`, completed: false },
-          { id: uuidv4(), title: `Assign roles based on team member strengths`, completed: false },
-          { id: uuidv4(), title: `Identify skills gaps and develop plans to address ${weaknessKeywords || 'them'}`, completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Team Development',
-        subtasks: [
-          { id: uuidv4(), title: 'Create a communication protocol for the team', completed: false },
-          { id: uuidv4(), title: `Establish decision-making framework for ${composition}`, completed: false },
-          { id: uuidv4(), title: 'Set up regular check-ins and progress reviews', completed: false },
-          { id: uuidv4(), title: `Identify training opportunities to address ${weaknessKeywords || 'skill gaps'}`, completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a product development task based on business idea and problem
- */
-const createProductDevelopmentTask = (businessData: BusinessIdeaData): Task => {
-  const problem = businessData.problem || 'the problem you\'re addressing';
-  const solution = businessData.solution || businessData.businessIdea || 'your solution';
+  if (message.includes('stuck') || message.includes('help') || message.includes('advice')) {
+    return "I'm here to help! Could you provide more specific details about what you're struggling with?";
+  }
   
-  // Extract key elements from solution for personalization
-  const solutionKeywords = solution.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 3)
-    .join(' ');
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Develop MVP for ${solution.substring(0, 30)}`,
-    description: `Create a minimal viable product (MVP) that addresses "${problem.substring(0, 50)}..." through your solution "${solution.substring(0, 50)}..."`,
-    status: 'pending',
-    stepId: 'business-plan',
-    resources: ['MVP Planning Template', 'Feature Prioritization Framework', 'User Testing Guidelines'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'MVP Planning',
-        subtasks: [
-          { id: uuidv4(), title: `Define core features of ${solutionKeywords || 'your solution'} that address the key problem`, completed: false },
-          { id: uuidv4(), title: 'Create MVP feature list and prioritization matrix', completed: false },
-          { id: uuidv4(), title: `Develop timeline for developing ${solutionKeywords || 'MVP'}`, completed: false },
-          { id: uuidv4(), title: 'Identify success metrics for MVP testing', completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Development & Testing',
-        subtasks: [
-          { id: uuidv4(), title: `Create ${solutionKeywords || 'MVP'} prototype or initial version`, completed: false },
-          { id: uuidv4(), title: 'Develop testing protocol with target users', completed: false },
-          { id: uuidv4(), title: 'Conduct MVP testing and collect feedback', completed: false },
-          { id: uuidv4(), title: 'Document learnings and plan iterations', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a financial planning task based on revenue model
- */
-const createFinancialPlanningTask = (businessData: BusinessIdeaData): Task => {
-  const revenueModel = businessData.revenueModel || 'your revenue model';
-  const businessIdea = businessData.businessIdea || 'your business';
-  
-  // Extract key elements for personalization
-  const businessKeywords = businessIdea.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' ');
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Financial Strategy for ${businessIdea.substring(0, 25)}`,
-    description: `Develop a comprehensive financial plan and revenue strategy based on "${revenueModel.substring(0, 50) || businessIdea.substring(0, 50)}"`,
-    status: 'pending',
-    stepId: 'financial-projection',
-    resources: ['Financial Projection Templates', 'Pricing Strategy Guide', 'Cash Flow Management Tools'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Financial Projections',
-        subtasks: [
-          { id: uuidv4(), title: `Create startup cost estimation for ${businessKeywords || 'your business'}`, completed: false },
-          { id: uuidv4(), title: 'Develop 12-month revenue projection', completed: false },
-          { id: uuidv4(), title: `Create expense forecast and budget for ${businessKeywords || 'operations'}`, completed: false },
-          { id: uuidv4(), title: 'Calculate break-even analysis', completed: false },
-          { id: uuidv4(), title: 'Develop 3-year financial forecast', completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Revenue Strategy',
-        subtasks: [
-          { id: uuidv4(), title: `Finalize pricing model for ${businessKeywords || 'your offering'}`, completed: false },
-          { id: uuidv4(), title: 'Define key revenue streams and metrics', completed: false },
-          { id: uuidv4(), title: 'Create sales forecast and targets', completed: false },
-          { id: uuidv4(), title: 'Develop financial KPIs and tracking systems', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a marketing strategy task based on target customers
- */
-const createMarketingStrategyTask = (businessData: BusinessIdeaData): Task => {
-  const targetCustomers = businessData.targetCustomers || 'your target market';
-  const businessIdea = businessData.businessIdea || 'your business';
-  
-  // Extract key elements for personalization
-  const targetKeywords = targetCustomers.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' ');
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Marketing Strategy for ${targetCustomers.substring(0, 25)}`,
-    description: `Develop a targeted marketing plan to reach ${targetCustomers} and effectively communicate the value of ${businessIdea.substring(0, 40)}`,
-    status: 'pending',
-    stepId: 'marketing',
-    resources: ['Marketing Plan Template', 'Customer Persona Worksheet', 'Channel Strategy Guide'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Audience Strategy',
-        subtasks: [
-          { id: uuidv4(), title: `Create detailed personas for ${targetKeywords || 'customer segments'}`, completed: false },
-          { id: uuidv4(), title: `Map ${targetKeywords || 'customer'} journey and touchpoints`, completed: false },
-          { id: uuidv4(), title: `Identify key messaging for ${targetKeywords || 'target audience'}`, completed: false },
-          { id: uuidv4(), title: 'Develop brand positioning statement', completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Channel Strategy',
-        subtasks: [
-          { id: uuidv4(), title: `Identify top 3 channels to reach ${targetKeywords || 'target customers'}`, completed: false },
-          { id: uuidv4(), title: 'Develop content strategy and calendar', completed: false },
-          { id: uuidv4(), title: 'Create marketing budget allocation', completed: false },
-          { id: uuidv4(), title: 'Set up analytics and tracking systems', completed: false },
-          { id: uuidv4(), title: `Plan launch campaign for ${businessIdea.substring(0, 20)}`, completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a legal setup task for the business
- */
-const createLegalSetupTask = (businessData: BusinessIdeaData): Task => {
-  const businessIdea = businessData.businessIdea || 'your business';
-  const industry = businessData.industry || 'your industry';
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Legal Formation for ${businessIdea.substring(0, 25)}`,
-    description: `Set up the legal structure and compliance framework for your ${industry} business.`,
-    status: 'pending',
-    stepId: 'legal-setup',
-    resources: ['Business Structure Guide', 'Trademark Registration Resources', 'Compliance Checklist'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Business Formation',
-        subtasks: [
-          { id: uuidv4(), title: `Determine optimal business structure for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Register business name and entity', completed: false },
-          { id: uuidv4(), title: `Obtain necessary ${industry} business licenses`, completed: false },
-          { id: uuidv4(), title: 'Apply for EIN/Tax ID', completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Intellectual Property',
-        subtasks: [
-          { id: uuidv4(), title: `Conduct trademark search for ${businessIdea.substring(0, 20)} name`, completed: false },
-          { id: uuidv4(), title: 'File trademark application if appropriate', completed: false },
-          { id: uuidv4(), title: `Develop IP protection strategy for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Create standard contracts and agreements', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a launch plan task
- */
-const createLaunchPlanTask = (businessData: BusinessIdeaData): Task => {
-  const businessIdea = businessData.businessIdea || 'your business';
-  const targetCustomers = businessData.targetCustomers || 'your target market';
-  
-  // Extract key elements for personalization
-  const targetKeywords = targetCustomers.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' ');
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Launch Plan for ${businessIdea.substring(0, 25)}`,
-    description: `Create a comprehensive launch strategy for bringing ${businessIdea.substring(0, 40)} to market.`,
-    status: 'pending',
-    stepId: 'launch-preparation',
-    resources: ['Launch Checklist', 'PR Strategy Guide', 'Event Planning Templates'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Launch Preparation',
-        subtasks: [
-          { id: uuidv4(), title: `Create detailed launch timeline for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Develop launch announcement strategy', completed: false },
-          { id: uuidv4(), title: `Prepare marketing materials targeting ${targetKeywords || 'customers'}`, completed: false },
-          { id: uuidv4(), title: 'Set up tracking for launch metrics', completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Launch Execution',
-        subtasks: [
-          { id: uuidv4(), title: `Plan launch event or webinar for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Prepare early customer onboarding process', completed: false },
-          { id: uuidv4(), title: 'Develop customer feedback collection system', completed: false },
-          { id: uuidv4(), title: 'Create post-launch assessment plan', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a customer acquisition task
- */
-const createCustomerAcquisitionTask = (businessData: BusinessIdeaData): Task => {
-  const targetCustomers = businessData.targetCustomers || 'your target market';
-  const businessIdea = businessData.businessIdea || 'your business';
-  
-  // Extract key elements for personalization
-  const targetKeywords = targetCustomers.split(' ')
-    .filter(word => word.length > 3)
-    .slice(0, 2)
-    .join(' ');
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Customer Acquisition Strategy for ${businessIdea.substring(0, 20)}`,
-    description: `Develop a sustainable customer acquisition framework to attract ${targetCustomers} to your business.`,
-    status: 'pending',
-    stepId: 'customer-acquisition',
-    resources: ['Acquisition Channel Analysis', 'CAC Calculator', 'Conversion Optimization Guide'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Acquisition Channels',
-        subtasks: [
-          { id: uuidv4(), title: `Identify top 3 channels to acquire ${targetKeywords || 'customers'}`, completed: false },
-          { id: uuidv4(), title: 'Create channel-specific acquisition strategies', completed: false },
-          { id: uuidv4(), title: 'Set up attribution tracking', completed: false },
-          { id: uuidv4(), title: `Develop budget to acquire ${targetKeywords || 'customers'}`, completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Conversion Optimization',
-        subtasks: [
-          { id: uuidv4(), title: 'Set up conversion funnel tracking', completed: false },
-          { id: uuidv4(), title: 'Identify and optimize conversion bottlenecks', completed: false },
-          { id: uuidv4(), title: `Implement A/B testing for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Create customer acquisition reporting dashboard', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
-};
-
-/**
- * Creates a scaling strategy task
- */
-const createScalingStrategyTask = (businessData: BusinessIdeaData): Task => {
-  const businessIdea = businessData.businessIdea || 'your business';
-  const industry = businessData.industry || 'your industry';
-  
-  return {
-    id: `ai-task-${Date.now()}-${uuidv4().substring(0, 8)}`,
-    title: `Scaling Strategy for ${businessIdea.substring(0, 25)}`,
-    description: `Develop a comprehensive plan to scale ${businessIdea.substring(0, 40)} for sustainable long-term growth.`,
-    status: 'pending',
-    stepId: 'scaling-strategy',
-    resources: ['Scale-up Playbook', 'Growth Metrics Guide', 'Operational Efficiency Framework'],
-    categories: [
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Growth Planning',
-        subtasks: [
-          { id: uuidv4(), title: `Define key growth metrics for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: `Identify potential new markets for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Develop product/service expansion strategy', completed: false },
-          { id: uuidv4(), title: `Create 1-3 year growth roadmap for ${industry} business`, completed: false }
-        ],
-        collapsed: false
-      },
-      {
-        id: `ai-cat-${Date.now()}-${uuidv4().substring(0, 8)}`,
-        title: 'Operational Scaling',
-        subtasks: [
-          { id: uuidv4(), title: `Identify operational bottlenecks for ${businessIdea.substring(0, 20)}`, completed: false },
-          { id: uuidv4(), title: 'Develop plan for operational efficiency', completed: false },
-          { id: uuidv4(), title: 'Create hiring and team scaling plan', completed: false },
-          { id: uuidv4(), title: 'Plan for technology and systems scaling', completed: false }
-        ],
-        collapsed: false
-      }
-    ]
-  };
+  // Default response
+  return "That's an interesting question. Could you provide more context about your specific situation so I can give you the most helpful guidance?";
 };

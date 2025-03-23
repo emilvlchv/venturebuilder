@@ -11,6 +11,7 @@ import StepDetailsDialog from '@/components/journey/StepDetailsDialog';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Journey } from '@/components/journey/types';
 import { Button } from '@/components/ui/button';
+import AIChatAssistant from '@/components/journey/AIChatAssistant';
 
 const JourneyPage = () => {
   const { user } = useAuth();
@@ -249,6 +250,11 @@ const JourneyPage = () => {
         isOpen={isDialogOpen} 
         onClose={handleCloseDialog} 
         stepDetails={selectedStep} 
+      />
+      
+      <AIChatAssistant 
+        journeyId={selectedJourneyId} 
+        businessData={selectedJourney?.businessIdeaData}
       />
     </div>
   );

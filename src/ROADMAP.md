@@ -3,7 +3,7 @@
 
 This roadmap outlines the planned development of VentureWayfinder, a platform designed to help users take the first step in creating their business.
 
-## Phase 1: Foundation (Current)
+## Phase 1: Foundation (Completed)
 - [x] Basic journey creation and management
 - [x] Business idea wizard implementation
 - [x] Step-by-step journey progression system
@@ -11,11 +11,11 @@ This roadmap outlines the planned development of VentureWayfinder, a platform de
 - [x] User authentication and subscription checks
 - [x] Google Analytics integration
 
-## Phase 2: AI Assistant Development
-- [ ] Implement conversational AI to discuss business ideas with users
-- [ ] Create functionality to gather comprehensive information about user's business concept
-- [ ] Develop system to generate personalized journeys based on user input
-- [ ] Build always-available AI chatbot for resolving user blockers
+## Phase 2: AI Assistant Development (Current)
+- [x] Implement conversational AI to discuss business ideas with users
+- [x] Create functionality to gather comprehensive information about user's business concept
+- [x] Develop system to generate personalized journeys based on user input
+- [x] Build always-available AI chatbot for resolving user blockers
 
 ## Phase 3: Enhanced Journey Management
 - [ ] Dynamic journey generation based on AI conversation

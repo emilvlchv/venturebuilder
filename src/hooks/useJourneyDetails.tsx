@@ -14,7 +14,7 @@ const journeyPhasesData = [
       {
         id: 'market-research',
         title: 'Market Research',
-        description: 'Understand your target market and competitors',
+        description: 'Understand your market, customers, and competition',
         status: 'in-progress',
         hasActiveTasks: true,
         allTasksCompleted: false,
@@ -23,7 +23,7 @@ const journeyPhasesData = [
       {
         id: 'idea-validation',
         title: 'Idea Validation',
-        description: 'Test your business concept with potential customers',
+        description: 'Test and validate your business concept',
         status: 'pending',
         hasActiveTasks: false,
         allTasksCompleted: false,
@@ -154,43 +154,52 @@ const journeyPhasesData = [
 ];
 
 // Sample step details for the market research step
-const stepDetailsData: Record<string, StepDetail> = {
+const defaultStepDetails: Record<string, StepDetail> = {
   'market-research': {
     id: 'market-research',
     title: 'Market Research',
-    description: 'Understand your target market and competitors',
-    timeEstimate: '2-3 weeks',
-    detailedDescription: 
-      'Market research is a critical first step in validating your business idea. ' +
-      'It involves gathering, analyzing, and interpreting information about a market, ' +
+    description: 'Understand your market, customers, and competition',
+    timeEstimate: '1-2 weeks',
+    detailedDescription: 'This phase involves researching and understanding ' +
       'its potential customers, and competitors. This research will help you understand ' +
       'if there\'s a real need for your product or service, how to position it in the market, ' +
       'and how to effectively reach your target audience.',
-    businessIdea: 'EcoFresh Delivery',
     status: 'in-progress',
-    tasks: ['Define your target market segments',
+    businessIdea: 'EcoFresh Delivery',
+    tasks: [
+      'Define your target market segments',
       'Analyze competitor strengths and weaknesses',
       'Conduct surveys or interviews with potential customers',
       'Research industry trends and market size',
-      'Identify potential pricing strategies']
+      'Identify potential pricing strategies'
+    ],
+    examples: [
+      'Example: A food delivery startup conducting research to understand customer preferences, delivery times, and pricing expectations in different neighborhoods.',
+      'Example: An e-commerce clothing brand researching competitors to identify gaps in the market for sustainable fashion.'
+    ]
   },
   'idea-validation': {
     id: 'idea-validation',
     title: 'Idea Validation',
-    description: 'Test your business concept with potential customers',
-    timeEstimate: '1-2 weeks',
-    detailedDescription: 
-      'Idea validation is the process of testing your business concept to determine ' +
+    description: 'Test and validate your business concept',
+    timeEstimate: '2-3 weeks',
+    detailedDescription: 'In this phase, you\'ll validate your business idea ' +
       'if it solves a real problem for your target market. This step helps you confirm ' +
       'there\'s demand for your product or service before investing significant time ' +
       'and resources into development.',
-    businessIdea: 'EcoFresh Delivery',
     status: 'pending',
-    tasks: ['Create a minimal viable product (MVP) or prototype',
+    businessIdea: 'EcoFresh Delivery',
+    tasks: [
+      'Create a minimal viable product (MVP) or prototype',
       'Get feedback from potential customers',
       'Analyze willingness to pay',
       'Refine your value proposition',
-      'Document validated learnings']
+      'Document validated learnings'
+    ],
+    examples: [
+      'Example: A software startup creating a simple landing page to gauge interest in their solution and collect email addresses of interested users.',
+      'Example: A physical product business creating a prototype and getting feedback from potential customers at local events or through online focus groups.'
+    ]
   }
 };
 
@@ -618,7 +627,7 @@ export const useJourneyDetails = () => {
     tasks,
     selectedTask,
     isTaskDetailOpen,
-    stepsDetailsMap: stepDetailsData,
+    stepsDetailsMap: defaultStepDetails,
     getTasksByStepId,
     handleCreateTaskFromStep,
     handleTaskStatusChange,

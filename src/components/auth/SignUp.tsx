@@ -12,10 +12,10 @@ const SignUp = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   
-  // If user is already authenticated, redirect to profile page
+  // If user is already authenticated, redirect to journey page
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      navigate('/profile');
+      navigate('/journey');
     }
   }, [isAuthenticated, navigate, isLoading]);
   
@@ -30,7 +30,13 @@ const SignUp = () => {
         <CardContent>
           <Auth
             supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
+            appearance={{ 
+              theme: ThemeSupa,
+              style: {
+                button: { background: 'hsl(var(--primary))', color: 'white' },
+                anchor: { color: 'hsl(var(--primary))' },
+              }
+            }}
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}/journey`}

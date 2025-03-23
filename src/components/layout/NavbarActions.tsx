@@ -48,27 +48,8 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
     );
   }
 
-  if (isMobile) {
-    return (
-      <div className="flex items-center space-x-2">
-        {isAdmin && location.pathname.startsWith('/admin') && (
-          <Button variant="outline" size="sm" onClick={goToMainSite} className="mr-2">
-            <Home size={16} className="mr-1" />
-            <span>Main Site</span>
-          </Button>
-        )}
-        {isAdmin && !location.pathname.startsWith('/admin') && (
-          <Button variant="outline" size="sm" onClick={goToAdmin} className="mr-2">
-            <LayoutDashboard size={16} className="mr-1" />
-            <span>Admin</span>
-          </Button>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="hidden md:flex items-center">
+    <div className="flex items-center">
       {isAdmin && location.pathname.startsWith('/admin') && (
         <Button 
           variant="outline" 
@@ -78,6 +59,17 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
           className="font-medium"
         >
           Main Site
+        </Button>
+      )}
+      {isAdmin && !location.pathname.startsWith('/admin') && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={goToAdmin}
+          icon={<LayoutDashboard size={16} />}
+          className="font-medium"
+        >
+          Admin
         </Button>
       )}
     </div>

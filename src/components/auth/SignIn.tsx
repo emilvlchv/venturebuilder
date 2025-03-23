@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,13 +11,18 @@ import { Link } from 'react-router-dom';
 const SignIn = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
-  // If user is already authenticated, redirect to journey page
+  // Get redirect URL from query params or default to journey
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get('redirectTo') || '/journey';
+  
+  // If user is already authenticated, redirect to journey page or specified redirect
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      navigate('/journey');
+      navigate(redirectTo);
     }
-  }, [isAuthenticated, navigate, isLoading]);
+  }, [isAuthenticated, navigate, isLoading, redirectTo]);
   
   return (
     <div className="max-w-md w-full mx-auto p-6 space-y-6">
@@ -33,7 +38,7 @@ const SignIn = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
-            redirectTo={`${window.location.origin}/journey`}
+            redirectTo={`${window.location.origin}${redirectTo}`}
             view="sign_in"
           />
         </CardContent>

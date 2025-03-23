@@ -1,8 +1,5 @@
 
 import React from 'react';
-import NavbarLinks from './NavbarLinks';
-import NavbarUserMenu from './NavbarUserMenu';
-import { useAuth } from '@/contexts/AuthContext';
 import { Menu, X } from 'lucide-react';
 
 interface MobileMenuProps {
@@ -11,10 +8,8 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <div className="md:hidden">
+    <div className="md:hidden ml-2">
       <button
         onClick={onToggle}
         className="p-2 -mr-2 transition-all rounded-md hover:bg-muted focus:outline-none"
@@ -28,19 +23,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
           <Menu className="w-6 h-6" />
         )}
       </button>
-
-      {isOpen && (
-        <div id="mobile-menu" className="absolute top-full left-0 right-0 p-4 mt-2 bg-background border-t shadow-lg animate-in slide-in-from-top-5">
-          <div className="space-y-3">
-            <NavbarLinks isMobile />
-            {isAuthenticated && (
-              <div className="pt-2 mt-2 border-t">
-                <NavbarUserMenu isMobile={true} />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

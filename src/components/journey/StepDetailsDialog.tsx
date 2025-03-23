@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -23,7 +22,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Task, TaskCategory } from './types';
+import { Task, TaskCategory, StepDetail } from './types';
 import { Badge } from '@/components/ui/badge';
 import {
   Accordion,
@@ -31,16 +30,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-export interface StepDetail {
-  title: string;
-  description: string;
-  timeEstimate: string;
-  detailedDescription: string;
-  tasks: string[];
-  examples?: string[];
-  stepId?: string;
-}
 
 interface StepDetailsDialogProps {
   isOpen: boolean;
@@ -51,7 +40,6 @@ interface StepDetailsDialogProps {
   onTaskOpen?: (task: Task) => void;
 }
 
-// Reusable components
 const TaskProgressBar = ({ task }: { task: Task }) => {
   const getCompletionPercentage = () => {
     const allSubtasks = task.categories.flatMap(category => category.subtasks);

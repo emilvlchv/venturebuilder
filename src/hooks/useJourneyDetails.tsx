@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskCategory, Subtask } from '@/components/journey/types';
-import { StepDetail } from '@/components/journey/StepDetailsDialog';
+import { Task, TaskCategory, Subtask, StepDetail } from '@/components/journey/types';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -167,19 +166,13 @@ const stepDetailsData: Record<string, StepDetail> = {
       'its potential customers, and competitors. This research will help you understand ' +
       'if there\'s a real need for your product or service, how to position it in the market, ' +
       'and how to effectively reach your target audience.',
-    tasks: [
-      'Define your target market segments',
+    businessIdea: 'EcoFresh Delivery',
+    status: 'in-progress',
+    tasks: ['Define your target market segments',
       'Analyze competitor strengths and weaknesses',
       'Conduct surveys or interviews with potential customers',
       'Research industry trends and market size',
-      'Identify potential pricing strategies'
-    ],
-    examples: [
-      'Example: A food delivery startup conducting research to understand customer preferences, delivery times, and pricing expectations in different neighborhoods.',
-      'Example: An e-commerce clothing brand researching competitors to identify gaps in the market for sustainable fashion.'
-    ],
-    businessIdea: 'EcoFresh Delivery',
-    status: 'in-progress'
+      'Identify potential pricing strategies']
   },
   'idea-validation': {
     id: 'idea-validation',
@@ -191,19 +184,13 @@ const stepDetailsData: Record<string, StepDetail> = {
       'if it solves a real problem for your target market. This step helps you confirm ' +
       'there\'s demand for your product or service before investing significant time ' +
       'and resources into development.',
-    tasks: [
-      'Create a minimal viable product (MVP) or prototype',
+    businessIdea: 'EcoFresh Delivery',
+    status: 'pending',
+    tasks: ['Create a minimal viable product (MVP) or prototype',
       'Get feedback from potential customers',
       'Analyze willingness to pay',
       'Refine your value proposition',
-      'Document validated learnings'
-    ],
-    examples: [
-      'Example: A software startup creating a simple landing page to gauge interest in their solution and collect email addresses of interested users.',
-      'Example: A physical product business creating a prototype and getting feedback from potential customers at local events or through online focus groups.'
-    ],
-    businessIdea: 'EcoFresh Delivery',
-    status: 'pending'
+      'Document validated learnings']
   }
 };
 

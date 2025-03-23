@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { BusinessIdeaData } from './types';
 import { formatBusinessDataForAI } from '@/utils/businessProfileUtils';
+import { generateAIChatResponse } from '@/utils/aiTaskGenerator';
 
 interface Message {
   id: string;
@@ -86,33 +87,8 @@ const AIChatAssistant: React.FC<AIChatAssistantProps> = ({
   const generateAIResponse = (userInput: string, businessData?: BusinessIdeaData) => {
     // Simulate AI thinking time
     setTimeout(() => {
-      // Context awareness for responses
-      let responseContent = '';
-      const lowerCaseInput = userInput.toLowerCase();
-      
-      // Basic context-aware responses
-      if (lowerCaseInput.includes('hello') || lowerCaseInput.includes('hi')) {
-        responseContent = `Hello! How can I assist you with your business journey today?`;
-      } 
-      else if (lowerCaseInput.includes('business plan') || lowerCaseInput.includes('plan')) {
-        responseContent = `Creating a solid business plan is crucial. Start with your executive summary, business description, market analysis, organization structure, products/services description, marketing strategy, financial projections, and funding requirements. Would you like more specific guidance on any of these sections?`;
-      } 
-      else if (lowerCaseInput.includes('market research') || lowerCaseInput.includes('research')) {
-        responseContent = `Market research is essential for validating your business idea. Consider these approaches: online surveys, competitor analysis, industry reports, customer interviews, and focus groups. This will help you understand your target market and refine your value proposition. Would you like me to elaborate on any of these methods?`;
-      } 
-      else if (lowerCaseInput.includes('funding') || lowerCaseInput.includes('money') || lowerCaseInput.includes('invest')) {
-        responseContent = `There are several funding options for startups: bootstrapping, friends & family, angel investors, venture capital, crowdfunding, small business loans, and grants. Each has advantages depending on your business stage and goals. Which options would you like to learn more about?`;
-      } 
-      else if (lowerCaseInput.includes('stuck') || lowerCaseInput.includes('help') || lowerCaseInput.includes('blocker')) {
-        responseContent = `I'm sorry to hear you're facing challenges. Could you provide more details about what specific blocker you're experiencing? I'd be happy to suggest strategies or resources to help you overcome it.`;
-      }
-      else if (businessData && (lowerCaseInput.includes('my business') || lowerCaseInput.includes('business idea'))) {
-        const formattedData = formatBusinessDataForAI(businessData);
-        responseContent = `Based on the information you've shared about your business idea:\n\n${formattedData}\n\nThis shows potential! To strengthen your concept, consider validating it with potential customers and refining your target market definition. Would you like specific advice on next steps?`;
-      }
-      else {
-        responseContent = `That's an interesting question. To give you the most helpful response, could you provide a bit more context about your business idea or the specific challenge you're facing? I'm here to help with everything from ideation to execution.`;
-      }
+      // Use the imported generateAIChatResponse function
+      const responseContent = generateAIChatResponse(userInput, businessData);
       
       const assistantMessage = {
         id: `assistant-${Date.now()}`,

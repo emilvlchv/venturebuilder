@@ -30,13 +30,30 @@ const Index = () => {
         <Hero />
         <Features />
         
-        {/* Entrepreneur Type Quiz Section */}
-        <EntrepreneurTypeSection />
-        
-        {/* Business Idea Generator Section */}
-        <div id="idea-generator" className="py-16 md:py-24 scroll-mt-20">
-          <BusinessIdeaGenerator />
-        </div>
+        {/* Interactive Tools Section - Both components side by side */}
+        <section className="py-16 md:py-24 bg-secondary/30">
+          <div className="container-padding">
+            <div className="text-center mb-12">
+              <h2 className="h2 mb-4">Interactive Tools for Entrepreneurs</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Use our interactive tools to discover your entrepreneur type and generate 
+                business ideas tailored to your unique strengths and interests.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Entrepreneur Type Quiz Section */}
+              <div id="entrepreneur-quiz" className="scroll-mt-20">
+                <EntrepreneurTypeSection />
+              </div>
+              
+              {/* Business Idea Generator Section */}
+              <div id="idea-generator" className="scroll-mt-20">
+                <BusinessIdeaGenerator />
+              </div>
+            </div>
+          </div>
+        </section>
         
         {/* Admin welcome message */}
         {isAdmin && fromAdmin && (

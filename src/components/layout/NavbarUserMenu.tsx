@@ -13,7 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/contexts/AuthContext';
 import { User, LogOut, Settings, Award, Briefcase, BarChart } from 'lucide-react';
 
-const NavbarUserMenu: React.FC = () => {
+interface NavbarUserMenuProps {
+  isMobile?: boolean;
+}
+
+const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => {
   const { user, logout } = useAuth();
 
   if (!user) {
@@ -35,14 +39,17 @@ const NavbarUserMenu: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none" asChild>
-        <button className="flex items-center gap-2 rounded-full transition">
+        <button className={`flex items-center gap-2 rounded-full transition ${isMobile ? 'w-full justify-start p-2' : ''}`}>
           <Avatar className="h-9 w-9 border-2 border-primary/10">
             <AvatarImage src={user.avatarUrl || ''} alt={user.firstName} />
             <AvatarFallback className="bg-primary/5">{getInitials()}</AvatarFallback>
           </Avatar>
+          {isMobile && (
+            <span className="ml-2 font-medium">{user.firstName} {user.lastName}</span>
+          )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align={isMobile ? "center" : "end"} className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,16 +10,28 @@ import ProgressDashboard from '@/components/profile/ProgressDashboard';
 import AchievementBadges from '@/components/profile/AchievementBadges';
 import SocialConnections from '@/components/profile/SocialConnections';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const UserProfile = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("profile");
+  const location = useLocation();
+  
+  // Get the tab from URL query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromUrl = queryParams.get('tab');
+  
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "profile");
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/user-profile${value !== "profile" ? `?tab=${value}` : ''}`, { replace: true });
+  };
 
   // Redirect if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
         variant: "destructive",
@@ -29,6 +41,13 @@ const UserProfile = () => {
       navigate('/signin');
     }
   }, [isLoading, isAuthenticated, toast, navigate]);
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   if (isLoading) {
     return (
@@ -56,7 +75,7 @@ const UserProfile = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid grid-cols-5 mb-8">
             <TabsTrigger value="profile">Profile Info</TabsTrigger>
             <TabsTrigger value="business">Business Idea</TabsTrigger>

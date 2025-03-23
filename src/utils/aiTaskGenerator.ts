@@ -12,7 +12,7 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
   // Personalization variables from business data
   const industry = businessData.industry || businessData.teamStrengths || '';
   const stage = businessData.stage || businessData.teamComposition || '';
-  const targetMarket = businessData.targetCustomers || ''; 
+  const targetCustomers = businessData.targetCustomers || ''; 
   const problem = businessData.problem || businessData.teamWeaknesses || '';
   const solution = businessData.solution || businessData.businessIdea || '';
   
@@ -20,20 +20,20 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
   const marketResearchTask: Task = {
     id: `task-mr-${Date.now()}`,
     title: `Market Research & Validation for ${industry ? industry + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business Idea'}`,
-    description: `Conduct thorough market research to validate your ${industry || 'business'} concept${targetMarket ? ' for ' + targetMarket : ''}.`,
+    description: `Conduct thorough market research to validate your ${industry || 'business'} concept${targetCustomers ? ' for ' + targetCustomers : ''}.`,
     status: 'pending',
     stepId: 'market-research',
     resources: [
-      targetMarket ? `Conduct surveys with ${targetMarket}` : 'Conduct customer surveys',
+      targetCustomers ? `Conduct surveys with ${targetCustomers}` : 'Conduct customer surveys',
       `Analyze ${industry || 'industry'} reports for market trends`,
-      `Interview potential customers${targetMarket ? ' in the ' + targetMarket + ' segment' : ''}`
+      `Interview potential customers${targetCustomers ? ' in the ' + targetCustomers + ' segment' : ''}`
     ],
     categories: [
       {
         id: 'cat-mr-1',
         title: 'Market Analysis',
         subtasks: [
-          { id: 'subtask-mr-1', title: `Define ${targetMarket ? targetMarket + ' as your' : 'your'} target market`, completed: false },
+          { id: 'subtask-mr-1', title: `Define ${targetCustomers ? targetCustomers + ' as your' : 'your'} target market`, completed: false },
           { id: 'subtask-mr-2', title: `Research competitors in the ${industry || 'industry'}`, completed: false },
           { id: 'subtask-mr-3', title: 'Identify market gaps and opportunities', completed: false }
         ],
@@ -43,7 +43,7 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
         id: 'cat-mr-2',
         title: 'Validation Methods',
         subtasks: [
-          { id: 'subtask-mr-4', title: `Create surveys for ${targetMarket || 'potential customers'}`, completed: false },
+          { id: 'subtask-mr-4', title: `Create surveys for ${targetCustomers || 'potential customers'}`, completed: false },
           { id: 'subtask-mr-5', title: 'Conduct customer interviews', completed: false },
           { id: 'subtask-mr-6', title: `Test your ${solution ? solution.substring(0, 20) + '...' : 'concept'} with focus groups`, completed: false }
         ],
@@ -81,7 +81,7 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
         id: 'cat-bp-2',
         title: 'Financial Projections',
         subtasks: [
-          { id: 'subtask-bp-4', title: `Create sales forecast based on ${targetMarket || 'market research'}`, completed: false },
+          { id: 'subtask-bp-4', title: `Create sales forecast based on ${targetCustomers || 'market research'}`, completed: false },
           { id: 'subtask-bp-5', title: `Determine startup costs for ${industry || 'your business'}`, completed: false },
           { id: 'subtask-bp-6', title: 'Project cash flow for first year', completed: false }
         ],
@@ -95,13 +95,13 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
   // Task 3: Marketing Strategy - Customized based on target market and solution
   const marketingTask: Task = {
     id: `task-mkt-${Date.now()}`,
-    title: `Marketing Strategy for ${targetMarket ? targetMarket + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business'}`,
-    description: `Develop your brand identity and marketing approach to reach ${targetMarket || 'your target audience'} with your ${solution ? solution.substring(0, 20) + '...' : 'solution'}.`,
+    title: `Marketing Strategy for ${targetCustomers ? targetCustomers + ' ' : ''}${solution ? solution.substring(0, 30) + '...' : 'Your Business'}`,
+    description: `Develop your brand identity and marketing approach to reach ${targetCustomers || 'your target audience'} with your ${solution ? solution.substring(0, 20) + '...' : 'solution'}.`,
     status: 'pending',
     stepId: 'marketing',
     resources: [
       'Brand identity guidelines',
-      `Marketing channel comparison for ${targetMarket || 'your target market'}`,
+      `Marketing channel comparison for ${targetCustomers || 'your target market'}`,
       'Content strategy templates'
     ],
     categories: [
@@ -119,7 +119,7 @@ export const generateAITasks = (businessData: BusinessIdeaData): Task[] => {
         id: 'cat-mkt-2',
         title: 'Marketing Channels',
         subtasks: [
-          { id: 'subtask-mkt-4', title: `Identify primary marketing channels for ${targetMarket || 'your audience'}`, completed: false },
+          { id: 'subtask-mkt-4', title: `Identify primary marketing channels for ${targetCustomers || 'your audience'}`, completed: false },
           { id: 'subtask-mkt-5', title: 'Create content calendar', completed: false },
           { id: 'subtask-mkt-6', title: 'Set marketing budget', completed: false }
         ],

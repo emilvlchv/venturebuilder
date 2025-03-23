@@ -16,6 +16,10 @@ This roadmap outlines the planned development of VentureWayfinder, a platform de
 - [x] Create functionality to gather comprehensive information about user's business concept
 - [x] Develop system to generate personalized journeys based on user input
 - [x] Build always-available AI chatbot for resolving user blockers
+- [x] Add enhanced journey personalization based on business data
+- [x] Implement floating chat widget for accessing AI assistance throughout the platform
+- [x] Create AI-driven task generation based on business profile
+- [x] Enhance business data model with additional industry and stage information
 
 ## Phase 3: Enhanced Journey Management
 - [ ] Dynamic journey generation based on AI conversation

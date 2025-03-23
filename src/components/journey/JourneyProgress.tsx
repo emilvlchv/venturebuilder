@@ -57,9 +57,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
       } else {
         // Count based on tasks
         stepTasks.forEach(task => {
-          const allSubtasks = task.categories.flatMap(c => c.subtasks);
-          if (allSubtasks.length === 0) {
-            // If no subtasks, count the task itself
+          if (!task.categories || task.categories.length === 0) {
+            // If no categories, count the task itself
             totalTasks += 1;
             if (task.status === 'completed') {
               completedTasks += 1;
@@ -68,6 +67,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
             }
           } else {
             // Count based on subtasks
+            const allSubtasks = task.categories.flatMap(c => c.subtasks);
             totalTasks += allSubtasks.length;
             completedTasks += allSubtasks.filter(s => s.completed).length;
           }

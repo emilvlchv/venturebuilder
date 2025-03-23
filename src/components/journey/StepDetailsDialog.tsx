@@ -56,10 +56,15 @@ const StepDetailsDialog: React.FC<StepDetailsDialogProps> = ({
     );
     
     if (onTaskSelect) {
-      const matchingTask = stepDetails.tasks.find(task => task === taskName);
-      if (matchingTask) {
-        onTaskSelect(matchingTask as Task);
-      }
+      // Create a task object with the taskName, since stepDetails.tasks is an array of strings
+      const taskObject: Task = {
+        id: `task-${Date.now()}`,
+        title: taskName,
+        description: `Task related to ${stepDetails.title}`,
+        status: 'pending',
+        categories: []
+      };
+      onTaskSelect(taskObject);
     }
   };
 

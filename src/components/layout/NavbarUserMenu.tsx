@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, LogOut, Settings, Shield, LayoutDashboard } from 'lucide-react';
+import { User, LogOut, Settings, Shield, LayoutDashboard, UserCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Button from '@/components/shared/Button';
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavbarUserMenuProps {
   isMobile?: boolean;
@@ -23,8 +24,8 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
   const { toast } = useToast();
   const isAdmin = user?.role === 'admin';
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
     toast({
       title: "Logged out successfully",
@@ -40,13 +41,26 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
     navigate('/admin');
   };
 
+  const getInitials = () => {
+    if (!user) return '';
+    const firstInitial = user.firstName ? user.firstName.charAt(0) : '';
+    const lastInitial = user.lastName ? user.lastName.charAt(0) : '';
+    return (firstInitial + lastInitial).toUpperCase();
+  };
+
   if (isMobile) {
     return (
       <div className="px-4 py-2 border-t border-border mt-2 pt-4">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <User size={20} />
-          </div>
+          <Avatar className="h-10 w-10">
+            {user?.avatarUrl ? (
+              <AvatarImage src={user.avatarUrl} alt={user?.username || 'User'} />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {getInitials()}
+              </AvatarFallback>
+            )}
+          </Avatar>
           <div>
             <p className="font-medium">{user?.firstName} {user?.lastName}</p>
             <p className="text-sm text-muted-foreground">@{user?.username}</p>
@@ -56,7 +70,7 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
           <Button 
             variant="outline" 
             fullWidth 
-            icon={<Settings size={16} />}
+            icon={<UserCircle size={16} />}
             onClick={goToProfile}
           >
             Profile Settings
@@ -87,20 +101,19 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
           Admin Panel
         </Button>
       )}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={goToProfile}
-        icon={<User size={16} />}
-        className="font-medium"
-      >
-        My Account
-      </Button>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="px-2">
-            <Settings size={16} />
+          <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              {user?.avatarUrl ? (
+                <AvatarImage src={user.avatarUrl} alt={user?.username || 'User'} />
+              ) : (
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials()}
+                </AvatarFallback>
+              )}
+            </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md">
@@ -117,6 +130,7 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
           )}
           {!isAdmin && (
             <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
+              <LayoutDashboard size={16} className="mr-2" />
               My Journey
             </DropdownMenuItem>
           )}
@@ -125,6 +139,7 @@ const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => 
             Profile Settings
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
+            <User size={16} className="mr-2" />
             Subscription
           </DropdownMenuItem>
           <DropdownMenuSeparator />

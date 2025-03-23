@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Home, LayoutDashboard } from 'lucide-react';
+import { ChevronRight, Home, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '../shared/Button';
-import { ChevronRight } from 'lucide-react';
 
 interface NavbarActionsProps {
   isMobile?: boolean;
@@ -29,6 +28,7 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
       <div className={isMobile ? "pt-2 space-y-2" : "hidden md:flex items-center space-x-4"}>
         <Link to="/signin">
           <Button variant="outline" fullWidth={isMobile} size={isMobile ? "md" : "md"}>
+            <LogIn size={16} className="mr-2" />
             Sign in
           </Button>
         </Link>
@@ -37,10 +37,11 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
             variant="primary"
             fullWidth={isMobile}
             size={isMobile ? "md" : "md"}
-            icon={<ChevronRight size={16} />}
-            iconPosition="right"
+            icon={<UserPlus size={16} />}
+            iconPosition="left"
           >
             Get Started
+            <ChevronRight size={16} className="ml-1" />
           </Button>
         </Link>
       </div>

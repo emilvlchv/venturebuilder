@@ -13,12 +13,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" attribute="class">
-        <AuthProvider>
-          <Router>
+        <Router>
+          <AuthProvider>
             <AppRoutes />
             <Toaster />
-          </Router>
-        </AuthProvider>
+          </AuthProvider>
+        </Router>
       </ThemeProvider>
     </QueryClientProvider>
   );

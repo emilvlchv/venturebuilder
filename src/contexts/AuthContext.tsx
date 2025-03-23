@@ -1,7 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { BusinessProfileData } from '@/utils/businessProfileUtils';
 
-type User = {
+type AuthUser = {
   id: string;
   firstName: string;
   lastName: string;
@@ -10,16 +13,18 @@ type User = {
   businessIdea?: string;
   businessProfileData?: BusinessProfileData;
   role?: 'admin' | 'user';
+  avatarUrl?: string;
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<void>;
-  logout: () => void;
-  updateUserInfo: (data: Partial<User>) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUserInfo: (data: Partial<AuthUser>) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 };
 
@@ -30,6 +35,16 @@ type SignupData = {
   email: string;
   password: string;
   role?: 'admin' | 'user';
+};
+
+type Profile = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  username: string | null;
+  business_idea: string | null;
+  avatar_url: string | null;
+  role: string;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,90 +58,96 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const initializeUsers = () => {
-    console.log('Initializing users');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    const adminExists = users.some((u: any) => u.email === 'admin@example.com');
-    
-    if (!adminExists) {
-      console.log('Admin user does not exist, creating...');
-      const adminUser = {
-        id: 'user_admin',
-        firstName: 'Admin',
-        lastName: 'User',
-        username: 'admin',
-        email: 'admin@example.com',
-        password: 'admin123',
-        role: 'admin'
-      };
-      
-      users.push(adminUser);
-      console.log('Admin user created');
-    } else {
-      console.log('Admin user already exists');
-    }
-    
-    const regularUserExists = users.some((u: any) => u.email === 'user@example.com');
-    
-    if (!regularUserExists) {
-      console.log('Regular user does not exist, creating...');
-      const regularUser = {
-        id: 'user_regular',
-        firstName: 'Regular',
-        lastName: 'User',
-        username: 'user',
-        email: 'user@example.com',
-        password: 'user123',
-        role: 'user',
-        businessIdea: 'E-commerce platform for handmade crafts'
-      };
-      
-      users.push(regularUser);
-      console.log('Regular user created');
-    } else {
-      console.log('Regular user already exists');
-    }
-    
-    localStorage.setItem('users', JSON.stringify(users));
-  };
-
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    
-    initializeUsers();
-    
-    setIsLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('Auth state changed:', event);
+        setSession(currentSession);
+        if (currentSession?.user) {
+          fetchUserProfile(currentSession.user);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          await fetchUserProfile(currentSession.user);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const fetchUserProfile = async (authUser: User) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      if (profile) {
+        const userProfile: AuthUser = {
+          id: profile.id,
+          firstName: profile.first_name || '',
+          lastName: profile.last_name || '',
+          username: profile.username || '',
+          email: authUser.email || '',
+          businessIdea: profile.business_idea || undefined,
+          role: (profile.role as 'admin' | 'user') || 'user',
+          avatarUrl: profile.avatar_url || undefined
+        };
+        
+        setUser(userProfile);
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       console.log(`Attempting to login with email: ${email}`);
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      console.log(`Found ${users.length} users in localStorage`);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      const foundUser = users.find((u: any) => 
-        u.email === email && u.password === password
-      );
-      
-      if (!foundUser) {
-        console.error('No matching user found');
-        throw new Error('Invalid email or password');
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
       }
       
-      console.log('Login successful for user:', foundUser.email);
-      
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      console.log('Login successful for user:', data.user?.email);
       
     } catch (error) {
       console.error('Login error:', error);
@@ -139,28 +160,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (userData: SignupData) => {
     try {
       setIsLoading(true);
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
       
-      if (users.some((u: any) => u.email === userData.email)) {
-        throw new Error('User with this email already exists');
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            username: userData.username,
+            role: userData.role || 'user'
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
       }
       
-      if (users.some((u: any) => u.username === userData.username)) {
-        throw new Error('Username is already taken');
-      }
-      
-      const newUser = {
-        ...userData,
-        id: `user_${Date.now()}`,
-        role: userData.role || 'user'
-      };
-      
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      console.log('Signup successful:', data);
       
     } catch (error) {
       console.error('Signup error:', error);
@@ -170,37 +189,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateUserInfo = async (data: Partial<User>) => {
+  const updateUserInfo = async (data: Partial<AuthUser>) => {
     try {
       setIsLoading(true);
-      if (!user) throw new Error('Not authenticated');
+      if (!user || !session) throw new Error('Not authenticated');
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const userIndex = users.findIndex((u: any) => u.id === user.id);
+      // Update profile in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          username: data.username,
+          business_idea: data.businessIdea
+        })
+        .eq('id', user.id);
       
-      if (userIndex === -1) throw new Error('User not found');
-      
-      if (data.username && data.username !== user.username) {
-        const usernameExists = users.some((u: any) => 
-          u.id !== user.id && u.username === data.username
-        );
-        if (usernameExists) throw new Error('Username is already taken');
+      if (error) {
+        console.error('Update user info error:', error);
+        throw error;
       }
       
-      if (data.email && data.email !== user.email) {
-        const emailExists = users.some((u: any) => 
-          u.id !== user.id && u.email === data.email
-        );
-        if (emailExists) throw new Error('Email is already in use');
-      }
-      
-      const updatedUser = { ...users[userIndex], ...data };
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      const { password: _, ...userWithoutPassword } = updatedUser;
+      // Update local user state
       setUser({ ...user, ...data });
-      localStorage.setItem('user', JSON.stringify({ ...user, ...data }));
       
     } catch (error) {
       console.error('Update user info error:', error);
@@ -213,19 +224,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePassword = async (currentPassword: string, newPassword: string) => {
     try {
       setIsLoading(true);
-      if (!user) throw new Error('Not authenticated');
+      if (!session) throw new Error('Not authenticated');
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const userIndex = users.findIndex((u: any) => u.id === user.id);
+      // First, verify the current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword
+      });
       
-      if (userIndex === -1) throw new Error('User not found');
-      
-      if (users[userIndex].password !== currentPassword) {
+      if (signInError) {
         throw new Error('Current password is incorrect');
       }
       
-      users[userIndex].password = newPassword;
-      localStorage.setItem('users', JSON.stringify(users));
+      // If sign-in succeeded, update the password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        throw error;
+      }
       
     } catch (error) {
       console.error('Update password error:', error);
@@ -235,16 +253,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+      }
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        session,
+        isAuthenticated: !!session,
         isLoading,
         login,
         signup,

@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const signInSchema = z.object({
   email: z.string()
@@ -20,9 +22,10 @@ const signInSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [authError, setAuthError] = React.useState<string | null>(null);
   
   // If user is already authenticated, redirect to journey page
   React.useEffect(() => {
@@ -41,6 +44,7 @@ const SignIn = () => {
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
+      setAuthError(null);
       await login(data.email, data.password);
       
       toast({
@@ -49,11 +53,12 @@ const SignIn = () => {
       });
       
       navigate('/journey');
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message || "Invalid email or password");
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid email or password",
+        description: error.message || "Invalid email or password",
       });
     }
   };
@@ -64,6 +69,13 @@ const SignIn = () => {
         <h1 className="text-3xl font-bold">Welcome back</h1>
         <p className="text-muted-foreground">Sign in to your account</p>
       </div>
+
+      {authError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{authError}</AlertDescription>
+        </Alert>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -95,8 +107,8 @@ const SignIn = () => {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
       </Form>

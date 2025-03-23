@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const signUpSchema = z.object({
   firstName: z.string()
@@ -38,9 +40,17 @@ const signUpSchema = z.object({
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
-  const { signup } = useAuth();
+  const { signup, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [authError, setAuthError] = React.useState<string | null>(null);
+  
+  // If user is already authenticated, redirect to profile page
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    }
+  }, [isAuthenticated, navigate]);
   
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -56,6 +66,7 @@ const SignUp = () => {
 
   const onSubmit = async (data: SignUpFormValues) => {
     try {
+      setAuthError(null);
       // Remove confirmPassword before sending
       const { confirmPassword, ...signupData } = data;
       
@@ -70,16 +81,16 @@ const SignUp = () => {
       
       toast({
         title: "Account created successfully",
-        description: "Welcome to VentureWayfinder!",
+        description: "Welcome to VentureWayfinder! Please check your email to verify your account.",
       });
       
-      // Redirect to profile page instead of journey
-      navigate('/profile');
-    } catch (error) {
+      // Don't redirect here - wait for auth state to change
+    } catch (error: any) {
+      setAuthError(error.message || "An unknown error occurred");
       toast({
         variant: "destructive",
         title: "Signup failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description: error.message || "An unknown error occurred",
       });
     }
   };
@@ -90,6 +101,13 @@ const SignUp = () => {
         <h1 className="text-3xl font-bold">Create an account</h1>
         <p className="text-muted-foreground">Enter your information to get started</p>
       </div>
+
+      {authError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{authError}</AlertDescription>
+        </Alert>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -179,8 +197,8 @@ const SignUp = () => {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Creating account..." : "Create account"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Creating account..." : "Create account"}
           </Button>
         </form>
       </Form>

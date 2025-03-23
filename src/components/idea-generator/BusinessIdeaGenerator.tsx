@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { 
   Select, 
@@ -18,7 +17,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { generateBusinessIdeas } from '@/utils/ideaGenerator';
+import { generateBusinessIdeas, IdeaInputs } from '@/utils/ideaGenerator';
 import { CategorySelector } from './CategorySelector';
 import { BusinessIdeaCard } from './BusinessIdeaCard';
 
@@ -53,7 +52,15 @@ const BusinessIdeaGenerator = () => {
     
     // Simulate API call delay
     setTimeout(() => {
-      const generatedIdeas = generateBusinessIdeas(values);
+      // Ensure all required fields are present before calling generateBusinessIdeas
+      const inputValues: IdeaInputs = {
+        passions: values.passions,
+        timePerWeek: values.timePerWeek,
+        budget: values.budget,
+        skills: values.skills,
+      };
+      
+      const generatedIdeas = generateBusinessIdeas(inputValues);
       setIdeas(generatedIdeas);
       setIsGenerating(false);
       setIsResultVisible(true);

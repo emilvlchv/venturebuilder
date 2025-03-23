@@ -6,7 +6,7 @@ type Passion = 'tech' | 'design' | 'fitness' | 'writing' | 'education' | 'gaming
 type Budget = 'low' | 'medium' | 'high';
 type Skill = 'creative' | 'analytical' | 'people' | 'technical';
 
-interface IdeaInputs {
+export interface IdeaInputs {
   passions: string[];
   timePerWeek: number;
   budget: string;

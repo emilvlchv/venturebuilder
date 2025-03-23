@@ -22,6 +22,7 @@ This roadmap outlines the planned development of VentureWayfinder, a platform de
 - [x] Enhance business data model with additional industry and stage information
 - [x] Build Business Idea Generator tool to help users explore startup opportunities
 - [x] Integrate Business Idea Generator on the homepage for improved accessibility
+- [x] Create Entrepreneur Type Quiz to help users identify their entrepreneurial strengths
 
 ## Phase 3: Enhanced Journey Management
 - [ ] Dynamic journey generation based on AI conversation
@@ -65,3 +66,4 @@ This roadmap outlines the planned development of VentureWayfinder, a platform de
 - Daria Lazarova: AI Trainer
 - Fandonov: Full Stack Developer
 - Dimitrina Pashova: Product Development
+

@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import BusinessIdeaGenerator from '@/components/idea-generator/BusinessIdeaGenerator';
+import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -28,6 +29,9 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <Features />
+        
+        {/* Entrepreneur Type Quiz Section */}
+        <EntrepreneurTypeSection />
         
         {/* Business Idea Generator Section */}
         <div id="idea-generator" className="py-16 md:py-24 scroll-mt-20">

@@ -8,6 +8,7 @@ import Privacy from '@/pages/Privacy';
 import SignIn from '@/pages/SignIn';
 import SignUp from '@/pages/SignUp';
 import Profile from '@/pages/Profile';
+import UserProfile from '@/pages/UserProfile';
 import Pricing from '@/pages/Pricing';
 import Payment from '@/pages/Payment';
 import Subscription from '@/pages/Subscription';
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       
       {/* Protected Routes */}
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/user-profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
       <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />

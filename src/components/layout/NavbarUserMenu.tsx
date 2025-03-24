@@ -1,17 +1,17 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { User, LogOut, Settings, Shield, LayoutDashboard } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import Button from '@/components/shared/Button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { User, LogOut, Settings, Award, Briefcase, BarChart } from 'lucide-react';
 
 interface NavbarUserMenuProps {
   isMobile?: boolean;
@@ -19,122 +19,82 @@ interface NavbarUserMenuProps {
 
 const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const isAdmin = user?.role === 'admin';
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-  };
-
-  const goToProfile = () => {
-    navigate('/profile');
-  };
-
-  const goToAdmin = () => {
-    navigate('/admin');
-  };
-
-  if (isMobile) {
-    return (
-      <div className="px-4 py-2 border-t border-border mt-2 pt-4">
-        <div className="flex items-center space-x-2 mb-4">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <User size={20} />
-          </div>
-          <div>
-            <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-            <p className="text-sm text-muted-foreground">@{user?.username}</p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Button 
-            variant="outline" 
-            fullWidth 
-            icon={<Settings size={16} />}
-            onClick={goToProfile}
-          >
-            Profile Settings
-          </Button>
-          <Button 
-            variant="outline" 
-            fullWidth 
-            onClick={handleLogout}
-            icon={<LogOut size={16} />}
-          >
-            Logout
-          </Button>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
+  const getInitials = () => {
+    return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`;
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      {isAdmin && !location.pathname.startsWith('/admin') && (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={goToAdmin}
-          icon={<LayoutDashboard size={16} />}
-          className="font-medium"
-        >
-          Admin Panel
-        </Button>
-      )}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={goToProfile}
-        icon={<User size={16} />}
-        className="font-medium"
-      >
-        My Account
-      </Button>
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="px-2">
-            <Settings size={16} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="z-50 bg-background border border-border shadow-md">
-          <div className="px-2 py-1.5">
-            <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-muted-foreground">@{user?.username}</p>
+    <DropdownMenu>
+      <DropdownMenuTrigger className="focus:outline-none" asChild>
+        <button className={`flex items-center gap-2 rounded-full transition ${isMobile ? 'w-full justify-start p-2' : ''}`}>
+          <Avatar className="h-9 w-9 border-2 border-primary/10">
+            <AvatarImage src={user.avatarUrl || ''} alt={user.firstName} />
+            <AvatarFallback className="bg-primary/5">{getInitials()}</AvatarFallback>
+          </Avatar>
+          {isMobile && (
+            <span className="ml-2 font-medium">{user.firstName} {user.lastName}</span>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={isMobile ? "center" : "end"} className="w-56">
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+            <p className="text-xs leading-none text-muted-foreground">@{user.username}</p>
           </div>
-          <DropdownMenuSeparator />
-          {isAdmin && (
-            <DropdownMenuItem onClick={goToAdmin} className="cursor-pointer">
-              <Shield size={16} className="mr-2" />
-              Admin Dashboard
-            </DropdownMenuItem>
-          )}
-          {!isAdmin && (
-            <DropdownMenuItem onClick={() => navigate('/journey')} className="cursor-pointer">
-              My Journey
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
-            <Settings size={16} className="mr-2" />
-            Profile Settings
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
-            Subscription
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
-            <LogOut size={16} className="mr-2" />
-            Logout
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/user-profile" className="cursor-pointer flex w-full items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/user-profile?tab=business" className="cursor-pointer flex w-full items-center">
+            <Briefcase className="mr-2 h-4 w-4" />
+            <span>Business Idea</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/user-profile?tab=progress" className="cursor-pointer flex w-full items-center">
+            <BarChart className="mr-2 h-4 w-4" />
+            <span>Progress Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/user-profile?tab=achievements" className="cursor-pointer flex w-full items-center">
+            <Award className="mr-2 h-4 w-4" />
+            <span>Achievements</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/subscription" className="cursor-pointer flex w-full items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Subscription</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

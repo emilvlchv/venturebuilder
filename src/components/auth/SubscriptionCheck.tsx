@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,25 +11,46 @@ interface SubscriptionCheckProps {
 }
 
 const SubscriptionCheck: React.FC<SubscriptionCheckProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
   
-  // For this demo, we'll simulate subscription status with localStorage
-  // In a real app, this would come from a backend API or user object
-  const hasSubscription = React.useMemo(() => {
-    // Check if user has an active subscription or is in trial period
-    const subscriptionData = localStorage.getItem('userSubscription');
-    if (!subscriptionData) return false;
-    
-    try {
-      const subscription = JSON.parse(subscriptionData);
-      // Check if subscription is active or in trial period
-      return subscription.status === 'active' || 
-             (subscription.trialEnd && new Date(subscription.trialEnd) > new Date());
-    } catch (e) {
-      return false;
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user?.id) {
+        setHasSubscription(false);
+        return;
+      }
+      
+      // Check if user has an active subscription or is in trial period
+      const subscriptionData = localStorage.getItem('userSubscription');
+      if (!subscriptionData) {
+        setHasSubscription(false);
+        return;
+      }
+      
+      try {
+        const subscription = JSON.parse(subscriptionData);
+        // Check if subscription is active or in trial period
+        const isValid = subscription.status === 'active' || 
+                     (subscription.trialEnd && new Date(subscription.trialEnd) > new Date());
+        setHasSubscription(isValid);
+      } catch (e) {
+        console.error("Error parsing subscription data:", e);
+        setHasSubscription(false);
+      }
     }
-  }, [user?.id]);
+  }, [user?.id, isLoading]);
+
+  console.log("SubscriptionCheck rendering:", { hasSubscription, userId: user?.id, isLoading });
+
+  if (isLoading || hasSubscription === null) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!hasSubscription) {
     return (
@@ -68,8 +89,7 @@ const SubscriptionCheck: React.FC<SubscriptionCheckProps> = ({ children }) => {
                   planId: 'starter'
                 }));
                 
-                // Reload the page to show the journey
-                window.location.reload();
+                setHasSubscription(true);
               }}
               className="w-full"
             >

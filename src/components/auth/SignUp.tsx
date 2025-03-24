@@ -27,6 +27,22 @@ const SignUp = () => {
     setAuthError(null);
   }, []);
 
+  // Set up auth state listener to capture errors
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_UP' && session) {
+        console.log('User signed up:', session.user);
+      }
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in:', session.user);
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
   console.log("SignUp rendering, auth state:", { isAuthenticated, isLoading });
   
   return (
@@ -57,10 +73,6 @@ const SignUp = () => {
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}/journey`}
-            onError={(error) => {
-              console.error("Auth error:", error);
-              setAuthError(error.message);
-            }}
             view="sign_up"
           />
         </CardContent>

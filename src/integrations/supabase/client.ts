@@ -14,10 +14,16 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true
   }
 });
 
 // Add event listener for auth state changes for debugging
 supabase.auth.onAuthStateChange((event, session) => {
-  console.info("Auth state changed:", event);
+  console.log("Auth state changed:", event, session ? 'User: ' + session.user?.email : 'No session');
+});
+
+// Add error handling
+supabase.auth.onError((error) => {
+  console.error("Supabase auth error:", error);
 });

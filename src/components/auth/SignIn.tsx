@@ -10,7 +10,7 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const SignIn = () => {
-  const { isAuthenticated, isLoading, login } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -31,6 +31,22 @@ const SignIn = () => {
   useEffect(() => {
     setAuthError(null);
   }, [location]);
+
+  // Set up auth state listener to capture errors
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'USER_UPDATED' && session) {
+        console.log('User updated:', session.user);
+      }
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in:', session.user);
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
 
   console.log("SignIn rendering, auth state:", { isAuthenticated, isLoading, redirectTo });
   
@@ -62,10 +78,6 @@ const SignIn = () => {
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}${redirectTo}`}
-            onError={(error) => {
-              console.error("Auth error:", error);
-              setAuthError(error.message);
-            }}
             view="sign_in"
           />
         </CardContent>

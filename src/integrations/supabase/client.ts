@@ -16,3 +16,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+
+// Add event listener for auth state changes for debugging
+supabase.auth.onAuthStateChange((event, session) => {
+  console.info("Auth state changed:", event);
+});

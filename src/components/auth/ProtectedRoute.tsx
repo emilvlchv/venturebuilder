@@ -14,6 +14,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   const { toast } = useToast();
   const location = useLocation();
 
+  console.log("ProtectedRoute rendering:", { isAuthenticated, isLoading, user, path: location.pathname });
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
@@ -34,7 +36,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-[calc(100vh-200px)]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );

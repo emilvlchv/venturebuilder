@@ -1,23 +1,33 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const SignUp = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState<string | null>(null);
   
   // If user is already authenticated, redirect to journey page
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
+      console.log("User is authenticated, redirecting to journey");
       navigate('/journey');
     }
   }, [isAuthenticated, navigate, isLoading]);
+  
+  // Clear error when component mounts
+  useEffect(() => {
+    setAuthError(null);
+  }, []);
+
+  console.log("SignUp rendering, auth state:", { isAuthenticated, isLoading });
   
   return (
     <div className="max-w-md w-full mx-auto p-6 space-y-6">
@@ -28,6 +38,13 @@ const SignUp = () => {
         </CardHeader>
         
         <CardContent>
+          {authError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+          
           <Auth
             supabaseClient={supabase}
             appearance={{ 
@@ -40,6 +57,10 @@ const SignUp = () => {
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}/journey`}
+            onError={(error) => {
+              console.error("Auth error:", error);
+              setAuthError(error.message);
+            }}
             view="sign_up"
           />
         </CardContent>

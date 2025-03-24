@@ -30,9 +30,6 @@ const SignUp = () => {
   // Set up auth state listener to capture errors
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_UP' && session) {
-        console.log('User signed up:', session.user);
-      }
       if (event === 'SIGNED_IN' && session) {
         console.log('User signed in:', session.user);
       }

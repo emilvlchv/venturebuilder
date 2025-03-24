@@ -1,5 +1,5 @@
+
 import React from 'react';
-import TaskCard from '@/components/journey/TaskCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PhaseSection from './PhaseSection';
 import { Task } from './types';

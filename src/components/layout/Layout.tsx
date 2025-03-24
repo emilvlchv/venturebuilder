@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children, showFooter = true }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow pt-24 pb-8 md:pt-32 md:pb-16">
+      <main className="flex-grow pt-16">
         {children}
       </main>
       {showFooter && <Footer />}

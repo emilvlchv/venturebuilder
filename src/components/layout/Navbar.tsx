@@ -52,12 +52,8 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="md:hidden flex items-center">
-            {isAuthenticated ? (
-              <NavbarUserMenu isMobile />
-            ) : (
-              <NavbarActions isMobile />
-            )}
+          <div className="md:hidden flex items-center space-x-2">
+            <NavbarActions isMobile />
             <MobileMenu isOpen={isMenuOpen} onToggle={toggleMenu} />
           </div>
         </div>
@@ -65,6 +61,11 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <NavbarLinks isMobile />
+            {isAuthenticated ? (
+              <NavbarUserMenu isMobile />
+            ) : (
+              <NavbarActions isMobile />
+            )}
           </div>
         )}
       </div>

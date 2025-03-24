@@ -1,13 +1,10 @@
 
 import React from 'react';
-import { ArrowRight, LogIn, UserPlus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../shared/Button';
-import { useAuth } from '@/contexts/AuthContext';
 
 const Hero = () => {
-  const { isAuthenticated } = useAuth();
-  
   return (
     <div className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
       {/* Background elements */}
@@ -35,36 +32,15 @@ const Hero = () => {
           
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in delay-[200ms]">
-            {isAuthenticated ? (
-              <Link to="/journey">
-                <Button 
-                  size="lg" 
-                  icon={<ArrowRight size={18} />} 
-                  iconPosition="right"
-                >
-                  Start Your Journey
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link to="/signup">
-                  <Button 
-                    size="lg" 
-                    icon={<UserPlus size={18} />} 
-                    iconPosition="left"
-                  >
-                    Sign Up
-                    <ArrowRight size={18} className="ml-1" />
-                  </Button>
-                </Link>
-                <Link to="/signin">
-                  <Button variant="outline" size="lg" icon={<LogIn size={18} />} iconPosition="left">
-                    Sign In
-                  </Button>
-                </Link>
-              </>
-            )}
-            
+            <Link to="/journey">
+              <Button 
+                size="lg" 
+                icon={<ArrowRight size={18} />} 
+                iconPosition="right"
+              >
+                Start Your Journey
+              </Button>
+            </Link>
             <Link to="#entrepreneur-quiz">
               <Button variant="outline" size="lg">
                 Find Your Entrepreneur Type

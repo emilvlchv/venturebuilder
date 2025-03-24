@@ -1,6 +1,10 @@
 
 import React from 'react';
-import { Menu, X } from 'lucide-react';
+import { X, Menu } from 'lucide-react';
+import NavbarLinks from './NavbarLinks';
+import NavbarUserMenu from './NavbarUserMenu';
+import NavbarActions from './NavbarActions';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -8,22 +12,39 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
-  return (
-    <div className="md:hidden ml-2">
+  const { isAuthenticated } = useAuth();
+
+  if (!isOpen) {
+    return (
       <button
         onClick={onToggle}
-        className="p-2 -mr-2 transition-all rounded-md hover:bg-muted focus:outline-none"
-        aria-expanded={isOpen}
-        aria-controls="mobile-menu"
-        aria-label={isOpen ? "Close menu" : "Open menu"}
+        className="md:hidden focus:outline-none"
+        aria-label="Toggle menu"
       >
-        {isOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <Menu className="w-6 h-6" />
-        )}
+        <Menu size={24} />
       </button>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        onClick={onToggle}
+        className="md:hidden focus:outline-none"
+        aria-label="Close menu"
+      >
+        <X size={24} />
+      </button>
+
+      <div className="md:hidden py-4 animate-fade-in">
+        <NavbarLinks isMobile />
+        {isAuthenticated ? (
+          <NavbarUserMenu isMobile />
+        ) : (
+          <NavbarActions isMobile />
+        )}
+      </div>
+    </>
   );
 };
 

@@ -7,8 +7,10 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
 interface NavbarLinksProps {
@@ -55,14 +57,13 @@ const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false }
       <NavigationMenuList>
         {navLinks.map((link) => (
           <NavigationMenuItem key={link.name}>
-            <Link
-              to={link.path}
-              className={cn(
-                "h-10 px-4 py-2 flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+            <Link to={link.path}>
+              <NavigationMenuLink className={cn(
+                navigationMenuTriggerStyle(),
                 location.pathname === link.path && "bg-accent/80 text-accent-foreground font-medium"
-              )}
-            >
-              {link.name}
+              )}>
+                {link.name}
+              </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
         ))}

@@ -1,9 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { BusinessProfileData } from '@/utils/businessProfileUtils';
-import { useToast } from '@/hooks/use-toast';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 type AuthUser = {
   id: string;
@@ -38,6 +37,16 @@ type SignupData = {
   role?: 'admin' | 'user';
 };
 
+type Profile = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  username: string | null;
+  business_idea: string | null;
+  avatar_url: string | null;
+  role: string;
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
@@ -52,45 +61,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log('Auth state changed:', event);
         setSession(currentSession);
-        
         if (currentSession?.user) {
-          await fetchUserProfile(currentSession.user);
-          
-          if (event === 'SIGNED_IN') {
-            toast({
-              title: "Successfully signed in",
-              description: "Welcome to VentureWayfinder!",
-            });
-            
-            // Get redirect URL from query params or default to journey
-            const params = new URLSearchParams(window.location.search);
-            const redirectTo = params.get('redirectTo') || '/journey';
-            navigate(redirectTo);
-          }
+          fetchUserProfile(currentSession.user);
         } else {
           setUser(null);
-          
-          if (event === 'SIGNED_OUT') {
-            toast({
-              title: "Signed out",
-              description: "You have been successfully signed out.",
-            });
-            navigate('/');
-          }
-        }
-
-        if (event !== 'INITIAL_SESSION') {
-          setIsLoading(false);
         }
       }
     );
@@ -117,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast, navigate]);
+  }, []);
 
   const fetchUserProfile = async (authUser: User) => {
     try {
@@ -163,11 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Login error:', error);
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: error.message,
-        });
         throw error;
       }
       
@@ -200,20 +176,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Signup error:', error);
-        toast({
-          variant: "destructive",
-          title: "Signup failed",
-          description: error.message,
-        });
         throw error;
       }
       
       console.log('Signup successful:', data);
-      
-      toast({
-        title: "Account created",
-        description: "Please check your email to verify your account.",
-      });
       
     } catch (error) {
       console.error('Signup error:', error);
@@ -241,21 +207,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Update user info error:', error);
-        toast({
-          variant: "destructive",
-          title: "Profile update failed",
-          description: error.message,
-        });
         throw error;
       }
       
       // Update local user state
       setUser({ ...user, ...data });
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
       
     } catch (error) {
       console.error('Update user info error:', error);
@@ -277,11 +233,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (signInError) {
-        toast({
-          variant: "destructive",
-          title: "Password update failed",
-          description: "Current password is incorrect",
-        });
         throw new Error('Current password is incorrect');
       }
       
@@ -291,18 +242,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Password update failed",
-          description: error.message,
-        });
         throw error;
       }
-      
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated.",
-      });
       
     } catch (error) {
       console.error('Update password error:', error);
@@ -317,11 +258,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
-        toast({
-          variant: "destructive",
-          title: "Sign out failed",
-          description: error.message,
-        });
       }
       setUser(null);
       setSession(null);

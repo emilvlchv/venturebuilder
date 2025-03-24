@@ -1,21 +1,26 @@
 
 import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProvider } from 'next-themes';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from './components/ui/toaster';
 import AppRoutes from './AppRoutes';
 import './App.css';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" attribute="class">
-      <Router>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" attribute="class">
         <AuthProvider>
-          <AppRoutes />
-          <Toaster />
+          <Router>
+            <AppRoutes />
+            <Toaster />
+          </Router>
         </AuthProvider>
-      </Router>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -21,10 +21,10 @@ interface NavbarLinksProps {
 const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false }) => {
   const location = useLocation();
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   
-  // For simplicity, we'll just use the same links regardless of user role
   const navLinks = [
-    { name: 'Journey', path: '/journey' },
+    { name: isAdmin ? 'Admin Panel' : 'Journey', path: isAdmin ? '/admin' : '/journey' },
     { name: 'Education', path: '/education' },
     { name: 'Community', path: '/community' },
     { name: 'Pricing', path: '/pricing' },

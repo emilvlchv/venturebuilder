@@ -4,7 +4,6 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
-import Testimonials from '@/components/home/Testimonials';
 import BusinessIdeaGenerator from '@/components/idea-generator/BusinessIdeaGenerator';
 import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,17 +12,24 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
-  const fromAdmin = location.state?.fromAdmin === true;
+  const isAdmin = user?.role === 'admin';
   
+  // Admin redirect logic
+  const fromAdmin = location.state?.fromAdmin === true;
+  const shouldRedirect = isAuthenticated && isAdmin && !fromAdmin;
+  
+  if (shouldRedirect) {
+    return <Navigate to="/admin" replace />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
         <Hero />
         <Features />
-        <Testimonials />
         
         {/* Interactive Tools Section */}
         <section className="py-16 md:py-24 bg-secondary/30">
@@ -57,15 +63,15 @@ const Index = () => {
         </section>
         
         {/* Admin welcome message */}
-        {fromAdmin && (
+        {isAdmin && fromAdmin && (
           <div className="container mx-auto px-4 sm:px-6 my-8">
             <Alert className="bg-primary/5 border-primary/20">
               <AlertTitle className="text-xl font-bold text-primary">
-                Welcome to the Main Site
+                Welcome to the Main Site, Administrator
               </AlertTitle>
               <AlertDescription className="text-muted-foreground">
-                You are currently viewing the main site. You can return to your
-                admin dashboard using the navigation bar.
+                You are currently viewing the main site as an administrator. You can return to your
+                admin dashboard using the "Admin Panel" button in the navigation bar.
               </AlertDescription>
             </Alert>
           </div>

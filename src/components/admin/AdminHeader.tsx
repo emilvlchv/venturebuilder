@@ -33,7 +33,7 @@ const AdminHeader: React.FC = () => {
             Main Site
           </Button>
           <div className="h-6 w-px bg-gray-200"></div>
-          <span className="text-sm text-gray-500">Welcome back, {user?.firstName}!</span>
+          <span className="text-sm text-gray-500">Welcome back, Admin</span>
         </div>
       </div>
     </header>

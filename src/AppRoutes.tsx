@@ -7,6 +7,7 @@ import Contact from '@/pages/Contact';
 import Privacy from '@/pages/Privacy';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import Journey from '@/pages/Journey';
 import BusinessIdeaGeneratorPage from '@/pages/BusinessIdeaGenerator';
 import NotFound from '@/pages/NotFound';
 
@@ -29,9 +30,10 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:postId" element={<BlogPost />} />
+      <Route path="/journey" element={<Journey />} />
       <Route path="/business-idea-generator" element={<BusinessIdeaGeneratorPage />} />
       
-      {/* Admin Routes - Moved to regular routes since there's no auth */}
+      {/* Admin Routes - No auth check for now */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<UserManagement />} />
@@ -43,6 +45,10 @@ const AppRoutes = () => {
         <Route path="security" element={<NotFound />} />
         <Route path="database" element={<NotFound />} />
       </Route>
+
+      {/* Placeholder routes for auth pages */}
+      <Route path="/signin" element={<NotFound />} />
+      <Route path="/signup" element={<NotFound />} />
 
       {/* 404 Page */}
       <Route path="*" element={<NotFound />} />

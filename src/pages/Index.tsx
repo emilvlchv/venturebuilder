@@ -13,18 +13,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 
 const Index = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
-  const isAdmin = user?.role === 'admin';
-  
-  // Admin redirect logic
   const fromAdmin = location.state?.fromAdmin === true;
-  const shouldRedirect = isAuthenticated && isAdmin && !fromAdmin;
   
-  if (shouldRedirect) {
-    return <Navigate to="/admin" replace />;
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -65,15 +57,15 @@ const Index = () => {
         </section>
         
         {/* Admin welcome message */}
-        {isAdmin && fromAdmin && (
+        {fromAdmin && (
           <div className="container mx-auto px-4 sm:px-6 my-8">
             <Alert className="bg-primary/5 border-primary/20">
               <AlertTitle className="text-xl font-bold text-primary">
-                Welcome to the Main Site, Administrator
+                Welcome to the Main Site
               </AlertTitle>
               <AlertDescription className="text-muted-foreground">
-                You are currently viewing the main site as an administrator. You can return to your
-                admin dashboard using the "Admin Panel" button in the navigation bar.
+                You are currently viewing the main site. You can return to your
+                admin dashboard using the navigation bar.
               </AlertDescription>
             </Alert>
           </div>

@@ -34,7 +34,7 @@ const SignUp = () => {
       
       if (event === 'SIGNED_IN' && session) {
         console.log('User signed in:', session.user);
-      } else if (event === 'SIGNED_UP' && session) {
+      } else if (event === 'USER_CREATED' && session) {
         console.log('User signed up:', session.user);
         setAuthError(null);
       } else if (event === 'USER_UPDATED') {

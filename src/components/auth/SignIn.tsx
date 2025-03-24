@@ -80,9 +80,6 @@ const SignIn = () => {
                   color: 'red' 
                 },
                 container: { gap: '8px' }
-              },
-              classes: {
-                message: 'text-sm font-medium text-destructive'
               }
             }}
             theme="light"
@@ -96,9 +93,7 @@ const SignIn = () => {
                   password_label: 'Password',
                   button_label: 'Sign in',
                   loading_button_label: 'Signing in...',
-                  link_text: 'Already have an account? Sign in',
-                  password_required: 'Please enter your password',
-                  email_required: 'Please enter your email address'
+                  link_text: 'Already have an account? Sign in'
                 }
               }
             }}

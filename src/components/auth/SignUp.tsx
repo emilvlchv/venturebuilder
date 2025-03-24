@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AuthChangeEvent } from '@supabase/supabase-js';
 
 const SignUp = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,7 +29,7 @@ const SignUp = () => {
 
   // Set up auth state listener to capture errors and events
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth event:", event);
       
       if (event === 'SIGNED_IN' && session) {
@@ -79,9 +78,6 @@ const SignUp = () => {
                   color: 'red' 
                 },
                 container: { gap: '8px' }
-              },
-              classes: {
-                message: 'text-sm font-medium text-destructive'
               }
             }}
             theme="light"
@@ -95,10 +91,7 @@ const SignUp = () => {
                   password_label: 'Password',
                   button_label: 'Sign up',
                   loading_button_label: 'Signing up...',
-                  link_text: 'Don\'t have an account? Sign up',
-                  password_required: 'Please enter a password',
-                  email_required: 'Please enter your email address',
-                  password_mismatch: 'Passwords do not match'
+                  link_text: 'Don\'t have an account? Sign up'
                 }
               }
             }}

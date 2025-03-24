@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { BusinessProfileData } from '@/utils/businessProfileUtils';
 
@@ -65,11 +65,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log('Auth state changed:', event);
         setSession(currentSession);
+        
         if (currentSession?.user) {
-          fetchUserProfile(currentSession.user);
+          await fetchUserProfile(currentSession.user);
         } else {
           setUser(null);
         }
@@ -129,6 +130,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

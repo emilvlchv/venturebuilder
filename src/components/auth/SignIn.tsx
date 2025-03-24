@@ -37,6 +37,12 @@ const SignIn = () => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         console.log('User signed in:', session.user);
+      } else if (event === 'USER_UPDATED') {
+        console.log('User updated');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        setAuthError('Please check your email to reset your password');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
       }
     });
 
@@ -70,12 +76,32 @@ const SignIn = () => {
               style: {
                 button: { background: 'hsl(var(--primary))', color: 'white' },
                 anchor: { color: 'hsl(var(--primary))' },
+                message: { 
+                  color: 'red' 
+                },
+                container: { gap: '8px' }
+              },
+              classes: {
+                message: 'text-sm font-medium text-destructive'
               }
             }}
             theme="light"
             providers={[]}
             redirectTo={`${window.location.origin}${redirectTo}`}
             view="sign_in"
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: 'Email address',
+                  password_label: 'Password',
+                  button_label: 'Sign in',
+                  loading_button_label: 'Signing in...',
+                  link_text: 'Already have an account? Sign in',
+                  password_required: 'Please enter your password',
+                  email_required: 'Please enter your email address'
+                }
+              }
+            }}
           />
         </CardContent>
         

@@ -10,11 +10,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, session } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
 
-  console.log("ProtectedRoute rendering:", { isAuthenticated, isLoading, user, path: location.pathname });
+  console.log("ProtectedRoute rendering:", { isAuthenticated, isLoading, user, session, path: location.pathname });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -34,6 +34,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     }
   }, [isLoading, isAuthenticated, adminOnly, user, toast]);
 
+  // While checking authentication status, show loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
@@ -42,15 +43,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     );
   }
 
+  // If not authenticated, redirect to signin page
   if (!isAuthenticated) {
     // Preserve the current URL to redirect back after login
     return <Navigate to={`/signin?redirectTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
+  // If page requires admin role and user is not admin, redirect to home
   if (adminOnly && user?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
+  // User is authenticated and has the necessary permissions
   return <>{children}</>;
 };
 

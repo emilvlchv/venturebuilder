@@ -34,7 +34,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     }
   }, [isLoading, isAuthenticated, adminOnly, user, toast]);
 
-  // While checking authentication status, show loading state
+  // Handle authentication and permission checks in a single pass
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
@@ -43,18 +43,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
     );
   }
 
-  // If not authenticated, redirect to signin page
+  // If not authenticated, redirect immediately
   if (!isAuthenticated) {
     // Preserve the current URL to redirect back after login
     return <Navigate to={`/signin?redirectTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
-  // If page requires admin role and user is not admin, redirect to home
+  // If page requires admin role and user is not admin, redirect immediately
   if (adminOnly && user?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
-  // User is authenticated and has the necessary permissions
+  // Only render children if all authentication and authorization checks pass
   return <>{children}</>;
 };
 

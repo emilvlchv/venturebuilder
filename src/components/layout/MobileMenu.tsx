@@ -2,9 +2,7 @@
 import React from 'react';
 import { X, Menu } from 'lucide-react';
 import NavbarLinks from './NavbarLinks';
-import NavbarUserMenu from './NavbarUserMenu';
 import NavbarActions from './NavbarActions';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -12,8 +10,6 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
-  const { isAuthenticated } = useAuth();
-
   if (!isOpen) {
     return (
       <button
@@ -38,11 +34,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
 
       <div className="md:hidden py-4 animate-fade-in">
         <NavbarLinks isMobile />
-        {isAuthenticated ? (
-          <NavbarUserMenu isMobile />
-        ) : (
-          <NavbarActions isMobile />
-        )}
+        <NavbarActions isMobile />
       </div>
     </>
   );

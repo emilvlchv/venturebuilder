@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
 import NavbarLogo from './NavbarLogo';
 import NavbarLinks from './NavbarLinks';
-import NavbarUserMenu from './NavbarUserMenu';
 import NavbarActions from './NavbarActions';
 import MobileMenu from './MobileMenu';
 
@@ -13,7 +11,6 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -45,11 +42,7 @@ const Navbar = () => {
           <NavbarLinks />
 
           <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
-              <NavbarUserMenu />
-            ) : (
-              <NavbarActions />
-            )}
+            <NavbarActions />
           </div>
 
           <div className="md:hidden flex items-center space-x-2">
@@ -61,11 +54,7 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <NavbarLinks isMobile />
-            {isAuthenticated ? (
-              <NavbarUserMenu isMobile />
-            ) : (
-              <NavbarActions isMobile />
-            )}
+            <NavbarActions isMobile />
           </div>
         )}
       </div>

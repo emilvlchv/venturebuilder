@@ -1,41 +1,16 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { UserProfileSettings } from '@/components/profile/UserProfileSettings';
 import { BusinessIdeaForm } from '@/components/profile/BusinessIdeaForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        variant: "destructive",
-        title: "Access denied",
-        description: "You need to sign in to access your profile.",
-      });
-      navigate('/signin');
-    }
-  }, [isLoading, isAuthenticated, toast, navigate]);
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container max-w-4xl mx-auto py-16 px-4 md:px-6 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return null;
   }
 

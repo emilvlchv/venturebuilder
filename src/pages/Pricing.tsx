@@ -1,201 +1,269 @@
-
-import React, { useState } from 'react';
-import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { formatCurrency } from '@/lib/stripe';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, X, Crown, Rocket, Leaf } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import Layout from '@/components/layout/Layout';
 
-const PricingTier = ({ 
-  title, 
-  price, 
-  annualPrice, 
-  isAnnual, 
-  features, 
-  priceId, 
-  recommended = false, 
-  onSelectPlan 
-}: { 
-  title: string; 
-  price: number; 
-  annualPrice: number; 
-  isAnnual: boolean; 
-  features: string[]; 
-  priceId: string; 
-  recommended?: boolean; 
-  onSelectPlan: (priceId: string) => void; 
-}) => {
-  const displayPrice = isAnnual ? annualPrice : price;
-  const savings = price * 12 - annualPrice;
-  
-  return (
-    <Card className={`flex flex-col ${recommended ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
-      {recommended && (
-        <div className="w-full bg-primary text-primary-foreground text-center py-2 text-sm font-medium rounded-t-lg">
-          RECOMMENDED
-        </div>
-      )}
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>
-          <div className="mt-4 flex items-baseline">
-            <span className="text-3xl font-bold tracking-tight">{formatCurrency(displayPrice)}</span>
-            <span className="ml-1 text-muted-foreground">{isAnnual ? '/year' : '/month'}</span>
-          </div>
-          {isAnnual && (
-            <p className="text-sm text-green-600 mt-2">
-              Save {formatCurrency(savings)} annually
-            </p>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <ul className="space-y-3">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-start">
-              <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-      <CardFooter>
-        <Button 
-          className="w-full" 
-          onClick={() => onSelectPlan(priceId)}
-          variant={recommended ? "default" : "outline"}
-        >
-          Get Started
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
+interface PricingFeature {
+  name: string;
+  included: boolean;
+}
+
+interface PricingPlan {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  price: number;
+  annualPrice?: number;
+  currency: string;
+  billingPeriod: string;
+  features: PricingFeature[];
+  highlighted?: boolean;
+  badge?: string;
+  ctaText: string;
+  priceId: string;
+  annualPriceId?: string;
+}
+
+const pricingPlans: PricingPlan[] = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    icon: <Leaf className="h-6 w-6 text-green-500" />,
+    description: 'Perfect for exploring entrepreneurship basics',
+    price: 10,
+    annualPrice: 9.5, // 5% discount
+    currency: '$',
+    billingPeriod: 'month',
+    features: [
+      { name: 'Basic personalized journey', included: true },
+      { name: 'Limited access to learning materials', included: true },
+      { name: 'Community forum access', included: true },
+      { name: 'Progress tracking', included: true },
+      { name: 'Advanced AI guidance', included: false },
+      { name: 'Mentorship sessions', included: false },
+      { name: 'Premium courses', included: false },
+      { name: 'Networking events', included: false },
+    ],
+    ctaText: 'Subscribe Now',
+    priceId: 'price_starter_monthly',
+    annualPriceId: 'price_starter_yearly'
+  },
+  {
+    id: 'growth',
+    name: 'Growth',
+    icon: <Rocket className="h-6 w-6 text-purple-500" />,
+    description: 'For serious entrepreneurs ready to scale',
+    price: 29,
+    annualPrice: 27.55, // 5% discount
+    currency: '$',
+    billingPeriod: 'month',
+    features: [
+      { name: 'Advanced personalized journey', included: true },
+      { name: 'Full access to learning materials', included: true },
+      { name: 'Community forum access', included: true },
+      { name: 'Detailed progress analytics', included: true },
+      { name: 'Advanced AI guidance', included: true },
+      { name: 'Monthly mentorship session', included: true },
+      { name: 'Premium courses', included: true },
+      { name: 'Networking events', included: false },
+    ],
+    highlighted: true,
+    badge: 'Most Popular',
+    ctaText: 'Subscribe Now',
+    priceId: 'price_growth_monthly',
+    annualPriceId: 'price_growth_yearly'
+  },
+  {
+    id: 'accelerate',
+    name: 'Accelerate',
+    icon: <Crown className="h-6 w-6 text-amber-500" />,
+    description: 'Complete support system for rapid growth',
+    price: 39,
+    annualPrice: 37.05, // 5% discount
+    currency: '$',
+    billingPeriod: 'month',
+    features: [
+      { name: 'Advanced personalized journey', included: true },
+      { name: 'Full access to learning materials', included: true },
+      { name: 'Priority community support', included: true },
+      { name: 'Detailed progress analytics', included: true },
+      { name: 'Advanced AI guidance', included: true },
+      { name: 'Weekly mentorship sessions', included: true },
+      { name: 'All premium courses', included: true },
+      { name: 'Exclusive networking events', included: true },
+    ],
+    badge: 'Best Value',
+    ctaText: 'Subscribe Now',
+    priceId: 'price_accelerate_monthly',
+    annualPriceId: 'price_accelerate_yearly'
+  },
+];
+
+const FeatureCheckmark = ({ included }: { included: boolean }) => (
+  included ? (
+    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+  ) : (
+    <X className="h-5 w-5 text-gray-300 flex-shrink-0" />
+  )
+);
 
 const Pricing = () => {
-  const [annualBilling, setAnnualBilling] = useState(true);
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  
-  const toggleBilling = () => {
-    setAnnualBilling(!annualBilling);
-  };
-  
-  const handleSelectPlan = (priceId: string) => {
-    if (!isAuthenticated) {
-      navigate('/signin?redirect=pricing');
-      return;
+  const [loadingPlan, setLoadingPlan] = React.useState<string | null>(null);
+  const [annualBilling, setAnnualBilling] = React.useState<boolean>(false);
+
+  const handleSubscription = async (plan: PricingPlan) => {
+    setLoadingPlan(plan.id);
+    
+    try {
+      navigate('/payment', {
+        state: {
+          plan: {
+            id: plan.id,
+            name: plan.name,
+            price: plan.price,
+            priceId: plan.priceId,
+            annualPrice: plan.annualPrice,
+            annualPriceId: plan.annualPriceId,
+            isAnnual: annualBilling
+          }
+        }
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Unable to process your subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
     }
-    navigate(`/payment?plan=${priceId}`);
   };
-  
-  const plans = [
-    {
-      title: "Starter",
-      price: 9.99,
-      annualPrice: 95.88, // 7.99 * 12
-      features: [
-        "3 AI-generated business ideas per month",
-        "Basic journey steps and templates",
-        "Access to educational articles and tutorials",
-        "Community access (read-only)",
-        "Email support"
-      ],
-      priceId: "price_starter_monthly",
-      annualPriceId: "price_starter_yearly"
-    },
-    {
-      title: "Professional",
-      price: 24.99,
-      annualPrice: 239.88, // 19.99 * 12
-      features: [
-        "Unlimited AI-generated business ideas",
-        "Advanced journeys with detailed steps",
-        "Full educational content access",
-        "Community participation",
-        "Priority email support",
-        "Business plan generation",
-        "1 custom journey per month"
-      ],
-      priceId: "price_professional_monthly",
-      annualPriceId: "price_professional_yearly",
-      recommended: true
-    },
-    {
-      title: "Enterprise",
-      price: 49.99,
-      annualPrice: 479.88, // 39.99 * 12
-      features: [
-        "Everything in Professional",
-        "Multiple business journeys",
-        "Team collaboration features",
-        "Educational video generation",
-        "Dedicated support manager",
-        "API access",
-        "Custom integrations"
-      ],
-      priceId: "price_enterprise_monthly",
-      annualPriceId: "price_enterprise_yearly"
-    }
-  ];
-  
+
   return (
     <Layout>
       <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl font-extrabold mb-4">Simple, Transparent Pricing</h1>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+            Invest in Your Entrepreneurial Journey
+          </h1>
           <p className="text-xl text-muted-foreground">
-            Choose the plan that's right for your entrepreneurial journey.
+            Choose a plan that fits your ambition level and access the tools, guidance, and community you need.
           </p>
-          
-          <div className="flex items-center justify-center mt-10">
-            <span className={`mr-3 ${!annualBilling ? 'font-bold' : 'text-muted-foreground'}`}>
-              Monthly
-            </span>
-            <Switch 
-              checked={annualBilling} 
-              onCheckedChange={toggleBilling} 
-              id="billing-toggle"
-            />
-            <Label 
-              htmlFor="billing-toggle" 
-              className={`ml-3 flex items-center ${annualBilling ? 'font-bold' : 'text-muted-foreground'}`}
+        </div>
+
+        <div className="flex justify-center mb-8">
+          <div className="bg-muted p-1 rounded-lg inline-flex items-center">
+            <button
+              onClick={() => setAnnualBilling(false)}
+              className={`px-4 py-2 rounded-md ${!annualBilling ? 'bg-white shadow-sm' : ''}`}
             >
-              Yearly
-              <span className="ml-2 py-0.5 px-1.5 text-xs bg-green-100 text-green-800 rounded font-medium">
-                Save 20%
-              </span>
-            </Label>
+              Monthly billing
+            </button>
+            <button
+              onClick={() => setAnnualBilling(true)}
+              className={`px-4 py-2 rounded-md ${annualBilling ? 'bg-white shadow-sm' : ''}`}
+            >
+              Annual billing <span className="text-green-600 font-medium">(-5%)</span>
+            </button>
           </div>
         </div>
-        
-        <div className="grid gap-6 lg:gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <PricingTier
-              key={plan.title}
-              title={plan.title}
-              price={plan.price}
-              annualPrice={plan.annualPrice}
-              isAnnual={annualBilling}
-              features={plan.features}
-              priceId={annualBilling ? plan.annualPriceId : plan.priceId}
-              recommended={plan.recommended}
-              onSelectPlan={handleSelectPlan}
-            />
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {pricingPlans.map((plan) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: pricingPlans.findIndex(p => p.id === plan.id) * 0.1 }}
+              className="flex"
+            >
+              <Card className={cn(
+                "flex flex-col w-full",
+                plan.highlighted && "border-primary shadow-lg relative",
+              )}>
+                {plan.badge && (
+                  <div className="absolute -top-3 right-0 left-0 flex justify-center">
+                    <Badge variant="default" className="bg-primary text-primary-foreground">
+                      {plan.badge}
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className={cn(
+                  "text-center pb-8",
+                  plan.highlighted && "bg-primary/5 rounded-t-lg"
+                )}>
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      {plan.icon}
+                    </div>
+                  </div>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription className="mt-1.5">{plan.description}</CardDescription>
+                  <div className="mt-6 flex items-baseline justify-center">
+                    <span className="text-5xl font-extrabold tracking-tight">
+                      {plan.currency}{annualBilling && plan.annualPrice ? plan.annualPrice : plan.price}
+                    </span>
+                    <span className="ml-1 text-muted-foreground">
+                      /{plan.billingPeriod}
+                    </span>
+                  </div>
+                  {annualBilling && plan.price > 0 && (
+                    <p className="mt-1 text-sm text-green-600">Billed annually (5% discount)</p>
+                  )}
+                </CardHeader>
+                
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <FeatureCheckmark included={feature.included} />
+                        <span className={cn(
+                          "ml-3",
+                          !feature.included && "text-muted-foreground"
+                        )}>
+                          {feature.name}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                
+                <CardFooter className="pt-4">
+                  <Button
+                    onClick={() => handleSubscription(plan)}
+                    variant={plan.highlighted ? "default" : "outline"}
+                    className="w-full"
+                    disabled={loadingPlan === plan.id}
+                  >
+                    {loadingPlan === plan.id ? (
+                      <span className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Processing...
+                      </span>
+                    ) : plan.ctaText}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
-        
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground mb-4">
-            All plans include a 7-day free trial. No credit card required.
+
+        <div className="mt-16 text-center max-w-2xl mx-auto">
+          <h3 className="text-2xl font-semibold mb-4">100% Satisfaction Guarantee</h3>
+          <p className="text-muted-foreground">
+            We're confident you'll love our platform. If you're not completely satisfied within 14 days, we'll refund your subscription - no questions asked.
           </p>
-          <Button variant="outline" onClick={() => handleSelectPlan("price_starter_monthly")}>
-            Start Your Free Trial
-          </Button>
         </div>
       </div>
     </Layout>

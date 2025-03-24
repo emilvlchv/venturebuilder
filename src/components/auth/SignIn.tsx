@@ -1,114 +1,114 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Link, useNavigate } from 'react-router-dom';
+
+const signInSchema = z.object({
+  email: z.string()
+    .email({ message: 'Please enter a valid email address' }),
+  password: z.string()
+    .min(1, { message: 'Password is required' }),
+});
+
+type SignInFormValues = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [authError, setAuthError] = useState<string | null>(null);
   
-  // Get redirect URL from query params or default to journey
-  const searchParams = new URLSearchParams(location.search);
-  const redirectTo = searchParams.get('redirectTo') || '/journey';
-  
-  // If user is already authenticated, redirect to journey page or specified redirect
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log("User is authenticated, redirecting to:", redirectTo);
-      navigate(redirectTo);
+  // If user is already authenticated, redirect to journey page
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/journey');
     }
-  }, [isAuthenticated, navigate, isLoading, redirectTo]);
+  }, [isAuthenticated, navigate]);
   
-  // Clear error when component mounts or location changes
-  useEffect(() => {
-    setAuthError(null);
-  }, [location]);
+  const form = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    }
+  });
 
-  // Set up auth state listener to capture errors
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        console.log('User signed in:', session.user);
-      } else if (event === 'USER_UPDATED') {
-        console.log('User updated');
-      } else if (event === 'PASSWORD_RECOVERY') {
-        setAuthError('Please check your email to reset your password');
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
-      }
-    });
+  const onSubmit = async (data: SignInFormValues) => {
+    try {
+      await login(data.email, data.password);
+      
+      toast({
+        title: "Welcome back!",
+        description: "You've successfully signed in.",
+      });
+      
+      navigate('/journey');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Invalid email or password",
+      });
+    }
+  };
 
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, []);
-
-  console.log("SignIn rendering, auth state:", { isAuthenticated, isLoading, redirectTo });
-  
   return (
     <div className="max-w-md w-full mx-auto p-6 space-y-6">
-      <Card className="w-full">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          {authError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{authError}</AlertDescription>
-            </Alert>
-          )}
-          
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ 
-              theme: ThemeSupa,
-              style: {
-                button: { background: 'hsl(var(--primary))', color: 'white' },
-                anchor: { color: 'hsl(var(--primary))' },
-                message: { 
-                  color: 'red' 
-                },
-                container: { gap: '8px' }
-              }
-            }}
-            theme="light"
-            providers={[]}
-            redirectTo={`${window.location.origin}${redirectTo}`}
-            view="sign_in"
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email address',
-                  password_label: 'Password',
-                  button_label: 'Sign in',
-                  loading_button_label: 'Signing in...',
-                  link_text: 'Already have an account? Sign in'
-                }
-              }
-            }}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold">Welcome back</h1>
+        <p className="text-muted-foreground">Sign in to your account</p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email address</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="john.doe@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </CardContent>
-        
-        <CardFooter className="text-center flex-col">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+          </Button>
+        </form>
+      </Form>
+
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline">
+            Sign up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };

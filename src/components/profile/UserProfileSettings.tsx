@@ -10,8 +10,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const profileFormSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters.' }),
@@ -34,10 +32,8 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export function UserProfileSettings() {
-  const { user, updateUserInfo, updatePassword, isLoading } = useAuth();
+  const { user, updateUserInfo, updatePassword } = useAuth();
   const { toast } = useToast();
-  const [profileError, setProfileError] = React.useState<string | null>(null);
-  const [passwordError, setPasswordError] = React.useState<string | null>(null);
 
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
@@ -49,18 +45,6 @@ export function UserProfileSettings() {
       email: user?.email || '',
     },
   });
-
-  // Reset form values when user changes
-  React.useEffect(() => {
-    if (user) {
-      profileForm.reset({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        username: user.username || '',
-        email: user.email || '',
-      });
-    }
-  }, [user, profileForm]);
 
   // Password form
   const passwordForm = useForm<PasswordFormValues>({
@@ -74,14 +58,12 @@ export function UserProfileSettings() {
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
     try {
-      setProfileError(null);
       await updateUserInfo(data);
       toast({
         title: "Profile updated",
         description: "Your profile information has been updated successfully.",
       });
     } catch (error: any) {
-      setProfileError(error.message || "Something went wrong.");
       toast({
         title: "Error updating profile",
         description: error.message || "Something went wrong.",
@@ -92,7 +74,6 @@ export function UserProfileSettings() {
 
   const onPasswordSubmit = async (data: PasswordFormValues) => {
     try {
-      setPasswordError(null);
       await updatePassword(data.currentPassword, data.newPassword);
       passwordForm.reset({
         currentPassword: '',
@@ -104,7 +85,6 @@ export function UserProfileSettings() {
         description: "Your password has been updated successfully.",
       });
     } catch (error: any) {
-      setPasswordError(error.message || "Something went wrong.");
       toast({
         title: "Error updating password",
         description: error.message || "Something went wrong.",
@@ -113,27 +93,11 @@ export function UserProfileSettings() {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="p-4 text-center">
-        <p>Please sign in to access your profile settings.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-10">
       {/* Profile Information */}
       <div>
         <h2 className="text-xl font-semibold mb-6">Profile Information</h2>
-        
-        {profileError && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{profileError}</AlertDescription>
-          </Alert>
-        )}
-        
         <Form {...profileForm}>
           <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -184,16 +148,13 @@ export function UserProfileSettings() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your email" type="email" {...field} disabled />
+                    <Input placeholder="Enter your email" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
-                  <p className="text-xs text-muted-foreground">Email address cannot be changed.</p>
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Profile"}
-            </Button>
+            <Button type="submit">Save Profile</Button>
           </form>
         </Form>
       </div>
@@ -203,14 +164,6 @@ export function UserProfileSettings() {
       {/* Password Update */}
       <div>
         <h2 className="text-xl font-semibold mb-6">Update Password</h2>
-        
-        {passwordError && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{passwordError}</AlertDescription>
-          </Alert>
-        )}
-        
         <Form {...passwordForm}>
           <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
             <FormField
@@ -254,9 +207,7 @@ export function UserProfileSettings() {
                 )}
               />
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update Password"}
-            </Button>
+            <Button type="submit">Update Password</Button>
           </form>
         </Form>
       </div>

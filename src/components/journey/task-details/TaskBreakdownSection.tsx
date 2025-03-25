@@ -24,10 +24,43 @@ const TaskBreakdownSection: React.FC<TaskBreakdownSectionProps> = ({
   newSubtasks
 }) => {
   const totalSubtasks = task.categories.reduce((sum, category) => sum + category.subtasks.length, 0);
+  
+  // Calculate overall completion percentage
+  const getCompletionPercentage = () => {
+    if (totalSubtasks === 0) return 0;
+    const completedSubtasks = task.categories.reduce(
+      (sum, category) => sum + category.subtasks.filter(s => s.completed).length,
+      0
+    );
+    return Math.round((completedSubtasks / totalSubtasks) * 100);
+  };
+  
+  const completionPercentage = getCompletionPercentage();
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border">
-      <h2 className="text-xl font-semibold mb-4">Task Breakdown</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Task Breakdown</h2>
+        {totalSubtasks > 0 && (
+          <div className="flex items-center gap-2">
+            <div className="w-24 h-2 rounded-full bg-gray-100 overflow-hidden">
+              <div 
+                className={`h-full ${
+                  completionPercentage >= 100 ? 'bg-green-500' : 
+                  completionPercentage >= 70 ? 'bg-emerald-500' :
+                  completionPercentage >= 30 ? 'bg-blue-500' :
+                  completionPercentage > 0 ? 'bg-amber-500' : 'bg-slate-200'
+                }`} 
+                style={{ 
+                  width: completionPercentage > 0 ? `${completionPercentage}%` : '100%', 
+                  opacity: completionPercentage > 0 ? 1 : 0.4 
+                }}
+              ></div>
+            </div>
+            <span className="text-sm font-medium">{completionPercentage}% Complete</span>
+          </div>
+        )}
+      </div>
       
       {task.categories.length === 0 && (
         <div className="flex items-center justify-center p-6 bg-muted/10 rounded-lg border border-dashed">

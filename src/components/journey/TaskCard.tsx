@@ -71,6 +71,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
     return Math.round((completedCount / category.subtasks.length) * 100);
   };
 
+  const getCategoryColorClass = (percentage: number) => {
+    if (percentage >= 100) return 'bg-green-500';
+    if (percentage >= 70) return 'bg-emerald-500';
+    if (percentage >= 30) return 'bg-blue-500';
+    if (percentage > 0) return 'bg-amber-500';
+    return 'bg-slate-200';
+  };
+
   const handleStatusChange = () => {
     const newStatus = task.status === 'completed' ? 'in-progress' : 'completed';
     onTaskStatusChange(task, newStatus);
@@ -265,25 +273,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </Button>
           </div>
           
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center justify-center w-full border transition-colors mt-2 ${isOpen ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
-            aria-expanded={isOpen}
-            aria-controls="subtasks-section"
-          >
-            {isOpen ? (
-              <>
-                <ChevronUp className="h-5 w-5 mr-2" /> Hide Subtasks
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-5 w-5 mr-2" /> Show Subtasks ({task.categories.flatMap(c => c.subtasks).length})
-              </>
-            )}
-          </Button>
-          
           {isOpen && (
             <div 
               id="subtasks-section" 
@@ -296,8 +285,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       <div className="flex items-center gap-2 text-left">
                         <Bookmark className="h-5 w-5 text-primary" />
                         <h4 className="font-medium text-lg">{category.title}</h4>
-                        <div className="ml-2 flex items-center gap-1.5">
-                          <Badge variant="outline" className="text-sm">
+                        <div className="ml-2 w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
+                          <div 
+                            className={`h-full ${getCategoryColorClass(getCategoryCompletionPercentage(category))}`} 
+                            style={{ 
+                              width: getCategoryCompletionPercentage(category) > 0 ? `${getCategoryCompletionPercentage(category)}%` : '100%', 
+                              opacity: getCategoryCompletionPercentage(category) > 0 ? 1 : 0.4 
+                            }}
+                          ></div>
+                        </div>
+                        <div className="ml-1 flex items-center gap-1.5">
+                          <Badge variant="outline" className={`text-sm ${getCategoryCompletionPercentage(category) > 0 ? 'bg-primary/10' : 'bg-slate-50'}`}>
                             <strong>{getCategoryCompletionPercentage(category)}%</strong> • {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
                           </Badge>
                         </div>

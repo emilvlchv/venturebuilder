@@ -45,6 +45,15 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
   const totalCount = category.subtasks.length;
   const completionPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  // Get the background color based on completion percentage
+  const getProgressColor = () => {
+    if (completionPercentage >= 100) return 'bg-green-500';
+    if (completionPercentage >= 70) return 'bg-emerald-500';
+    if (completionPercentage >= 30) return 'bg-blue-500';
+    if (completionPercentage > 0) return 'bg-amber-500';
+    return 'bg-slate-200'; // Light visible background for 0%
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white hover:shadow-md transition-shadow">
       <div 
@@ -54,9 +63,18 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
         <div className="flex items-center gap-2">
           <Bookmark className="h-5 w-5 text-primary" />
           <h4 className="font-medium text-base">{category.title}</h4>
+          <div className="ml-1 w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div 
+              className={`h-full ${getProgressColor()}`} 
+              style={{ 
+                width: completionPercentage > 0 ? `${completionPercentage}%` : '100%', 
+                opacity: completionPercentage > 0 ? 1 : 0.4 
+              }}
+            ></div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm bg-primary/10">
+          <Badge variant="outline" className={`text-sm ${completionPercentage > 0 ? 'bg-primary/10' : 'bg-slate-50'}`}>
             {completedCount}/{totalCount} ({completionPercentage}%)
           </Badge>
           {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}

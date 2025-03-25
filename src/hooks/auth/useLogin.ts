@@ -22,7 +22,7 @@ export const useLogin = () => {
             title: "Demo login successful",
             description: "You are now logged in as a demo user",
           });
-          return { user: { id: demoUser.id, email: demoUser.email }, error: null };
+          return { user: { id: demoUser.id, email: demoUser.email || '' }, error: null };
         }
       }
       
@@ -49,7 +49,7 @@ export const useLogin = () => {
         description: `Welcome back!`,
       });
       
-      return { user: data.user || null, error: null };
+      return { user: data.user ? { id: data.user.id, email: data.user.email || '' } : null, error: null };
     } catch (error) {
       console.error('Login error:', error);
       return { user: null, error: error as Error };

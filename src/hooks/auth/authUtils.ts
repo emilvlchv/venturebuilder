@@ -1,5 +1,7 @@
 
 import { User } from './authTypes';
+import { UserRole } from '@/hooks/useUserProfile';
+import { supabase } from '@/lib/supabase';
 
 // Demo users for development
 const demoUsers = {
@@ -9,7 +11,7 @@ const demoUsers = {
     firstName: 'Demo',
     lastName: 'User',
     username: 'demouser',
-    role: 'user',
+    role: 'user' as UserRole,
     isSubscribed: true,
     subscription: {
       planId: 'basic',
@@ -23,7 +25,7 @@ const demoUsers = {
     firstName: 'Admin',
     lastName: 'User',
     username: 'adminuser',
-    role: 'admin',
+    role: 'admin' as UserRole,
     isSubscribed: true,
     subscription: {
       planId: 'premium',
@@ -68,6 +70,29 @@ export const getDemoUser = (): User | null => {
   }
   
   return null;
+};
+
+/**
+ * Check if a username already exists in the system
+ */
+export const checkUsernameExists = async (username: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error checking username:', error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking username:', error);
+    return false;
+  }
 };
 
 /**

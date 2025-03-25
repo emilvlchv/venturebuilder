@@ -53,7 +53,10 @@ export const useSignup = () => {
         description: `Welcome to VentureWayfinder${userData.firstName ? ', ' + userData.firstName : ''}!`,
       });
       
-      return { user: data.user || null, error: null };
+      return { 
+        user: data.user ? { id: data.user.id, email: data.user.email || '' } : null, 
+        error: null 
+      };
     } catch (error) {
       console.error('Signup error:', error);
       return { user: null, error: error as Error };

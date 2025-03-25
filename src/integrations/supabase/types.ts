@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           business_idea: string | null
+          business_profile_data: Json | null
           created_at: string
           first_name: string | null
           id: string
@@ -24,6 +25,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           business_idea?: string | null
+          business_profile_data?: Json | null
           created_at?: string
           first_name?: string | null
           id: string
@@ -35,6 +37,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           business_idea?: string | null
+          business_profile_data?: Json | null
           created_at?: string
           first_name?: string | null
           id?: string

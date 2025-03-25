@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
@@ -8,6 +7,7 @@ import { BusinessIdeaData, Journey, Task } from './types';
 import { useNavigate } from 'react-router-dom';
 import { generateAITasks } from '@/utils/aiTaskGenerator';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
 
@@ -32,6 +32,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   });
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   
   useEffect(() => {
     console.log("Current step changed to:", currentStep);
@@ -50,10 +51,18 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     setTimeout(() => {
       console.log("Setting step to complete");
       setCurrentStep('complete');
-      toast({
-        title: "Journey Created",
-        description: "Your personalized business journey with AI-generated tasks is ready to view.",
-      });
+      
+      if (isAuthenticated) {
+        toast({
+          title: "Journey Created",
+          description: "Your personalized business journey with AI-generated tasks is ready to view.",
+        });
+      } else {
+        toast({
+          title: "Journey Created",
+          description: "Sign in or create an account to save your personalized business journey.",
+        });
+      }
     }, 2000);
   };
   
@@ -163,71 +172,100 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     
     try {
       if (businessData.businessIdea) {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          const userId = user.id;
-          
-          if (userId) {
-            // Initialize journey data structure if it doesn't exist
-            initializeJourneyData(userId, journeyId);
+        // For authenticated users, save the journey data
+        if (isAuthenticated && user?.id) {
+          const userData = localStorage.getItem('user');
+          if (userData) {
+            const user = JSON.parse(userData);
+            const userId = user.id;
             
-            // Update the user's business data
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const userIndex = users.findIndex((u: any) => u.id === userId);
-            if (userIndex !== -1) {
-              // Store business data in user profile
-              users[userIndex].businessIdea = businessData.businessIdea;
-              users[userIndex].businessData = {
-                solution: businessData.businessIdea,
-                targetMarket: businessData.targetCustomers,
-                stage: businessData.teamComposition,
-                industry: businessData.teamStrengths,
-                problem: businessData.teamWeaknesses,
-                revenueModel: businessData.revenueModel,
-              };
-              localStorage.setItem('users', JSON.stringify(users));
+            if (userId) {
+              // Initialize journey data structure if it doesn't exist
+              initializeJourneyData(userId, journeyId);
               
-              // Update current user session data
-              user.businessIdea = businessData.businessIdea;
-              user.businessData = {
-                solution: businessData.businessIdea,
-                targetMarket: businessData.targetCustomers,
-                stage: businessData.teamComposition,
-                industry: businessData.teamStrengths,
-                problem: businessData.teamWeaknesses,
-                revenueModel: businessData.revenueModel,
-              };
-              localStorage.setItem('user', JSON.stringify(user));
-            }
-            
-            // Update journey with business data
-            const journeysKey = `journeys_${userId}`;
-            const journeysData = localStorage.getItem(journeysKey);
-            if (journeysData) {
-              const journeys = JSON.parse(journeysData);
-              const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
+              // Update the user's business data
+              const users = JSON.parse(localStorage.getItem('users') || '[]');
+              const userIndex = users.findIndex((u: any) => u.id === userId);
+              if (userIndex !== -1) {
+                // Store business data in user profile
+                users[userIndex].businessIdea = businessData.businessIdea;
+                users[userIndex].businessData = {
+                  solution: businessData.businessIdea,
+                  targetMarket: businessData.targetCustomers,
+                  stage: businessData.teamComposition,
+                  industry: businessData.teamStrengths,
+                  problem: businessData.teamWeaknesses,
+                  revenueModel: businessData.revenueModel,
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Update current user session data
+                user.businessIdea = businessData.businessIdea;
+                user.businessData = {
+                  solution: businessData.businessIdea,
+                  targetMarket: businessData.targetCustomers,
+                  stage: businessData.teamComposition,
+                  industry: businessData.teamStrengths,
+                  problem: businessData.teamWeaknesses,
+                  revenueModel: businessData.revenueModel,
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+              }
               
-              if (journeyIndex !== -1) {
-                journeys[journeyIndex].businessIdeaData = businessData;
-                journeys[journeyIndex].progress = 15;
-                journeys[journeyIndex].updatedAt = new Date().toISOString();
-                localStorage.setItem(journeysKey, JSON.stringify(journeys));
+              // Update journey with business data
+              const journeysKey = `journeys_${userId}`;
+              const journeysData = localStorage.getItem(journeysKey);
+              if (journeysData) {
+                const journeys = JSON.parse(journeysData);
+                const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
                 
-                // Create AI-generated tasks
-                createDefaultTasks(userId, journeyId);
-                
-                setTimeout(() => {
-                  navigate(`/journey-details/${journeyId}`);
-                }, 100);
-                
-                if (onComplete) {
-                  onComplete(businessData);
+                if (journeyIndex !== -1) {
+                  journeys[journeyIndex].businessIdeaData = businessData;
+                  journeys[journeyIndex].progress = 15;
+                  journeys[journeyIndex].updatedAt = new Date().toISOString();
+                  localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                  
+                  // Create AI-generated tasks
+                  createDefaultTasks(userId, journeyId);
+                  
+                  setTimeout(() => {
+                    navigate(`/journey-details/${journeyId}`);
+                  }, 100);
+                  
+                  if (onComplete) {
+                    onComplete(businessData);
+                  }
+                  return;
+                } else {
+                  // Journey not found, create a new one
+                  const newJourney = {
+                    id: journeyId,
+                    title: "Your Entrepreneurial Journey",
+                    description: "A personalized roadmap to help you turn your business idea into reality.",
+                    businessIdeaData: businessData,
+                    progress: 15,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  };
+                  
+                  journeys.push(newJourney);
+                  localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                  
+                  // Create AI-generated tasks
+                  createDefaultTasks(userId, journeyId);
+                  
+                  setTimeout(() => {
+                    navigate(`/journey-details/${journeyId}`);
+                  }, 100);
+                  
+                  if (onComplete) {
+                    onComplete(businessData);
+                  }
+                  return;
                 }
-                return;
               } else {
-                // Journey not found, create a new one
-                const newJourney = {
+                // No journeys data found, create initial journeys array
+                const newJourneys = [{
                   id: journeyId,
                   title: "Your Entrepreneurial Journey",
                   description: "A personalized roadmap to help you turn your business idea into reality.",
@@ -235,10 +273,9 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   progress: 15,
                   createdAt: new Date().toISOString(),
                   updatedAt: new Date().toISOString()
-                };
+                }];
                 
-                journeys.push(newJourney);
-                localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                localStorage.setItem(journeysKey, JSON.stringify(newJourneys));
                 
                 // Create AI-generated tasks
                 createDefaultTasks(userId, journeyId);
@@ -252,42 +289,22 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 }
                 return;
               }
-            } else {
-              // No journeys data found, create initial journeys array
-              const newJourneys = [{
-                id: journeyId,
-                title: "Your Entrepreneurial Journey",
-                description: "A personalized roadmap to help you turn your business idea into reality.",
-                businessIdeaData: businessData,
-                progress: 15,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              }];
-              
-              localStorage.setItem(journeysKey, JSON.stringify(newJourneys));
-              
-              // Create AI-generated tasks
-              createDefaultTasks(userId, journeyId);
-              
-              setTimeout(() => {
-                navigate(`/journey-details/${journeyId}`);
-              }, 100);
-              
-              if (onComplete) {
-                onComplete(businessData);
-              }
-              return;
             }
           }
         }
+        
+        // For all users, notify the parent component
+        if (onComplete) {
+          onComplete(businessData);
+        }
+      } else {
+        console.error("Missing business idea data");
+        toast({
+          title: "Error",
+          description: "Could not complete journey. Missing business idea data.",
+          variant: "destructive"
+        });
       }
-      
-      console.error("Failed to update journey data");
-      toast({
-        title: "Error",
-        description: "An error occurred while saving your journey data.",
-        variant: "destructive"
-      });
     } catch (error) {
       console.error('Error saving business idea:', error);
       toast({
@@ -364,7 +381,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 icon={<ArrowRight size={16} />}
                 iconPosition="right"
               >
-                View My Journey
+                {isAuthenticated ? "View My Journey" : "Continue"}
               </Button>
             </div>
           </div>

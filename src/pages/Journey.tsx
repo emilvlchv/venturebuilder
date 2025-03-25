@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -24,6 +23,7 @@ const JourneyPage = () => {
   const [hasCompletedInitialChat, setHasCompletedInitialChat] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedStep, setSelectedStep] = useState<any>(null);
+  const [tempBusinessData, setTempBusinessData] = useState<any>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -94,61 +94,67 @@ const JourneyPage = () => {
   };
 
   const handleJourneyComplete = (data: any) => {
-    console.log("Journey complete callback triggered with data:", data);
-    setHasCompletedInitialChat(true);
-    
-    if (selectedJourneyId && user?.id) {
-      const journeysKey = `journeys_${user.id}`;
-      const journeysData = localStorage.getItem(journeysKey);
+    if (isAuthenticated) {
+      console.log("Journey complete callback triggered with data:", data);
+      setHasCompletedInitialChat(true);
       
-      if (journeysData) {
-        try {
-          const journeys = JSON.parse(journeysData);
-          const updatedJourneys = journeys.map((journey: Journey) => {
-            if (journey.id === selectedJourneyId) {
-              return {
-                ...journey,
-                businessIdeaData: {
-                  ...data,
-                  solution: data.businessIdea || data.solution,
-                  targetMarket: data.targetCustomers || data.targetMarket,
-                  stage: data.teamComposition || data.stage,
-                  industry: data.teamStrengths || data.industry,
-                  problem: data.teamWeaknesses || data.problem
-                },
-                progress: Math.max(journey.progress, 15),
-                updatedAt: new Date().toISOString()
-              };
-            }
-            return journey;
-          });
-          
-          localStorage.setItem(journeysKey, JSON.stringify(updatedJourneys));
-          
-          const updatedJourney = updatedJourneys.find((j: Journey) => j.id === selectedJourneyId);
-          if (updatedJourney) {
-            setSelectedJourney(updatedJourney);
-          }
-          
-          if (selectedJourneyId) {
-            const journeyDetailsPath = `/journey-details/${selectedJourneyId}`;
-            console.log("Navigating to:", journeyDetailsPath);
-            navigate(journeyDetailsPath);
+      if (selectedJourneyId && user?.id) {
+        const journeysKey = `journeys_${user.id}`;
+        const journeysData = localStorage.getItem(journeysKey);
+        
+        if (journeysData) {
+          try {
+            const journeys = JSON.parse(journeysData);
+            const updatedJourneys = journeys.map((journey: Journey) => {
+              if (journey.id === selectedJourneyId) {
+                return {
+                  ...journey,
+                  businessIdeaData: {
+                    ...data,
+                    solution: data.businessIdea || data.solution,
+                    targetMarket: data.targetCustomers || data.targetMarket,
+                    stage: data.teamComposition || data.stage,
+                    industry: data.teamStrengths || data.industry,
+                    problem: data.teamWeaknesses || data.problem
+                  },
+                  progress: Math.max(journey.progress, 15),
+                  updatedAt: new Date().toISOString()
+                };
+              }
+              return journey;
+            });
             
+            localStorage.setItem(journeysKey, JSON.stringify(updatedJourneys));
+            
+            const updatedJourney = updatedJourneys.find((j: Journey) => j.id === selectedJourneyId);
+            if (updatedJourney) {
+              setSelectedJourney(updatedJourney);
+            }
+            
+            if (selectedJourneyId) {
+              const journeyDetailsPath = `/journey-details/${selectedJourneyId}`;
+              console.log("Navigating to:", journeyDetailsPath);
+              navigate(journeyDetailsPath);
+              
+              toast({
+                title: "Journey Updated",
+                description: "Your journey has been updated with your business information.",
+              });
+            }
+          } catch (error) {
+            console.error("Error updating journey:", error);
             toast({
-              title: "Journey Updated",
-              description: "Your journey has been updated with your business information.",
+              title: "Error",
+              description: "An error occurred while updating your journey.",
+              variant: "destructive"
             });
           }
-        } catch (error) {
-          console.error("Error updating journey:", error);
-          toast({
-            title: "Error",
-            description: "An error occurred while updating your journey.",
-            variant: "destructive"
-          });
         }
       }
+    } else {
+      console.log("Unauthenticated user completed journey wizard with data:", data);
+      setTempBusinessData(data);
+      setHasCompletedInitialChat(true);
     }
   };
 
@@ -183,22 +189,39 @@ const JourneyPage = () => {
             </p>
           </div>
           
-          {!isAuthenticated ? (
+          {!hasCompletedInitialChat ? (
+            <div className="max-w-6xl mx-auto">
+              <JourneyWizard 
+                onComplete={handleJourneyComplete} 
+                journeyId={selectedJourneyId || "temp-journey"}
+              />
+            </div>
+          ) : !isAuthenticated ? (
             <div className="max-w-md mx-auto text-center">
               <Card className="p-6 mb-6">
                 <h3 className="text-xl font-semibold mb-4">Sign In to Access Your Journey</h3>
                 <p className="mb-6">
-                  To create and manage your personalized entrepreneurial journey, please sign in or create an account.
+                  To save your progress and access your personalized entrepreneurial journey, please sign in or create an account.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
-                    onClick={() => navigate('/signin', { state: { from: location.pathname } })}
+                    onClick={() => navigate('/signin', { 
+                      state: { 
+                        from: location.pathname,
+                        businessData: tempBusinessData
+                      } 
+                    })}
                     variant="default"
                   >
                     Sign In
                   </Button>
                   <Button 
-                    onClick={() => navigate('/signup', { state: { from: location.pathname } })}
+                    onClick={() => navigate('/signup', { 
+                      state: { 
+                        from: location.pathname,
+                        businessData: tempBusinessData
+                      } 
+                    })}
                     variant="outline"
                   >
                     Create Account
@@ -243,27 +266,20 @@ const JourneyPage = () => {
                       </p>
                     </div>
                     
-                    {!hasCompletedInitialChat ? (
-                      <JourneyWizard 
-                        onComplete={handleJourneyComplete} 
-                        journeyId={selectedJourneyId}
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <Card className="p-6 mb-6">
-                          <h3 className="text-xl font-semibold mb-4">Journey in Progress</h3>
-                          <p className="mb-6">
-                            Your journey is underway! View the detailed steps and progress in the Journey Details page.
-                          </p>
-                          <Button 
-                            onClick={handleViewJourneyDetails}
-                            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                          >
-                            View Journey Details
-                          </Button>
-                        </Card>
-                      </div>
-                    )}
+                    <div className="text-center">
+                      <Card className="p-6 mb-6">
+                        <h3 className="text-xl font-semibold mb-4">Journey in Progress</h3>
+                        <p className="mb-6">
+                          Your journey is underway! View the detailed steps and progress in the Journey Details page.
+                        </p>
+                        <Button 
+                          onClick={handleViewJourneyDetails}
+                          className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                        >
+                          View Journey Details
+                        </Button>
+                      </Card>
+                    </div>
                   </>
                 )}
               </div>

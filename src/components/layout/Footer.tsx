@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +17,7 @@ const Footer = () => {
     {
       title: 'Company',
       links: [
-        { name: 'About Us', path: '/about' },
+        { name: 'About', path: '/about' },
         { name: 'Contact', path: '/contact' },
         { name: 'Privacy Policy', path: '/privacy' },
       ],

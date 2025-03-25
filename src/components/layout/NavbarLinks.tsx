@@ -6,9 +6,9 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
@@ -27,7 +27,7 @@ const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false, 
     { name: 'Education', path: '/education' },
     { name: 'Community', path: '/community' },
     { name: 'Pricing', path: '/pricing' },
-    { name: 'About Us', path: '/about' },
+    { name: 'About', path: '/about' },
   ];
 
   if (isMobile) {
@@ -56,14 +56,14 @@ const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false, 
       <NavigationMenuList>
         {navLinks.map((link) => (
           <NavigationMenuItem key={link.name}>
-            <Link to={link.path}>
-              <NavigationMenuLink className={cn(
-                navigationMenuTriggerStyle(),
-                location.pathname === link.path && "bg-accent/80 text-accent-foreground font-medium"
-              )}>
+            <NavigationMenuLink asChild className={cn(
+              navigationMenuTriggerStyle(),
+              location.pathname === link.path && "bg-accent/80 text-accent-foreground font-medium"
+            )}>
+              <Link to={link.path}>
                 {link.name}
-              </NavigationMenuLink>
-            </Link>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
         ))}
       </NavigationMenuList>

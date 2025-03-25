@@ -1,332 +1,76 @@
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
-import { User, UserRole } from './useUserProfile';
+import { User } from './useUserProfile';
+import { SignupData } from './auth/authTypes';
+import { useLogin } from './auth/useLogin';
+import { useSignup } from './auth/useSignup';
+import { useLogout } from './auth/useLogout';
+import { useProfileUpdate } from './auth/useProfileUpdate';
+import { usePasswordUpdate } from './auth/usePasswordUpdate';
 
-export type SignupData = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
-  role?: UserRole;
-};
+// Re-export types
+export type { SignupData };
 
 /**
  * Hook providing authentication methods for login, signup, logout, etc.
+ * This is a composite hook that combines specialized authentication hooks.
  */
 export const useAuthMethods = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
+  const { login: performLogin, isLoading: loginLoading } = useLogin();
+  const { signup: performSignup, isLoading: signupLoading } = useSignup();
+  const { logout: performLogout, isLoading: logoutLoading } = useLogout();
+  const { updateUserInfo: performUpdateUserInfo, isLoading: updateInfoLoading } = useProfileUpdate();
+  const { updatePassword: performUpdatePassword, isLoading: updatePasswordLoading } = usePasswordUpdate();
+  
+  // Overall loading state
+  const isLoading = loginLoading || signupLoading || logoutLoading || updateInfoLoading || updatePasswordLoading;
+  
+  // Main login method
   const login = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      console.log(`Attempting to login with email: ${email}`);
-      
-      // For demo purposes, handle hardcoded demo credentials
-      if (process.env.NODE_ENV === 'development') {
-        // Demo user account
-        if (email === 'user@example.com' && password === 'password123') {
-          // Mock successful login for demo user
-          localStorage.setItem('demo_user', JSON.stringify({
-            id: 'demo_user_id',
-            email: 'user@example.com',
-            firstName: 'Demo',
-            lastName: 'User',
-            username: 'demouser',
-            role: 'user'
-          }));
-          
-          toast({
-            title: "Login successful",
-            description: `Welcome back, Demo User!`,
-          });
-          
-          return;
-        }
-        
-        // Demo admin account
-        if (email === 'admin@example.com' && password === 'password123') {
-          // Mock successful login for demo admin
-          localStorage.setItem('demo_user', JSON.stringify({
-            id: 'demo_admin_id',
-            email: 'admin@example.com',
-            firstName: 'Demo',
-            lastName: 'Admin',
-            username: 'demoadmin',
-            role: 'admin'
-          }));
-          
-          toast({
-            title: "Login successful",
-            description: `Welcome back, Demo Admin!`,
-          });
-          
-          return;
-        }
-      }
-      
-      // Regular Supabase authentication for non-demo users
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error('Login error:', error.message);
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: error.message || "Invalid email or password. Please try again.",
-        });
-        throw error;
-      }
-      
-      console.log('Login successful for user:', data.user?.email);
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome back!`,
-      });
-      
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    const result = await performLogin(email, password);
+    if (result.error) {
+      throw result.error;
     }
   };
-
+  
+  // Main signup method
   const signup = async (userData: SignupData) => {
-    try {
-      setIsLoading(true);
-      
-      // Check if username already exists in the profiles table
-      const { data: existingProfiles, error: usernameCheckError } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', userData.username);
-      
-      if (usernameCheckError) {
-        console.error('Error checking username:', usernameCheckError);
-        throw usernameCheckError;
-      }
-      
-      if (existingProfiles && existingProfiles.length > 0) {
-        toast({
-          variant: "destructive",
-          title: "Signup failed",
-          description: "This username is already taken. Please choose a different username.",
-        });
-        throw new Error('Username is already taken');
-      }
-      
-      // Sign up with Supabase auth
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            username: userData.username,
-          },
-        },
-      });
-      
-      if (error) {
-        console.error('Signup error:', error.message);
-        toast({
-          variant: "destructive",
-          title: "Signup failed",
-          description: error.message,
-        });
-        throw error;
-      }
-      
-      // The profile will be created automatically by the database trigger
-      // we don't need to manually create it here
-      
-      toast({
-        title: "Account created successfully",
-        description: `Welcome to VentureWayfinder${userData.firstName ? ', ' + userData.firstName : ''}!`,
-      });
-      
-    } catch (error) {
-      console.error('Signup error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    const result = await performSignup(userData);
+    if (result.error) {
+      throw result.error;
     }
   };
-
+  
+  // Main logout method
   const logout = async () => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Logout error:', error.message);
-        toast({
-          variant: "destructive",
-          title: "Logout failed",
-          description: error.message,
-        });
-        throw error;
-      }
-      
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully.",
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    const result = await performLogout();
+    if (result.error) {
+      throw result.error;
     }
   };
-
+  
+  // Main update user info method
   const updateUserInfo = async (user: User, data: Partial<User>) => {
-    try {
-      setIsLoading(true);
-      
-      // Check if username is unique if it's being updated
-      if (data.username && data.username !== user.username) {
-        const { data: existingProfiles, error: usernameCheckError } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('username', data.username);
-        
-        if (usernameCheckError) {
-          console.error('Error checking username:', usernameCheckError);
-          throw usernameCheckError;
-        }
-        
-        if (existingProfiles && existingProfiles.length > 0) {
-          toast({
-            variant: "destructive",
-            title: "Update failed",
-            description: "This username is already taken. Please choose a different one.",
-          });
-          throw new Error('Username is already taken');
-        }
-      }
-      
-      // Update user metadata in auth if email is changing
-      if (data.email && data.email !== user.email) {
-        const { error: updateAuthError } = await supabase.auth.updateUser({
-          email: data.email,
-        });
-        
-        if (updateAuthError) {
-          console.error('Error updating auth email:', updateAuthError);
-          toast({
-            variant: "destructive",
-            title: "Update failed",
-            description: updateAuthError.message,
-          });
-          throw updateAuthError;
-        }
-      }
-      
-      // Update profile in the profiles table
-      const updates: Record<string, any> = {
-        ...(data.firstName && { first_name: data.firstName }),
-        ...(data.lastName && { last_name: data.lastName }),
-        ...(data.username && { username: data.username }),
-        ...(data.businessIdea && { business_idea: data.businessIdea }),
-        updated_at: new Date().toISOString(),
-      };
-      
-      // Only add business_profile_data if it exists in data
-      if (data.businessProfileData) {
-        updates.business_profile_data = data.businessProfileData;
-      }
-      
-      const { error: updateProfileError } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-      
-      if (updateProfileError) {
-        console.error('Error updating profile:', updateProfileError);
-        toast({
-          variant: "destructive",
-          title: "Update failed",
-          description: updateProfileError.message,
-        });
-        throw updateProfileError;
-      }
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-      
-    } catch (error) {
-      console.error('Update user info error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    const result = await performUpdateUserInfo(user, data);
+    if (result.error) {
+      throw result.error;
     }
   };
-
+  
+  // Main update password method
   const updatePassword = async (user: User, currentPassword: string, newPassword: string) => {
-    try {
-      setIsLoading(true);
-      
-      // First verify the current password by trying to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: currentPassword,
-      });
-      
-      if (signInError) {
-        toast({
-          variant: "destructive",
-          title: "Password update failed",
-          description: "Current password is incorrect. Please try again.",
-        });
-        throw new Error('Current password is incorrect');
-      }
-      
-      // Update the password
-      const { error: updatePasswordError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      
-      if (updatePasswordError) {
-        console.error('Error updating password:', updatePasswordError);
-        toast({
-          variant: "destructive",
-          title: "Password update failed",
-          description: updatePasswordError.message,
-        });
-        throw updatePasswordError;
-      }
-      
-      toast({
-        title: "Password updated",
-        description: "Your password has been changed successfully.",
-      });
-      
-    } catch (error) {
-      console.error('Update password error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+    const result = await performUpdatePassword(user, currentPassword, newPassword);
+    if (result.error) {
+      throw result.error;
     }
   };
-
+  
   return {
     login,
     signup,
     logout,
     updateUserInfo,
     updatePassword,
-    isLoading,
+    isLoading
   };
 };

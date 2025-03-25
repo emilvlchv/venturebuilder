@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -64,6 +63,8 @@ const SignIn = () => {
   const loginWithDemoAccount = async (email: string, password: string) => {
     try {
       setLoginError(null);
+      form.setValue('email', email);
+      form.setValue('password', password);
       await login(email, password);
       // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {

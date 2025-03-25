@@ -84,8 +84,9 @@ export function ProgressDashboard() {
   const recentlyCompletedTasks = tasks
     .filter(task => task.status === 'completed')
     .sort((a, b) => {
-      const dateA = a.isCompleted ? new Date(a.isCompleted).getTime() : 0;
-      const dateB = b.isCompleted ? new Date(b.isCompleted).getTime() : 0;
+      // Fixed: Check if isCompleted is a string/date before using it with Date constructor
+      const dateA = typeof a.isCompleted === 'string' ? new Date(a.isCompleted).getTime() : 0;
+      const dateB = typeof b.isCompleted === 'string' ? new Date(b.isCompleted).getTime() : 0;
       return dateB - dateA;
     })
     .slice(0, 3);
@@ -165,7 +166,7 @@ export function ProgressDashboard() {
                   <div>
                     <div className="font-medium text-sm">{task.title}</div>
                     <div className="text-xs text-muted-foreground">
-                      {task.isCompleted ? new Date(task.isCompleted).toLocaleDateString() : 'Recently'}
+                      {typeof task.isCompleted === 'string' ? new Date(task.isCompleted).toLocaleDateString() : 'Recently'}
                     </div>
                   </div>
                 </div>

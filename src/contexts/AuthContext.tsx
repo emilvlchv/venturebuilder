@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { BusinessProfileData } from '@/utils/businessProfileUtils';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 type User = {
   id: string;
@@ -21,7 +22,7 @@ type AuthContextType = {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUserInfo: (data: Partial<User>) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 };
@@ -48,105 +49,124 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const { toast } = useToast();
 
-  const initializeUsers = () => {
-    console.log('Initializing users');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    const adminExists = users.some((u: any) => u.email === 'admin@example.com');
-    
-    if (!adminExists) {
-      console.log('Admin user does not exist, creating...');
-      const adminUser = {
-        id: 'user_admin',
-        firstName: 'Admin',
-        lastName: 'User',
-        username: 'admin',
-        email: 'admin@example.com',
-        password: 'admin123',
-        role: 'admin'
-      };
-      
-      users.push(adminUser);
-      console.log('Admin user created');
-    } else {
-      console.log('Admin user already exists');
-    }
-    
-    const regularUserExists = users.some((u: any) => u.email === 'user@example.com');
-    
-    if (!regularUserExists) {
-      console.log('Regular user does not exist, creating...');
-      const regularUser = {
-        id: 'user_regular',
-        firstName: 'Regular',
-        lastName: 'User',
-        username: 'user',
-        email: 'user@example.com',
-        password: 'user123',
-        role: 'user',
-        businessIdea: 'E-commerce platform for handmade crafts'
-      };
-      
-      users.push(regularUser);
-      console.log('Regular user created');
-    } else {
-      console.log('Regular user already exists');
-    }
-    
-    localStorage.setItem('users', JSON.stringify(users));
-  };
-
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        console.log('User session restored:', parsedUser.email);
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('user');
+    // Get initial session
+    const initialSession = async () => {
+      setIsLoading(true);
+      
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        setIsLoading(false);
+        return;
       }
-    }
-    
-    initializeUsers();
-    
-    setIsLoading(false);
+      
+      setSession(session);
+      
+      if (session?.user) {
+        setSupabaseUser(session.user);
+        await fetchUserProfile(session.user);
+      }
+      
+      setIsLoading(false);
+    };
+
+    initialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
+        setSupabaseUser(session?.user || null);
+        
+        if (session?.user) {
+          await fetchUserProfile(session.user);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      // Fetch user profile from profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      if (data) {
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          firstName: data.first_name || '',
+          lastName: data.last_name || '',
+          username: data.username || '',
+          businessIdea: data.business_idea || '',
+          businessProfileData: data.business_profile_data,
+          role: data.role || 'user',
+        });
+      } else {
+        // If profile doesn't exist yet, just use basic info from auth
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          firstName: '',
+          lastName: '',
+          username: '',
+          role: 'user',
+        });
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       console.log(`Attempting to login with email: ${email}`);
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      console.log(`Found ${users.length} users in localStorage`);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      const foundUser = users.find((u: any) => 
-        u.email === email && u.password === password
-      );
-      
-      if (!foundUser) {
-        console.error('No matching user found');
+      if (error) {
+        console.error('Login error:', error.message);
         toast({
           variant: "destructive",
           title: "Login failed",
-          description: "Invalid email or password. Please try again.",
+          description: error.message || "Invalid email or password. Please try again.",
         });
-        throw new Error('Invalid email or password');
+        throw error;
       }
       
-      console.log('Login successful for user:', foundUser.email);
+      if (!data.user) {
+        throw new Error('No user returned from login');
+      }
       
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      console.log('Login successful for user:', data.user.email);
       
       toast({
         title: "Login successful",
-        description: `Welcome back, ${foundUser.firstName}!`,
+        description: `Welcome back!`,
       });
       
     } catch (error) {
@@ -160,18 +180,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (userData: SignupData) => {
     try {
       setIsLoading(true);
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
       
-      if (users.some((u: any) => u.email === userData.email)) {
-        toast({
-          variant: "destructive",
-          title: "Signup failed",
-          description: "A user with this email already exists. Please use a different email.",
-        });
-        throw new Error('User with this email already exists');
+      // Check if username already exists in the profiles table
+      const { data: existingProfiles, error: usernameCheckError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', userData.username);
+      
+      if (usernameCheckError) {
+        console.error('Error checking username:', usernameCheckError);
+        throw usernameCheckError;
       }
       
-      if (users.some((u: any) => u.username === userData.username)) {
+      if (existingProfiles && existingProfiles.length > 0) {
         toast({
           variant: "destructive",
           title: "Signup failed",
@@ -180,18 +201,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Username is already taken');
       }
       
-      const newUser = {
-        ...userData,
-        id: `user_${Date.now()}`,
-        role: userData.role || 'user'
-      };
+      // Sign up with Supabase auth
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+          },
+        },
+      });
       
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
+      if (error) {
+        console.error('Signup error:', error.message);
+        toast({
+          variant: "destructive",
+          title: "Signup failed",
+          description: error.message,
+        });
+        throw error;
+      }
       
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      if (!data.user) {
+        throw new Error('No user returned from signup');
+      }
+      
+      // Create user profile in the profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: data.user.id,
+            username: userData.username,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+            role: userData.role || 'user',
+          },
+        ]);
+      
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        toast({
+          variant: "destructive",
+          title: "Profile creation failed",
+          description: "Your account was created but we couldn't set up your profile. Please contact support.",
+        });
+        
+        // We still continue as the auth account was created successfully
+      }
       
       toast({
         title: "Account created successfully",
@@ -206,10 +265,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error.message);
+        toast({
+          variant: "destructive",
+          title: "Logout failed",
+          description: error.message,
+        });
+        throw error;
+      }
+      
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully.",
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const updateUserInfo = async (data: Partial<User>) => {
     try {
       setIsLoading(true);
-      if (!user) {
+      if (!user || !supabaseUser) {
         toast({
           variant: "destructive",
           title: "Update failed",
@@ -218,23 +304,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Not authenticated');
       }
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const userIndex = users.findIndex((u: any) => u.id === user.id);
-      
-      if (userIndex === -1) {
-        toast({
-          variant: "destructive",
-          title: "Update failed",
-          description: "User not found. Please logout and login again.",
-        });
-        throw new Error('User not found');
-      }
-      
+      // Check if username is unique if it's being updated
       if (data.username && data.username !== user.username) {
-        const usernameExists = users.some((u: any) => 
-          u.id !== user.id && u.username === data.username
-        );
-        if (usernameExists) {
+        const { data: existingProfiles, error: usernameCheckError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', data.username);
+        
+        if (usernameCheckError) {
+          console.error('Error checking username:', usernameCheckError);
+          throw usernameCheckError;
+        }
+        
+        if (existingProfiles && existingProfiles.length > 0) {
           toast({
             variant: "destructive",
             title: "Update failed",
@@ -244,27 +326,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       
+      // Update user metadata in auth if email is changing
       if (data.email && data.email !== user.email) {
-        const emailExists = users.some((u: any) => 
-          u.id !== user.id && u.email === data.email
-        );
-        if (emailExists) {
+        const { error: updateAuthError } = await supabase.auth.updateUser({
+          email: data.email,
+        });
+        
+        if (updateAuthError) {
+          console.error('Error updating auth email:', updateAuthError);
           toast({
             variant: "destructive",
             title: "Update failed",
-            description: "This email is already in use. Please use a different one.",
+            description: updateAuthError.message,
           });
-          throw new Error('Email is already in use');
+          throw updateAuthError;
         }
       }
       
-      const updatedUser = { ...users[userIndex], ...data };
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
+      // Update profile in the profiles table
+      const updates = {
+        ...(data.firstName && { first_name: data.firstName }),
+        ...(data.lastName && { last_name: data.lastName }),
+        ...(data.username && { username: data.username }),
+        ...(data.businessIdea && { business_idea: data.businessIdea }),
+        ...(data.businessProfileData && { business_profile_data: data.businessProfileData }),
+        updated_at: new Date(),
+      };
       
-      const { password: _, ...userWithoutPassword } = updatedUser;
+      const { error: updateProfileError } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+      
+      if (updateProfileError) {
+        console.error('Error updating profile:', updateProfileError);
+        toast({
+          variant: "destructive",
+          title: "Update failed",
+          description: updateProfileError.message,
+        });
+        throw updateProfileError;
+      }
+      
+      // Update local state
       setUser({ ...user, ...data });
-      localStorage.setItem('user', JSON.stringify({ ...user, ...data }));
       
       toast({
         title: "Profile updated",
@@ -282,7 +387,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePassword = async (currentPassword: string, newPassword: string) => {
     try {
       setIsLoading(true);
-      if (!user) {
+      if (!user || !supabaseUser) {
         toast({
           variant: "destructive",
           title: "Password update failed",
@@ -291,19 +396,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Not authenticated');
       }
       
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const userIndex = users.findIndex((u: any) => u.id === user.id);
+      // First verify the current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
       
-      if (userIndex === -1) {
-        toast({
-          variant: "destructive",
-          title: "Password update failed",
-          description: "User not found. Please logout and login again.",
-        });
-        throw new Error('User not found');
-      }
-      
-      if (users[userIndex].password !== currentPassword) {
+      if (signInError) {
         toast({
           variant: "destructive",
           title: "Password update failed",
@@ -312,8 +411,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Current password is incorrect');
       }
       
-      users[userIndex].password = newPassword;
-      localStorage.setItem('users', JSON.stringify(users));
+      // Update the password
+      const { error: updatePasswordError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      
+      if (updatePasswordError) {
+        console.error('Error updating password:', updatePasswordError);
+        toast({
+          variant: "destructive",
+          title: "Password update failed",
+          description: updatePasswordError.message,
+        });
+        throw updatePasswordError;
+      }
       
       toast({
         title: "Password updated",
@@ -326,15 +437,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
   };
 
   return (

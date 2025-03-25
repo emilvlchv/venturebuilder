@@ -48,28 +48,18 @@ const SignIn = () => {
     try {
       await login(data.email, data.password);
       
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully signed in.",
-      });
-      
-      // Navigate to the page they tried to access, or journey page if they came directly to login
-      navigate(from, { replace: true });
+      // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
-      // Error handling is done in the AuthContext
+      // Error handling is now done in the AuthContext
       console.error("Login submission error:", error);
     }
   };
 
-  // Demo account quick login buttons
-  const loginWithDemoAccount = async (role: 'user' | 'admin') => {
+  // Demo account quick login buttons for development
+  const loginWithDemoAccount = async (email: string, password: string) => {
     try {
-      if (role === 'admin') {
-        await login('admin@example.com', 'admin123');
-      } else {
-        await login('user@example.com', 'user123');
-      }
-      navigate(from, { replace: true });
+      await login(email, password);
+      // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
       console.error("Demo login error:", error);
     }
@@ -127,33 +117,37 @@ const SignIn = () => {
         </form>
       </Form>
       
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => loginWithDemoAccount('user')}
-        >
-          Demo User
-        </Button>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => loginWithDemoAccount('admin')}
-        >
-          Demo Admin
-        </Button>
-      </div>
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Dev mode login options
+              </span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => loginWithDemoAccount('user@example.com', 'Password123!')}
+            >
+              Demo User
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => loginWithDemoAccount('admin@example.com', 'Password123!')}
+            >
+              Demo Admin
+            </Button>
+          </div>
+        </>
+      )}
 
       <div className="text-center">
         <p className="text-sm text-muted-foreground">

@@ -34,11 +34,16 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         
-        {/* Waitlist Call to Action Section - Moved right below Hero */}
-        <section className="py-16 bg-brand-secondary">
+        {/* Waitlist Call to Action Section - Enhanced to stand out more */}
+        <section className="py-20 bg-brand-accent text-white shadow-lg">
           <div className="container mx-auto px-4 sm:px-6 text-center">
-            <h2 className="h3 mb-6">Ready to start your entrepreneurial journey?</h2>
-            <WaitlistButton size="lg" className="shadow-md">Join the Waitlist →</WaitlistButton>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">Ready to start your entrepreneurial journey?</h2>
+            <WaitlistButton 
+              size="lg" 
+              className="shadow-xl text-lg py-6 px-10 rounded-xl hover:scale-105 transition-transform"
+            >
+              Join the Waitlist →
+            </WaitlistButton>
           </div>
         </section>
         

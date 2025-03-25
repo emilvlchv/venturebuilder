@@ -34,6 +34,14 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         
+        {/* Waitlist Call to Action Section - Moved right below Hero */}
+        <section className="py-16 bg-brand-secondary">
+          <div className="container mx-auto px-4 sm:px-6 text-center">
+            <h2 className="h3 mb-6">Ready to start your entrepreneurial journey?</h2>
+            <WaitlistButton size="lg" className="shadow-md">Join the Waitlist →</WaitlistButton>
+          </div>
+        </section>
+        
         {/* Social Proof Section */}
         <SocialProof />
         
@@ -41,14 +49,6 @@ const Index = () => {
         
         {/* Testimonials Section */}
         <Testimonials />
-        
-        {/* Waitlist Call to Action Section */}
-        <section className="py-16 bg-brand-secondary">
-          <div className="container mx-auto px-4 sm:px-6 text-center">
-            <h2 className="h3 mb-6">Ready to start your entrepreneurial journey?</h2>
-            <WaitlistButton size="lg" className="shadow-md">Join the Waitlist →</WaitlistButton>
-          </div>
-        </section>
         
         {/* Interactive Tools Section */}
         <section id="interactive-tools" className="py-16 md:py-24 bg-secondary/30 scroll-mt-20">

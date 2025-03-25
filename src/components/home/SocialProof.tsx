@@ -36,33 +36,6 @@ const SocialProof = () => {
             <p className="text-muted-foreground">Success Rate</p>
           </div>
         </div>
-        
-        <div className="mt-16 text-center">
-          <h3 className="text-lg font-medium mb-6">Featured In</h3>
-          <div className="flex justify-center flex-wrap gap-8 items-center opacity-70">
-            <div className="grayscale hover:grayscale-0 transition-all">
-              <img 
-                src="/lovable-uploads/e992d80e-c485-491a-90a1-e77c7f9a396d.png" 
-                alt="Forbes" 
-                className="h-8 object-contain"
-              />
-            </div>
-            <div className="grayscale hover:grayscale-0 transition-all">
-              <img 
-                src="/lovable-uploads/cae0f508-f4c9-45e7-ab61-8073354f43fa.png" 
-                alt="TechCrunch" 
-                className="h-8 object-contain" 
-              />
-            </div>
-            <div className="grayscale hover:grayscale-0 transition-all">
-              <img 
-                src="/lovable-uploads/4e9daaea-6b6d-4f93-9b88-36c9f40790b8.png" 
-                alt="Entrepreneur" 
-                className="h-8 object-contain" 
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

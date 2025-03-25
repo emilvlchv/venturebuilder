@@ -48,7 +48,8 @@ const JourneyManager: React.FC<JourneyManagerProps> = ({ onSelectJourney }) => {
           description: "This is a demo journey for exploration",
           progress: 25,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          status: 'active' // Add the required status property
         }
       ]);
     }
@@ -66,7 +67,8 @@ const JourneyManager: React.FC<JourneyManagerProps> = ({ onSelectJourney }) => {
           description: "A personalized roadmap to help you turn your business idea into reality.",
           progress: 0,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          status: 'active' // Add the required status property
         };
         
         const journeysKey = `journeys_${user.id}`;

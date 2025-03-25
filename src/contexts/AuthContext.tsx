@@ -66,7 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const defaultUser = {
           id: uuidv4(),
           email: 'dev@example.com',
-          fullName: 'Development User',
+          firstName: 'Development', // Changed from fullName to firstName
+          lastName: 'User', // Added lastName
+          username: 'devuser', // Added username
           role: 'user' as UserRole,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

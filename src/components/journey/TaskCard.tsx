@@ -295,7 +295,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                           ></div>
                         </div>
                         <div className="ml-1 flex items-center gap-1.5">
-                          <Badge variant="outline" className={`text-sm ${getCategoryCompletionPercentage(category) > 0 ? 'bg-primary/10' : 'bg-slate-50'}`}>
+                          <Badge variant="outline" className={`text-sm ${getCategoryCompletionPercentage(category) > 0 ? 'bg-primary/10' : 'bg-slate-50'} text-foreground`}>
                             <strong>{getCategoryCompletionPercentage(category)}%</strong> • {category.subtasks.filter(s => s.completed).length}/{category.subtasks.length}
                           </Badge>
                         </div>

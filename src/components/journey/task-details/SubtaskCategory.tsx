@@ -74,7 +74,7 @@ const SubtaskCategory: React.FC<SubtaskCategoryProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={`text-sm ${completionPercentage > 0 ? 'bg-primary/10' : 'bg-slate-50'}`}>
+          <Badge variant="outline" className={`text-sm ${completionPercentage > 0 ? 'bg-primary/10' : 'bg-slate-50'} text-foreground`}>
             {completedCount}/{totalCount} ({completionPercentage}%)
           </Badge>
           {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}

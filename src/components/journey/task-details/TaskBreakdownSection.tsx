@@ -57,7 +57,7 @@ const TaskBreakdownSection: React.FC<TaskBreakdownSectionProps> = ({
                 }}
               ></div>
             </div>
-            <span className="text-sm font-medium">{completionPercentage}% Complete</span>
+            <span className="text-sm font-medium text-foreground">{completionPercentage}% Complete</span>
           </div>
         )}
       </div>

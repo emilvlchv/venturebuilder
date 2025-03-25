@@ -69,18 +69,15 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
   const createDefaultTasks = (userId: string, journeyId: string) => {
     const tasksKey = `tasks_${userId}_${journeyId}`;
     
-    // Generate AI tasks based on the user's business data
     let formattedTasks: Task[] = [];
     
     if (businessData.businessIdea) {
-      // Generate personalized AI tasks
       const aiTasks = generateAITasks(businessData);
       console.log("Generated AI tasks:", aiTasks);
       
       if (aiTasks && aiTasks.length > 0) {
         formattedTasks = [...aiTasks];
       } else {
-        // Fallback to standard tasks if AI tasks couldn't be generated
         console.log("Using standard tasks as fallback");
         formattedTasks = getStandardTasks();
       }
@@ -88,13 +85,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       formattedTasks = getStandardTasks();
     }
     
-    // Save tasks to localStorage
     localStorage.setItem(tasksKey, JSON.stringify(formattedTasks));
     return formattedTasks;
   };
   
   const getStandardTasks = (): Task[] => {
-    // Standard fallback tasks if AI generation fails
     return [
       {
         id: 'task1',
@@ -119,13 +114,12 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
             collapsed: false
           }
         ],
-        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
+        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
       }
     ];
   };
   
   const initializeJourneyData = (userId: string, journeyId: string) => {
-    // Check if journey data already exists
     const journeysKey = `journeys_${userId}`;
     let journeys = [];
     
@@ -137,11 +131,9 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
       journeys = [];
     }
     
-    // Check if this journey exists
     const journeyExists = journeys.some((j: Journey) => j.id === journeyId);
     
     if (!journeyExists) {
-      // Create a new journey entry
       const newJourney = {
         id: journeyId,
         title: "Your Entrepreneurial Journey",
@@ -172,7 +164,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     
     try {
       if (businessData.businessIdea) {
-        // For authenticated users, save the journey data
         if (isAuthenticated && user?.id) {
           const userData = localStorage.getItem('user');
           if (userData) {
@@ -180,14 +171,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
             const userId = user.id;
             
             if (userId) {
-              // Initialize journey data structure if it doesn't exist
               initializeJourneyData(userId, journeyId);
               
-              // Update the user's business data
               const users = JSON.parse(localStorage.getItem('users') || '[]');
               const userIndex = users.findIndex((u: any) => u.id === userId);
               if (userIndex !== -1) {
-                // Store business data in user profile
                 users[userIndex].businessIdea = businessData.businessIdea;
                 users[userIndex].businessData = {
                   solution: businessData.businessIdea,
@@ -199,7 +187,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 };
                 localStorage.setItem('users', JSON.stringify(users));
                 
-                // Update current user session data
                 user.businessIdea = businessData.businessIdea;
                 user.businessData = {
                   solution: businessData.businessIdea,
@@ -212,7 +199,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 localStorage.setItem('user', JSON.stringify(user));
               }
               
-              // Update journey with business data
               const journeysKey = `journeys_${userId}`;
               const journeysData = localStorage.getItem(journeysKey);
               if (journeysData) {
@@ -225,7 +211,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   journeys[journeyIndex].updatedAt = new Date().toISOString();
                   localStorage.setItem(journeysKey, JSON.stringify(journeys));
                   
-                  // Create AI-generated tasks
                   createDefaultTasks(userId, journeyId);
                   
                   setTimeout(() => {
@@ -237,7 +222,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   }
                   return;
                 } else {
-                  // Journey not found, create a new one
                   const newJourney = {
                     id: journeyId,
                     title: "Your Entrepreneurial Journey",
@@ -251,7 +235,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   journeys.push(newJourney);
                   localStorage.setItem(journeysKey, JSON.stringify(journeys));
                   
-                  // Create AI-generated tasks
                   createDefaultTasks(userId, journeyId);
                   
                   setTimeout(() => {
@@ -264,7 +247,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                   return;
                 }
               } else {
-                // No journeys data found, create initial journeys array
                 const newJourneys = [{
                   id: journeyId,
                   title: "Your Entrepreneurial Journey",
@@ -277,7 +259,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 
                 localStorage.setItem(journeysKey, JSON.stringify(newJourneys));
                 
-                // Create AI-generated tasks
                 createDefaultTasks(userId, journeyId);
                 
                 setTimeout(() => {
@@ -293,7 +274,6 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
           }
         }
         
-        // For all users, notify the parent component
         if (onComplete) {
           onComplete(businessData);
         }

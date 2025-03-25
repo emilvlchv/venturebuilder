@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User } from 'lucide-react';
+import { Send, User, Rocket } from 'lucide-react';
 import { BusinessIdeaData } from './types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface ChatMessage {
   sender: 'user' | 'assistant';
@@ -119,9 +120,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     if (message.sender === 'assistant') {
       return (
         <div key={index} className="flex items-start space-x-3 max-w-3xl animate-fade-in">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0">
-            AI
-          </div>
+          <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex-shrink-0">
+            <AvatarFallback className="flex items-center justify-center">
+              <Rocket size={16} />
+            </AvatarFallback>
+          </Avatar>
           <div className="glass p-4 rounded-xl rounded-tl-none">
             <p className="text-foreground">{message.text}</p>
           </div>
@@ -148,9 +151,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         
         {isTyping && (
           <div className="flex items-start space-x-3 animate-fade-in">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0">
-              AI
-            </div>
+            <Avatar className="h-8 w-8 bg-primary text-primary-foreground flex-shrink-0">
+              <AvatarFallback className="flex items-center justify-center">
+                <Rocket size={16} />
+              </AvatarFallback>
+            </Avatar>
             <div className="glass p-4 rounded-xl rounded-tl-none">
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 rounded-full bg-foreground/60 animate-bounce"></div>

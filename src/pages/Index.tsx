@@ -4,6 +4,8 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
+import Testimonials from '@/components/home/Testimonials';
+import SocialProof from '@/components/home/SocialProof';
 import BusinessIdeaGenerator from '@/components/idea-generator/BusinessIdeaGenerator';
 import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
 import AutoWaitlistPopup from '@/components/waitlist/AutoWaitlistPopup';
@@ -31,7 +33,14 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         <Hero />
+        
+        {/* Social Proof Section */}
+        <SocialProof />
+        
         <Features />
+        
+        {/* Testimonials Section */}
+        <Testimonials />
         
         {/* Waitlist Call to Action Section */}
         <section className="py-16 bg-brand-secondary">

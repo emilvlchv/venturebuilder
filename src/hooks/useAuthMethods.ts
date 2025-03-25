@@ -25,6 +25,50 @@ export const useAuthMethods = () => {
       setIsLoading(true);
       console.log(`Attempting to login with email: ${email}`);
       
+      // For demo purposes, handle hardcoded demo credentials
+      if (process.env.NODE_ENV === 'development') {
+        // Demo user account
+        if (email === 'user@example.com' && password === 'password123') {
+          // Mock successful login for demo user
+          localStorage.setItem('demo_user', JSON.stringify({
+            id: 'demo_user_id',
+            email: 'user@example.com',
+            firstName: 'Demo',
+            lastName: 'User',
+            username: 'demouser',
+            role: 'user'
+          }));
+          
+          toast({
+            title: "Login successful",
+            description: `Welcome back, Demo User!`,
+          });
+          
+          return;
+        }
+        
+        // Demo admin account
+        if (email === 'admin@example.com' && password === 'password123') {
+          // Mock successful login for demo admin
+          localStorage.setItem('demo_user', JSON.stringify({
+            id: 'demo_admin_id',
+            email: 'admin@example.com',
+            firstName: 'Demo',
+            lastName: 'Admin',
+            username: 'demoadmin',
+            role: 'admin'
+          }));
+          
+          toast({
+            title: "Login successful",
+            description: `Welcome back, Demo Admin!`,
+          });
+          
+          return;
+        }
+      }
+      
+      // Regular Supabase authentication for non-demo users
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

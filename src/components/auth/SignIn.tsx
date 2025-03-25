@@ -9,9 +9,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const signInSchema = z.object({
   email: z.string()
@@ -28,6 +29,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const supabaseReady = isSupabaseConfigured();
+  const [loginError, setLoginError] = React.useState<string | null>(null);
   
   // Check if there's a redirect path in the location state
   const from = location.state?.from || '/journey';
@@ -49,21 +51,24 @@ const SignIn = () => {
 
   const onSubmit = async (data: SignInFormValues) => {
     try {
+      setLoginError(null);
       await login(data.email, data.password);
       // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
-      // Error handling is done in the AuthContext
       console.error("Login submission error:", error);
+      setLoginError('Invalid email or password. Please try again.');
     }
   };
 
   // Demo account quick login buttons for development
   const loginWithDemoAccount = async (email: string, password: string) => {
     try {
+      setLoginError(null);
       await login(email, password);
       // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
       console.error("Demo login error:", error);
+      setLoginError('Failed to log in with demo account. Please try again.');
     }
   };
 
@@ -75,6 +80,13 @@ const SignIn = () => {
       </CardHeader>
       
       <CardContent className="space-y-4">
+        {loginError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{loginError}</AlertDescription>
+          </Alert>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -158,7 +170,7 @@ const SignIn = () => {
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => loginWithDemoAccount('user@example.com', 'Password123!')}
+                onClick={() => loginWithDemoAccount('user@example.com', 'password123')}
                 className="text-xs"
               >
                 Demo User
@@ -166,7 +178,7 @@ const SignIn = () => {
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => loginWithDemoAccount('admin@example.com', 'Password123!')}
+                onClick={() => loginWithDemoAccount('admin@example.com', 'password123')}
                 className="text-xs"
               >
                 Demo Admin

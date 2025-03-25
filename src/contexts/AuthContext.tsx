@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { session, supabaseUser, isLoading: authStateLoading } = useAuthState();
   const { user, setUser } = useUserProfile(supabaseUser);
   const { 
-    login, 
+    login: performLogin, 
     signup, 
     logout: performLogout, 
     updateUserInfo: performUpdateUserInfo, 
@@ -41,13 +41,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading: authMethodsLoading 
   } = useAuthMethods();
 
+  // Check for demo user in local storage for development mode
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const demoUser = localStorage.getItem('demo_user');
+      if (demoUser && !user) {
+        setUser(JSON.parse(demoUser));
+      }
+    }
+  }, [setUser, user]);
+
   // Derived state
   const isLoading = authStateLoading || authMethodsLoading;
   const isAuthenticated = !!user;
 
   // Wrapper methods that update local state after API operations
+  const login = async (email: string, password: string) => {
+    await performLogin(email, password);
+    
+    // For development mode with demo users
+    if (process.env.NODE_ENV === 'development') {
+      const demoUser = localStorage.getItem('demo_user');
+      if (demoUser) {
+        setUser(JSON.parse(demoUser));
+      }
+    }
+  };
+
   const updateUserInfo = async (data: Partial<User>) => {
     if (!user) throw new Error('Not authenticated');
+    
+    // For development mode with demo users
+    if (process.env.NODE_ENV === 'development' && localStorage.getItem('demo_user')) {
+      const demoUser = JSON.parse(localStorage.getItem('demo_user') || '{}');
+      const updatedUser = { ...demoUser, ...data };
+      localStorage.setItem('demo_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      return;
+    }
+    
     await performUpdateUserInfo(user, data);
     
     // Update local state
@@ -56,10 +88,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePassword = async (currentPassword: string, newPassword: string) => {
     if (!user) throw new Error('Not authenticated');
+    
+    // For development mode with demo users
+    if (process.env.NODE_ENV === 'development' && localStorage.getItem('demo_user')) {
+      // Mock password update for demo users
+      return;
+    }
+    
     await performUpdatePassword(user, currentPassword, newPassword);
   };
 
   const logout = async () => {
+    // For development mode with demo users
+    if (process.env.NODE_ENV === 'development' && localStorage.getItem('demo_user')) {
+      localStorage.removeItem('demo_user');
+      setUser(null);
+      return;
+    }
+    
     await performLogout();
     setUser(null);
   };

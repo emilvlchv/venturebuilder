@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, Award, TrendingUp, Sparkles, Star } from 'lucide-react';
+import { Users, Star, TrendingUp } from 'lucide-react';
 
 const SocialProof = () => {
   return (
@@ -11,12 +11,12 @@ const SocialProof = () => {
           <div className="w-20 h-1 bg-primary/20 mx-auto"></div>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="flex flex-col items-center">
             <div className="bg-primary/5 rounded-full p-4 mb-4">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold">10,000+</h3>
+            <h3 className="text-2xl font-bold">1,000+</h3>
             <p className="text-muted-foreground">Active Users</p>
           </div>
           
@@ -34,14 +34,6 @@ const SocialProof = () => {
             </div>
             <h3 className="text-2xl font-bold">85%</h3>
             <p className="text-muted-foreground">Success Rate</p>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-primary/5 rounded-full p-4 mb-4">
-              <Award className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="text-2xl font-bold">15+</h3>
-            <p className="text-muted-foreground">Industry Awards</p>
           </div>
         </div>
         

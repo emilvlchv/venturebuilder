@@ -41,11 +41,11 @@ const Hero = () => {
                 Start Your Journey
               </Button>
             </Link>
-            <Link to="#entrepreneur-quiz">
+            <a href="#interactive-tools">
               <Button variant="outline" size="lg">
                 Find Your Entrepreneur Type
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>

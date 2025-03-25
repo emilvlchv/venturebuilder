@@ -51,7 +51,7 @@ const Index = () => {
         </section>
         
         {/* Interactive Tools Section */}
-        <section className="py-16 md:py-24 bg-secondary/30">
+        <section id="interactive-tools" className="py-16 md:py-24 bg-secondary/30 scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
               <h2 className="h2 mb-4">Interactive Tools for Entrepreneurs</h2>

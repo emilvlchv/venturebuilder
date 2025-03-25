@@ -11,7 +11,15 @@ interface NavbarActionsProps {
 }
 
 const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
-  const { isAuthenticated, user } = useAuth();
+  // Add a fallback for useAuth in case the component renders outside of AuthProvider
+  let authContext = { isAuthenticated: false, user: null };
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error("AuthProvider not available in NavbarActions:", error);
+  }
+  
+  const { isAuthenticated, user } = authContext;
   const navigate = useNavigate();
   const location = useLocation();
   const isAdmin = user?.role === 'admin';

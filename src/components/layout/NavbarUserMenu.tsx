@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, LogOut, Settings, Shield, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -18,8 +17,17 @@ interface NavbarUserMenuProps {
 }
 
 const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => {
-  const { user, logout } = useAuth();
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error("AuthProvider not available in NavbarUserMenu:", error);
+    return null; // Don't render the user menu if auth context is not available
+  }
+  
+  const { user, logout } = authContext;
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const isAdmin = user?.role === 'admin';
 

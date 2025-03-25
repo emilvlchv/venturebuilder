@@ -12,7 +12,14 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
-  const { isAuthenticated } = useAuth();
+  // Add a fallback for useAuth in case the component renders outside of AuthProvider
+  let isAuthenticated = false;
+  try {
+    const { isAuthenticated: authStatus } = useAuth();
+    isAuthenticated = authStatus;
+  } catch (error) {
+    console.error("AuthProvider not available in MobileMenu:", error);
+  }
 
   if (!isOpen) {
     return (

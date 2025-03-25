@@ -13,7 +13,17 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  
+  // Add a fallback for useAuth in case the component renders outside of AuthProvider
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error("AuthProvider not available in Navbar:", error);
+    authContext = { isAuthenticated: false };
+  }
+  
+  const { isAuthenticated } = authContext;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 

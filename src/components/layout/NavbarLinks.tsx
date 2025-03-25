@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -20,7 +19,15 @@ interface NavbarLinksProps {
 
 const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false }) => {
   const location = useLocation();
-  const { user } = useAuth();
+  
+  let user = null;
+  try {
+    const { user: authUser } = useAuth();
+    user = authUser;
+  } catch (error) {
+    console.error("AuthProvider not available in NavbarLinks:", error);
+  }
+  
   const isAdmin = user?.role === 'admin';
   
   const navLinks = [

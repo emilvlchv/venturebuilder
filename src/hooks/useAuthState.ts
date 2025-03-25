@@ -21,30 +21,10 @@ export const useAuthState = () => {
   });
 
   useEffect(() => {
-    // Get initial session
-    const initialSession = async () => {
-      setAuthState(prev => ({ ...prev, isLoading: true }));
-      
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        return;
-      }
-      
-      setAuthState({
-        session,
-        supabaseUser: session?.user || null,
-        isLoading: false,
-      });
-    };
-
-    initialSession();
-
-    // Listen for auth changes
+    // Set up auth state listener FIRST (best practice for Supabase auth)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log("Auth state changed:", _event, session?.user?.email);
         setAuthState({
           session,
           supabaseUser: session?.user || null,
@@ -52,6 +32,33 @@ export const useAuthState = () => {
         });
       }
     );
+
+    // THEN check for existing session
+    const initialSession = async () => {
+      try {
+        setAuthState(prev => ({ ...prev, isLoading: true }));
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          throw error;
+        }
+        
+        console.log("Initial session check:", session?.user?.email || "No session");
+        
+        setAuthState({
+          session,
+          supabaseUser: session?.user || null,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error('Error in initialSession:', error);
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    initialSession();
 
     return () => {
       subscription.unsubscribe();

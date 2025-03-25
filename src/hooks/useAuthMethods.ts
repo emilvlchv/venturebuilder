@@ -40,11 +40,7 @@ export const useAuthMethods = () => {
         throw error;
       }
       
-      if (!data.user) {
-        throw new Error('No user returned from login');
-      }
-      
-      console.log('Login successful for user:', data.user.email);
+      console.log('Login successful for user:', data.user?.email);
       
       toast({
         title: "Login successful",
@@ -91,6 +87,7 @@ export const useAuthMethods = () => {
           data: {
             first_name: userData.firstName,
             last_name: userData.lastName,
+            username: userData.username,
           },
         },
       });
@@ -105,38 +102,12 @@ export const useAuthMethods = () => {
         throw error;
       }
       
-      if (!data.user) {
-        throw new Error('No user returned from signup');
-      }
-      
-      // Create user profile in the profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username: userData.username,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            email: userData.email,
-            role: userData.role || 'user',
-          },
-        ]);
-      
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        toast({
-          variant: "destructive",
-          title: "Profile creation failed",
-          description: "Your account was created but we couldn't set up your profile. Please contact support.",
-        });
-        
-        // We still continue as the auth account was created successfully
-      }
+      // The profile will be created automatically by the database trigger
+      // we don't need to manually create it here
       
       toast({
         title: "Account created successfully",
-        description: `Welcome to VentureWayfinder, ${userData.firstName}!`,
+        description: `Welcome to VentureWayfinder${userData.firstName ? ', ' + userData.firstName : ''}!`,
       });
       
     } catch (error) {
@@ -149,6 +120,7 @@ export const useAuthMethods = () => {
 
   const logout = async () => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -167,6 +139,9 @@ export const useAuthMethods = () => {
       });
     } catch (error) {
       console.error('Logout error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,7 +194,7 @@ export const useAuthMethods = () => {
         ...(data.lastName && { last_name: data.lastName }),
         ...(data.username && { username: data.username }),
         ...(data.businessIdea && { business_idea: data.businessIdea }),
-        updated_at: new Date().toISOString(), // Convert Date to ISO string
+        updated_at: new Date().toISOString(),
       };
       
       // Only add business_profile_data if it exists in data

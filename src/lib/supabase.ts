@@ -8,5 +8,5 @@ export const supabase = supabaseClient;
 
 // Export a function to check if Supabase is properly configured
 export const isSupabaseConfigured = () => {
-  return true; // We're now using the automatically generated client which always has the credentials
+  return true; // Using the automatically generated client which always has the credentials
 };

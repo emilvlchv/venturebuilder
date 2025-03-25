@@ -9,7 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const signInSchema = z.object({
   email: z.string()
@@ -25,6 +27,7 @@ const SignIn = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const supabaseReady = isSupabaseConfigured();
   
   // Check if there's a redirect path in the location state
   const from = location.state?.from || '/journey';
@@ -45,18 +48,35 @@ const SignIn = () => {
   });
 
   const onSubmit = async (data: SignInFormValues) => {
+    if (!supabaseReady) {
+      toast({
+        variant: "destructive",
+        title: "Supabase not configured",
+        description: "Please connect your Supabase project in the Lovable interface.",
+      });
+      return;
+    }
+
     try {
       await login(data.email, data.password);
-      
       // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
-      // Error handling is now done in the AuthContext
+      // Error handling is done in the AuthContext
       console.error("Login submission error:", error);
     }
   };
 
   // Demo account quick login buttons for development
   const loginWithDemoAccount = async (email: string, password: string) => {
+    if (!supabaseReady) {
+      toast({
+        variant: "destructive",
+        title: "Supabase not configured",
+        description: "Please connect your Supabase project in the Lovable interface.",
+      });
+      return;
+    }
+
     try {
       await login(email, password);
       // Navigation will happen in the effect when isAuthenticated changes
@@ -71,6 +91,16 @@ const SignIn = () => {
         <h1 className="text-3xl font-bold">Welcome back</h1>
         <p className="text-muted-foreground">Sign in to your account</p>
       </div>
+
+      {!supabaseReady && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Supabase not connected</AlertTitle>
+          <AlertDescription>
+            This application requires Supabase to be connected. Please connect your Supabase project through the Lovable interface.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -105,7 +135,7 @@ const SignIn = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || !supabaseReady}
           >
             {form.formState.isSubmitting ? (
               <>
@@ -135,6 +165,7 @@ const SignIn = () => {
               variant="outline"
               type="button"
               onClick={() => loginWithDemoAccount('user@example.com', 'Password123!')}
+              disabled={!supabaseReady}
             >
               Demo User
             </Button>
@@ -142,6 +173,7 @@ const SignIn = () => {
               variant="outline"
               type="button"
               onClick={() => loginWithDemoAccount('admin@example.com', 'Password123!')}
+              disabled={!supabaseReady}
             >
               Demo Admin
             </Button>

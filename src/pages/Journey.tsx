@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import AIChatAssistant from '@/components/journey/AIChatAssistant';
 
 const JourneyPage = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -182,67 +183,92 @@ const JourneyPage = () => {
             </p>
           </div>
           
-          <SubscriptionCheck>
-            <div className="max-w-6xl mx-auto">
-              {!selectedJourneyId || !selectedJourney ? (
-                <div className="mb-10">
-                  <JourneyManager onSelectJourney={handleJourneySelect} />
+          {!isAuthenticated ? (
+            <div className="max-w-md mx-auto text-center">
+              <Card className="p-6 mb-6">
+                <h3 className="text-xl font-semibold mb-4">Sign In to Access Your Journey</h3>
+                <p className="mb-6">
+                  To create and manage your personalized entrepreneurial journey, please sign in or create an account.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    onClick={() => navigate('/signin', { state: { from: location.pathname } })}
+                    variant="default"
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/signup', { state: { from: location.pathname } })}
+                    variant="outline"
+                  >
+                    Create Account
+                  </Button>
                 </div>
-              ) : (
-                <>
-                  <div className="mb-6">
-                    <button 
-                      onClick={() => setSelectedJourneyId(null)}
-                      className="text-primary hover:underline flex items-center"
-                    >
-                      ← Back to All Journeys
-                    </button>
-                  </div>
-                  
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold mb-2">{selectedJourney.title}</h2>
-                    <p className="text-muted-foreground mb-4">{selectedJourney.description}</p>
-                    
-                    <div className="w-full bg-muted rounded-full h-2 mb-1 max-w-md">
-                      <div 
-                        className="bg-primary h-2 rounded-full" 
-                        style={{ width: `${selectedJourney.progress}%` }}
-                        role="progressbar"
-                        aria-valuenow={selectedJourney.progress}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      ></div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedJourney.progress}% complete
-                    </p>
-                  </div>
-                  
-                  {!hasCompletedInitialChat ? (
-                    <JourneyWizard 
-                      onComplete={handleJourneyComplete} 
-                      journeyId={selectedJourneyId}
-                    />
-                  ) : (
-                    <div className="text-center">
-                      <Card className="p-6 mb-6">
-                        <h3 className="text-xl font-semibold mb-4">Journey in Progress</h3>
-                        <p className="mb-6">
-                          Your journey is underway! View the detailed steps and progress in the Journey Details page.
-                        </p>
-                        <Button 
-                          onClick={handleViewJourneyDetails}
-                          className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                        >
-                          View Journey Details
-                        </Button>
-                      </Card>
-                    </div>
-                  )}
-                </>
-              )}
+              </Card>
             </div>
-          </SubscriptionCheck>
+          ) : (
+            <SubscriptionCheck>
+              <div className="max-w-6xl mx-auto">
+                {!selectedJourneyId || !selectedJourney ? (
+                  <div className="mb-10">
+                    <JourneyManager onSelectJourney={handleJourneySelect} />
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-6">
+                      <button 
+                        onClick={() => setSelectedJourneyId(null)}
+                        className="text-primary hover:underline flex items-center"
+                      >
+                        ← Back to All Journeys
+                      </button>
+                    </div>
+                    
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-bold mb-2">{selectedJourney.title}</h2>
+                      <p className="text-muted-foreground mb-4">{selectedJourney.description}</p>
+                      
+                      <div className="w-full bg-muted rounded-full h-2 mb-1 max-w-md">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ width: `${selectedJourney.progress}%` }}
+                          role="progressbar"
+                          aria-valuenow={selectedJourney.progress}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedJourney.progress}% complete
+                      </p>
+                    </div>
+                    
+                    {!hasCompletedInitialChat ? (
+                      <JourneyWizard 
+                        onComplete={handleJourneyComplete} 
+                        journeyId={selectedJourneyId}
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <Card className="p-6 mb-6">
+                          <h3 className="text-xl font-semibold mb-4">Journey in Progress</h3>
+                          <p className="mb-6">
+                            Your journey is underway! View the detailed steps and progress in the Journey Details page.
+                          </p>
+                          <Button 
+                            onClick={handleViewJourneyDetails}
+                            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                          >
+                            View Journey Details
+                          </Button>
+                        </Card>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </SubscriptionCheck>
+          )}
         </div>
       </main>
       <Footer />
@@ -252,10 +278,12 @@ const JourneyPage = () => {
         stepDetails={selectedStep} 
       />
       
-      <AIChatAssistant 
-        journeyId={selectedJourneyId} 
-        businessData={selectedJourney?.businessIdeaData}
-      />
+      {isAuthenticated && (
+        <AIChatAssistant 
+          journeyId={selectedJourneyId} 
+          businessData={selectedJourney?.businessIdeaData}
+        />
+      )}
     </div>
   );
 };

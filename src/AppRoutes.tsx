@@ -43,6 +43,10 @@ const AppRoutes = () => {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/education" element={<Education />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/journey" element={<Journey />} />
       
       {/* Protected routes */}
       <Route path="/profile" element={
@@ -50,12 +54,8 @@ const AppRoutes = () => {
           <Profile />
         </ProtectedRoute>
       } />
-      <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
       <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
-      <Route path="/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
-      <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
-      <Route path="/journey" element={<ProtectedRoute><Journey /></ProtectedRoute>} />
       <Route path="/journey-details/:journeyId" element={<ProtectedRoute><JourneyDetails /></ProtectedRoute>} />
       <Route path="/journey-details/:journeyId/step/:stepId" element={<ProtectedRoute><StepDetailsPage /></ProtectedRoute>} />
       <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetailPage /></ProtectedRoute>} />

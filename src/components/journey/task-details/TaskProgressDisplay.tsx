@@ -38,6 +38,7 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
   };
 
   const progress = calculateProgress(task);
+  const hasSubtasks = task.categories && task.categories.flatMap(c => c.subtasks).length > 0;
 
   // Get color based on task status or progress
   const getProgressColor = (progress: number) => {
@@ -52,20 +53,35 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
     <div className="space-y-2 mb-3">
       <div className="flex justify-between items-center">
         <div>
-          {task.categories && 
+          {hasSubtasks && 
             <span className="text-sm font-medium">
               <strong className="text-primary">{progress}%</strong> Complete
             </span>
+          }
+          {!hasSubtasks &&
+            <span className="text-sm text-muted-foreground">No subtasks to track</span>
           }
         </div>
         <div>
           {renderStatusBadge(task.status)}
         </div>
       </div>
-      <Progress value={progress} className={`h-2.5 ${getProgressColor(progress)}`} />
-      <div className="text-xs text-muted-foreground">
-        {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks completed
-      </div>
+      
+      {hasSubtasks ? (
+        <>
+          <Progress value={progress} className={`h-2.5`} />
+          <div className="text-xs text-muted-foreground">
+            {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks completed
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="h-2.5 w-full rounded-full bg-muted/40"></div>
+          <div className="text-xs text-muted-foreground">
+            Add subtasks to track progress
+          </div>
+        </>
+      )}
     </div>
   );
 };

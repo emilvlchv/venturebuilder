@@ -78,6 +78,15 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   };
 
+  // Get color class based on completion percentage
+  const getColorForProgress = (completion: number) => {
+    if (completion >= 100) return 'bg-green-500';
+    if (completion >= 70) return 'bg-emerald-500';
+    if (completion >= 30) return 'bg-blue-500';
+    if (completion > 0) return 'bg-amber-500';
+    return 'bg-muted/50';
+  };
+
   return (
     <div className="tabs-section mb-16">
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -90,7 +99,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
                 <div className="absolute -bottom-1 left-0 w-full px-4">
                   <div className="h-1 bg-gray-200 rounded-full w-full">
                     <div 
-                      className="h-1 bg-green-500 rounded-full" 
+                      className={`h-1 rounded-full ${getColorForProgress(completion)}`} 
                       style={{ width: `${completion}%` }}
                     ></div>
                   </div>

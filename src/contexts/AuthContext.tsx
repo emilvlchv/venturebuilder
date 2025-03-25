@@ -2,8 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { BusinessProfileData } from '@/utils/businessProfileUtils';
 import { useToast } from '@/hooks/use-toast';
+
+// Define a type for business profile data since we can't modify the Supabase types
+export type BusinessProfileData = any; // Using 'any' here since we don't know the exact structure
+
+// Define UserRole type to ensure type safety
+type UserRole = 'admin' | 'user';
 
 type User = {
   id: string;
@@ -13,7 +18,7 @@ type User = {
   email: string;
   businessIdea?: string;
   businessProfileData?: BusinessProfileData;
-  role?: 'admin' | 'user';
+  role?: UserRole;
 };
 
 type AuthContextType = {
@@ -33,7 +38,7 @@ type SignupData = {
   username: string;
   email: string;
   password: string;
-  role?: 'admin' | 'user';
+  role?: UserRole;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,6 +117,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
+        // Safely cast the role to our UserRole type
+        const safeRole: UserRole = data.role === 'admin' ? 'admin' : 'user';
+        
         setUser({
           id: supabaseUser.id,
           email: supabaseUser.email || '',
@@ -119,8 +127,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastName: data.last_name || '',
           username: data.username || '',
           businessIdea: data.business_idea || '',
-          businessProfileData: data.business_profile_data,
-          role: data.role || 'user',
+          // Handle business_profile_data property safely
+          businessProfileData: data.business_profile_data || null,
+          role: safeRole,
         });
       } else {
         // If profile doesn't exist yet, just use basic info from auth
@@ -344,14 +353,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // Update profile in the profiles table
-      const updates = {
+      const updates: Record<string, any> = {
         ...(data.firstName && { first_name: data.firstName }),
         ...(data.lastName && { last_name: data.lastName }),
         ...(data.username && { username: data.username }),
         ...(data.businessIdea && { business_idea: data.businessIdea }),
-        ...(data.businessProfileData && { business_profile_data: data.businessProfileData }),
-        updated_at: new Date(),
+        updated_at: new Date().toISOString(), // Convert Date to ISO string
       };
+      
+      // Only add business_profile_data if it exists in data
+      if (data.businessProfileData) {
+        updates.business_profile_data = data.businessProfileData;
+      }
       
       const { error: updateProfileError } = await supabase
         .from('profiles')

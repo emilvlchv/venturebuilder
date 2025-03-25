@@ -9,8 +9,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, Lock, LogIn } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 
 const signInSchema = z.object({
   email: z.string()
@@ -67,98 +68,123 @@ const SignIn = () => {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Welcome back</h1>
-        <p className="text-muted-foreground">Sign in to your account</p>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email address</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="john.doe@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : "Sign in"}
-          </Button>
-        </form>
-      </Form>
+    <Card className="w-full mx-auto">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-3xl font-bold">Welcome back</CardTitle>
+        <CardDescription>Sign in to your account to continue your entrepreneurial journey</CardDescription>
+      </CardHeader>
       
-      {process.env.NODE_ENV === 'development' && (
-        <>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Dev mode login options
-              </span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => loginWithDemoAccount('user@example.com', 'Password123!')}
-            >
-              Demo User
-            </Button>
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => loginWithDemoAccount('admin@example.com', 'Password123!')}
-            >
-              Demo Admin
-            </Button>
-          </div>
-        </>
-      )}
+      <CardContent className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email address</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        type="email" 
+                        placeholder="john.doe@example.com" 
+                        className="pl-10" 
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button 
+              type="submit" 
+              className="w-full mt-2" 
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign in
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+        
+        {process.env.NODE_ENV === 'development' && (
+          <>
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Dev mode login options
+                </span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => loginWithDemoAccount('user@example.com', 'Password123!')}
+                className="text-xs"
+              >
+                Demo User
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => loginWithDemoAccount('admin@example.com', 'Password123!')}
+                className="text-xs"
+              >
+                Demo Admin
+              </Button>
+            </div>
+          </>
+        )}
+      </CardContent>
+
+      <CardFooter className="flex flex-col">
+        <p className="text-sm text-muted-foreground text-center">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-primary hover:underline">
+          <Link to="/signup" className="text-primary hover:underline font-medium">
             Sign up
           </Link>
         </p>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

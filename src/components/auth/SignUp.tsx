@@ -9,7 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail, Lock, User, UserPlus } from 'lucide-react';
+import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 
 const signUpSchema = z.object({
   firstName: z.string()
@@ -84,23 +85,59 @@ const SignUp = () => {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Create an account</h1>
-        <p className="text-muted-foreground">Enter your information to get started</p>
-      </div>
+    <Card className="w-full mx-auto">
+      <CardHeader className="space-y-1 text-center">
+        <CardTitle className="text-3xl font-bold">Create an account</CardTitle>
+        <CardDescription>Join VentureWayfinder and start your entrepreneurial journey</CardDescription>
+      </CardHeader>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input placeholder="John" className="pl-10" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="firstName"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First name</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input placeholder="johndoe" className="pl-10" {...field} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,99 +146,85 @@ const SignUp = () => {
 
             <FormField
               control={form.control}
-              name="lastName"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last name</FormLabel>
+                  <FormLabel>Email address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input type="email" placeholder="john.doe@example.com" className="pl-10" {...field} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
 
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="johndoe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input type="password" placeholder="••••••••" className="pl-10" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email address</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="john.doe@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input type="password" placeholder="••••••••" className="pl-10" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <Button 
+              type="submit" 
+              className="w-full mt-2" 
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Create account
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
 
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
-              </>
-            ) : "Create account"}
-          </Button>
-        </form>
-      </Form>
-
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
+      <CardFooter className="flex flex-col">
+        <p className="text-sm text-muted-foreground text-center">
           Already have an account?{" "}
-          <Link to="/signin" className="text-primary hover:underline">
+          <Link to="/signin" className="text-primary hover:underline font-medium">
             Sign in
           </Link>
         </p>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

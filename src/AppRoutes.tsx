@@ -1,12 +1,11 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Privacy from '@/pages/Privacy';
-import SignIn from '@/pages/SignIn';
-import SignUp from '@/pages/SignUp';
+import SignInPage from '@/pages/SignIn';
+import SignUpPage from '@/pages/SignUp';
 import Profile from '@/pages/Profile';
 import Pricing from '@/pages/Pricing';
 import Payment from '@/pages/Payment';
@@ -36,18 +35,17 @@ import AdminLayout from '@/components/admin/AdminLayout';
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<Index />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:postId" element={<BlogPost />} />
-      <Route path="/business-idea-generator" element={<BusinessIdeaGeneratorPage />} />
+      <Route path="/signin" element={<SignInPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
       
-      {/* Protected Routes */}
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      {/* Protected routes */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      } />
       <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
       <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
@@ -71,7 +69,7 @@ const AppRoutes = () => {
         <Route path="database" element={<NotFound />} />
       </Route>
 
-      {/* 404 Page */}
+      {/* 404 route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

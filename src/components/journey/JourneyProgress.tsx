@@ -84,7 +84,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     if (completion >= 70) return 'bg-emerald-500';
     if (completion >= 30) return 'bg-blue-500';
     if (completion > 0) return 'bg-amber-500';
-    return 'bg-muted/50';
+    return 'bg-muted/30'; // More visible background for 0% completion
   };
 
   return (
@@ -100,7 +100,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
                   <div className="h-1 bg-gray-200 rounded-full w-full">
                     <div 
                       className={`h-1 rounded-full ${getColorForProgress(completion)}`} 
-                      style={{ width: `${completion}%` }}
+                      style={{ width: completion > 0 ? `${completion}%` : '100%', opacity: completion > 0 ? 1 : 0.3 }}
                     ></div>
                   </div>
                 </div>

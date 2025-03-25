@@ -40,15 +40,6 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
   const progress = calculateProgress(task);
   const hasSubtasks = task.categories && task.categories.flatMap(c => c.subtasks).length > 0;
 
-  // Get color based on task status or progress
-  const getProgressColor = (progress: number) => {
-    if (progress >= 100) return 'bg-green-500';
-    if (progress > 66) return 'bg-emerald-500';
-    if (progress > 33) return 'bg-blue-500';
-    if (progress > 0) return 'bg-amber-500';
-    return 'bg-muted';
-  };
-
   return (
     <div className="space-y-2 mb-3">
       <div className="flex justify-between items-center">
@@ -69,14 +60,14 @@ const TaskProgressDisplay: React.FC<TaskProgressDisplayProps> = ({ task }) => {
       
       {hasSubtasks ? (
         <>
-          <Progress value={progress} className={`h-2.5`} />
+          <Progress value={progress} className="h-2.5" />
           <div className="text-xs text-muted-foreground">
             {task.categories.flatMap(c => c.subtasks).filter(s => s.completed).length}/{task.categories.flatMap(c => c.subtasks).length} subtasks completed
           </div>
         </>
       ) : (
         <>
-          <div className="h-2.5 w-full rounded-full bg-muted/40"></div>
+          <Progress value={0} className="h-2.5" />
           <div className="text-xs text-muted-foreground">
             Add subtasks to track progress
           </div>

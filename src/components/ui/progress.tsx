@@ -24,10 +24,15 @@ const Progress = React.forwardRef<
           "bg-blue-500": (value || 0) >= 30 && (value || 0) < 70,
           "bg-emerald-500": (value || 0) >= 70 && (value || 0) < 100,
           "bg-green-500": (value || 0) >= 100,
-          "bg-muted": (value || 0) === 0
+          "bg-muted/30": (value || 0) === 0 // Light visible background for 0%
         }
       )}
-      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      style={{ 
+        transform: `translateX(-${100 - (value || 0)}%)`,
+        // Show full width but with reduced opacity when at 0%
+        width: (value || 0) === 0 ? '100%' : undefined,
+        opacity: (value || 0) === 0 ? 0.5 : 1
+      }}
     />
   </ProgressPrimitive.Root>
 ))

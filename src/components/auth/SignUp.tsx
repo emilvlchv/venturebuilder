@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
 const signUpSchema = z.object({
   firstName: z.string()
@@ -38,9 +39,16 @@ const signUpSchema = z.object({
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
-  const { signup } = useAuth();
+  const { signup, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // If user is already authenticated, redirect to profile page
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    }
+  }, [isAuthenticated, navigate]);
   
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -68,19 +76,10 @@ const SignUp = () => {
         password: signupData.password
       });
       
-      toast({
-        title: "Account created successfully",
-        description: "Welcome to VentureWayfinder!",
-      });
-      
-      // Redirect to profile page instead of journey
-      navigate('/profile');
+      // Navigation will happen in the effect when isAuthenticated changes
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Signup failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      // Error handling is now done in the AuthContext
+      console.error("Signup submission error:", error);
     }
   };
 
@@ -179,8 +178,17 @@ const SignUp = () => {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Creating account..." : "Create account"}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating account...
+              </>
+            ) : "Create account"}
           </Button>
         </form>
       </Form>

@@ -108,23 +108,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
     }, 1000);
   };
 
-  const handleSkipToEnd = () => {
-    const updatedBusinessData = {
-      businessIdea: 'Test business idea',
-      teamComposition: 'Solo founder',
-      teamStrengths: 'Development',
-      teamWeaknesses: 'Marketing',
-      targetCustomers: 'Small businesses',
-      revenueModel: 'Subscription',
-      industry: 'Software',
-      problem: 'Productivity',
-      stage: 'Early startup',
-      solution: 'Automation platform',
-    };
-    
-    onComplete(updatedBusinessData);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -199,13 +182,6 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
           </button>
         </div>
       )}
-      
-      <button 
-        onClick={handleSkipToEnd}
-        className="mt-4 p-2 bg-orange-500 text-white rounded"
-      >
-        Skip to End (Testing Only)
-      </button>
     </div>
   );
 };

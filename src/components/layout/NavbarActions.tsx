@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Home, LayoutDashboard } from 'lucide-react';
 import Button from '../shared/Button';
 import { ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NavbarActionsProps {
   isMobile?: boolean;
@@ -18,6 +19,7 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const goToMainSite = () => {
     navigate('/', { state: { fromAdmin: true } });
@@ -80,6 +82,17 @@ const NavbarActions: React.FC<NavbarActionsProps> = ({
           className="font-medium"
         >
           Main Site
+        </Button>
+      )}
+      {isAdmin && !location.pathname.startsWith('/admin') && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={goToAdmin}
+          icon={<LayoutDashboard size={16} />}
+          className="font-medium"
+        >
+          Admin Panel
         </Button>
       )}
     </div>

@@ -42,9 +42,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Social Proof Section */}
-        <SocialProof />
-        
         <Features />
         
         {/* Testimonials Section */}
@@ -80,6 +77,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+        
+        {/* Social Proof Section - Moved to the bottom of the page */}
+        <SocialProof />
         
         {/* Admin welcome message */}
         {isAdmin && fromAdmin && (

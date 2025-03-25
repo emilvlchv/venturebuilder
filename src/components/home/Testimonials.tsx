@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Quote } from 'lucide-react';
 import { 
   Carousel,
@@ -15,8 +14,6 @@ type TestimonialProps = {
   name: string;
   title: string;
   company?: string;
-  avatarUrl?: string;
-  initials: string;
 };
 
 const testimonials: TestimonialProps[] = [
@@ -25,24 +22,18 @@ const testimonials: TestimonialProps[] = [
     name: "Sarah Johnson",
     title: "Founder",
     company: "EcoStyle Living",
-    initials: "SJ",
-    avatarUrl: "/lovable-uploads/5ca2a881-98be-484e-bdce-0e5588eeb74a.png"
   },
   {
     quote: "As a first-time entrepreneur, I was overwhelmed by everything I needed to do. VentureWay broke it down into manageable steps and their AI assistant was there whenever I had questions.",
     name: "Michael Rodriguez",
     title: "CEO",
     company: "TechBridge Solutions",
-    initials: "MR",
-    avatarUrl: "/lovable-uploads/397b5fd1-2dde-4adf-b3cf-9ae9e5f2a93e.png"
   },
   {
     quote: "The personalized journey mapped out for my business idea was incredibly valuable. It saved me months of research and helped me avoid common pitfalls.",
     name: "Lisa Chen",
     title: "Co-founder",
     company: "Wellness Collective",
-    initials: "LC",
-    avatarUrl: "/lovable-uploads/fed329d4-6ab4-4c2e-bbf3-12167f17f15b.png"
   }
 ];
 
@@ -50,9 +41,7 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
   quote,
   name,
   title,
-  company,
-  avatarUrl,
-  initials
+  company
 }) => (
   <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-border/50 h-full flex flex-col">
     <div className="mb-6 text-accent opacity-80">
@@ -61,18 +50,11 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
     
     <p className="mb-6 italic text-muted-foreground flex-grow">{quote}</p>
     
-    <div className="flex items-center">
-      <Avatar className="h-12 w-12 mr-4">
-        <AvatarImage src={avatarUrl} alt={name} />
-        <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
-      </Avatar>
-      
-      <div>
-        <h4 className="font-medium text-foreground">{name}</h4>
-        <p className="text-sm text-muted-foreground">
-          {title}{company ? `, ${company}` : ''}
-        </p>
-      </div>
+    <div>
+      <h4 className="font-medium text-foreground">{name}</h4>
+      <p className="text-sm text-muted-foreground">
+        {title}{company ? `, ${company}` : ''}
+      </p>
     </div>
   </div>
 );

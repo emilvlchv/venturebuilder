@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Task } from '../types';
 import TaskDetailsSection from './TaskDetailsSection';
 import TaskBreakdownSection from './TaskBreakdownSection';
@@ -27,23 +27,42 @@ const TaskDetailMainSection: React.FC<TaskDetailMainSectionProps> = ({
   onNewSubtaskChange,
   newSubtasks
 }) => {
+  const [activeTab, setActiveTab] = useState<'details' | 'breakdown'>('details');
+
   return (
     <div className="lg:col-span-2 space-y-8">
-      <TaskDetailsSection
-        task={task}
-        onStatusChange={onStatusChange}
-        onDeadlineChange={onDeadlineChange}
-      />
-      
-      <TaskBreakdownSection
-        task={task}
-        onSubtaskToggle={onSubtaskToggle}
-        onCategoryToggle={onCategoryToggle}
-        onAddSubtask={onAddSubtask}
-        onRemoveSubtask={onRemoveSubtask}
-        onNewSubtaskChange={onNewSubtaskChange}
-        newSubtasks={newSubtasks}
-      />
+      <div className="flex gap-2 mb-2 border-b">
+        <button 
+          className={`py-2 px-4 ${activeTab === 'details' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('details')}
+        >
+          Task Details
+        </button>
+        <button 
+          className={`py-2 px-4 ${activeTab === 'breakdown' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('breakdown')}
+        >
+          Task Breakdown
+        </button>
+      </div>
+
+      {activeTab === 'details' ? (
+        <TaskDetailsSection
+          task={task}
+          onStatusChange={onStatusChange}
+          onDeadlineChange={onDeadlineChange}
+        />
+      ) : (
+        <TaskBreakdownSection
+          task={task}
+          onSubtaskToggle={onSubtaskToggle}
+          onCategoryToggle={onCategoryToggle}
+          onAddSubtask={onAddSubtask}
+          onRemoveSubtask={onRemoveSubtask}
+          onNewSubtaskChange={onNewSubtaskChange}
+          newSubtasks={newSubtasks}
+        />
+      )}
     </div>
   );
 };

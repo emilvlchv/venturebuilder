@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,12 +12,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { useParams } from 'react-router-dom';
 import { BusinessIdeaData, Task } from '@/components/journey/types';
 import { useJourneyDetails } from '@/hooks/useJourneyDetails';
+import { Loader2 } from 'lucide-react';
 
 const JourneyDetails = () => {
   const { journeyId } = useParams<{ journeyId: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const {
     journey,
@@ -42,6 +45,9 @@ const JourneyDetails = () => {
     if (initialTasks && initialTasks.length > 0) {
       console.log("Setting local tasks from initialTasks:", initialTasks);
       setLocalTasks(initialTasks);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
     }
   }, [initialTasks]);
 
@@ -114,41 +120,58 @@ const JourneyDetails = () => {
     }))
   }));
 
-  const getLocalTasksByStepId = (stepId: string) => {
+  const getLocalTasksByStepId = useCallback((stepId: string) => {
     return localTasks.filter(task => task.stepId === stepId);
-  };
+  }, [localTasks]);
 
-  const handleLocalTaskStatusChange = (task: Task, status: 'completed' | 'in-progress' | 'pending') => {
+  const handleLocalTaskStatusChange = useCallback((task: Task, status: 'completed' | 'in-progress' | 'pending') => {
     if (selectedTask) {
       handleTaskStatusChange(selectedTask, status);
-      const updatedTasks = localTasks.map(t => 
-        t.id === selectedTask.id ? {...t, status} : t
+      setLocalTasks(prevTasks => 
+        prevTasks.map(t => 
+          t.id === selectedTask.id ? {...t, status} : t
+        )
       );
-      setLocalTasks(updatedTasks);
     }
-  };
+  }, [selectedTask, handleTaskStatusChange]);
 
-  const handleLocalSubtaskToggle = (taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
+  const handleLocalSubtaskToggle = useCallback((taskId: string, categoryId: string, subtaskId: string, completed: boolean) => {
     if (selectedTask) {
       handleSubtaskToggle(taskId, categoryId, subtaskId, completed);
-      const updatedTasks = localTasks.map(task => {
-        if (task.id === taskId) {
-          const updatedCategories = task.categories.map(category => {
-            if (category.id === categoryId) {
-              const updatedSubtasks = category.subtasks.map(subtask => 
-                subtask.id === subtaskId ? {...subtask, completed} : subtask
-              );
-              return {...category, subtasks: updatedSubtasks};
-            }
-            return category;
-          });
-          return {...task, categories: updatedCategories};
-        }
-        return task;
-      });
-      setLocalTasks(updatedTasks);
+      setLocalTasks(prevTasks => 
+        prevTasks.map(task => {
+          if (task.id === taskId) {
+            const updatedCategories = task.categories.map(category => {
+              if (category.id === categoryId) {
+                const updatedSubtasks = category.subtasks.map(subtask => 
+                  subtask.id === subtaskId ? {...subtask, completed} : subtask
+                );
+                return {...category, subtasks: updatedSubtasks};
+              }
+              return category;
+            });
+            return {...task, categories: updatedCategories};
+          }
+          return task;
+        })
+      );
     }
-  };
+  }, [selectedTask, handleSubtaskToggle]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+            <p>Loading your journey...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

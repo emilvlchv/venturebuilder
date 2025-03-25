@@ -25,3 +25,18 @@ export type SignupResponse = {
   } | null;
   error: Error | null;
 };
+
+export type User = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  role: UserRole;
+  isSubscribed?: boolean;
+  subscription?: {
+    planId: string;
+    status: string;
+    currentPeriodEnd: string;
+  };
+};

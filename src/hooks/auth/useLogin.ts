@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { handleDemoLogin } from './authUtils';
-import { LoginResponse } from './authTypes';
+import { LoginResponse, User } from './authTypes';
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,8 +16,13 @@ export const useLogin = () => {
       
       // For demo purposes, handle hardcoded demo credentials
       if (process.env.NODE_ENV === 'development') {
-        if (handleDemoLogin(email, password)) {
-          return { user: { id: 'demo_id', email }, error: null };
+        const demoUser = handleDemoLogin(email, password);
+        if (demoUser) {
+          toast({
+            title: "Demo login successful",
+            description: "You are now logged in as a demo user",
+          });
+          return { user: { id: demoUser.id, email: demoUser.email }, error: null };
         }
       }
       

@@ -1,8 +1,9 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useUserProfile, User, UserRole, BusinessProfileData } from '@/hooks/useUserProfile';
 import { useAuthMethods, SignupData } from '@/hooks/useAuthMethods';
+import { v4 as uuidv4 } from 'uuid';
 
 type AuthContextType = {
   user: User | null;
@@ -41,8 +42,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading: authMethodsLoading 
   } = useAuthMethods();
 
+  // Initialize development environment if needed
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // Check or initialize basic localStorage structures for development mode
+      initializeDevEnvironment();
+    }
+  }, []);
+
+  const initializeDevEnvironment = () => {
+    try {
+      // Initialize users array if doesn't exist
+      if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify([]));
+      }
+      
+      // Check for demo user
+      const demoUser = localStorage.getItem('demo_user');
+      if (demoUser && !user) {
+        setUser(JSON.parse(demoUser));
+      } else if (!demoUser) {
+        // Create a default dev user for convenience
+        const defaultUser = {
+          id: uuidv4(),
+          email: 'dev@example.com',
+          fullName: 'Development User',
+          role: 'user' as UserRole,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isSubscribed: true,
+          subscription: {
+            planId: 'basic',
+            status: 'active',
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+        };
+        
+        localStorage.setItem('demo_user', JSON.stringify(defaultUser));
+        
+        // Add to users array
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.push(defaultUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // Set as current user
+        localStorage.setItem('user', JSON.stringify(defaultUser));
+        setUser(defaultUser);
+      }
+    } catch (error) {
+      console.error("Error initializing dev environment:", error);
+    }
+  };
+
   // Check for demo user in local storage for development mode
-  React.useEffect(() => {
+  useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       const demoUser = localStorage.getItem('demo_user');
       if (demoUser && !user) {

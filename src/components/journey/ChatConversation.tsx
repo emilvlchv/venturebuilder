@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, AlertTriangle } from 'lucide-react';
-import Button from '../shared/Button';
+import { Send, User } from 'lucide-react';
 import { BusinessIdeaData } from './types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,17 +33,11 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Enhanced question set for more comprehensive information gathering
+  // Simplified question set for better user experience
   const questions = [
-    "What's your business idea? Please describe it in detail.",
-    "What problem does your business solve for customers?",
-    "Who is your target market? Be as specific as possible about demographics, behaviors, and needs.",
-    "What's your industry or market sector?",
-    "What stage is your business in? (Idea, planning, started, growing, etc.)",
-    "Who is on your team and what roles do they play?",
-    "What are the key strengths of you and your team?",
-    "What areas might you and your team need help with?",
-    "What's your planned revenue model or monetization strategy?"
+    "What's your business idea in a few sentences?",
+    "Who are your target customers?",
+    "What industry or market sector are you in?",
   ];
 
   useEffect(() => {
@@ -56,7 +49,7 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMessages([
-        { sender: 'assistant', text: "Hi there! I'm your AI business guide. I'll ask you some questions to understand your business idea better, so I can create a personalized journey for you." },
+        { sender: 'assistant', text: "Hi there! I'll help create your personalized business journey. Let me ask you a few quick questions." },
         { sender: 'assistant', text: questions[0] }
       ]);
     }, 500);
@@ -77,28 +70,17 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
         updatedBusinessData.solution = currentInput;
         break;
       case 1:
-        updatedBusinessData.problem = currentInput;
-        break;
-      case 2:
         updatedBusinessData.targetCustomers = currentInput;
         break;
-      case 3:
+      case 2:
         updatedBusinessData.industry = currentInput;
-        break;
-      case 4:
-        updatedBusinessData.stage = currentInput;
-        break;
-      case 5:
-        updatedBusinessData.teamComposition = currentInput;
-        break;
-      case 6:
-        updatedBusinessData.teamStrengths = currentInput;
-        break;
-      case 7:
-        updatedBusinessData.teamWeaknesses = currentInput;
-        break;
-      case 8:
-        updatedBusinessData.revenueModel = currentInput;
+        // Set reasonable defaults for other fields to ensure we have complete data
+        updatedBusinessData.problem = "General market needs";
+        updatedBusinessData.stage = "Early stage";
+        updatedBusinessData.teamComposition = "Solo founder or small team";
+        updatedBusinessData.teamStrengths = "Vision and domain knowledge";
+        updatedBusinessData.teamWeaknesses = "Scaling and operations";
+        updatedBusinessData.revenueModel = "Standard industry model";
         break;
     }
     
@@ -114,34 +96,32 @@ const ChatConversation: React.FC<ChatConversationProps> = ({ onComplete }) => {
       } else {
         setMessages(prev => [...prev, { 
           sender: 'assistant' as const, 
-          text: "Thank you for all this great information! I now have a comprehensive understanding of your business idea. I'll create a personalized journey with tasks and resources tailored specifically to your needs." 
+          text: "Thanks! I have enough information to create your personalized journey now." 
         }]);
         
         setTimeout(() => {
-          console.log("Chat completed, sending data to parent:", updatedBusinessData);
           onComplete(updatedBusinessData);
-        }, 2000);
+        }, 1500);
       }
       
       setIsTyping(false);
-    }, 1500);
+    }, 1000);
   };
 
   const handleSkipToEnd = () => {
     const updatedBusinessData = {
       businessIdea: 'Test business idea',
-      teamComposition: 'Solo founder with 2 employees',
-      teamStrengths: 'Development, marketing',
-      teamWeaknesses: 'Finance, legal',
+      teamComposition: 'Solo founder',
+      teamStrengths: 'Development',
+      teamWeaknesses: 'Marketing',
       targetCustomers: 'Small businesses',
-      revenueModel: 'SaaS subscription model',
+      revenueModel: 'Subscription',
       industry: 'Software',
-      problem: 'Inefficient workflow processes',
+      problem: 'Productivity',
       stage: 'Early startup',
-      solution: 'AI-powered workflow automation platform',
+      solution: 'Automation platform',
     };
     
-    console.log("Skipping to end, sending data:", updatedBusinessData);
     onComplete(updatedBusinessData);
   };
 

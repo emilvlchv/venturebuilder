@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Send, User, ArrowRight, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, ArrowRight } from 'lucide-react';
 import Button from '../shared/Button';
-import { cn } from '@/lib/utils';
 import ChatConversation from './ChatConversation';
 import { useToast } from "@/hooks/use-toast";
-import { BusinessIdeaData, Journey, Task, TaskCategory, Subtask } from './types';
+import { BusinessIdeaData, Journey, Task } from './types';
 import { useNavigate } from 'react-router-dom';
 import { generateAITasks } from '@/utils/aiTaskGenerator';
+import { v4 as uuidv4 } from 'uuid';
 
 type Step = 'welcome' | 'chat' | 'generating' | 'complete';
 
@@ -24,6 +24,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
     teamStrengths: '',
     teamWeaknesses: '',
     targetCustomers: '',
+    revenueModel: '',
+    industry: '',
+    problem: '',
+    stage: '',
+    solution: '',
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -49,7 +54,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         title: "Journey Created",
         description: "Your personalized business journey with AI-generated tasks is ready to view.",
       });
-    }, 3000);
+    }, 2000);
   };
   
   const createDefaultTasks = (userId: string, journeyId: string) => {
@@ -103,91 +108,44 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               { id: 'subtask3', title: 'Identify market gaps', completed: false }
             ],
             collapsed: false
-          },
-          {
-            id: 'cat2',
-            title: 'Validation Methods',
-            subtasks: [
-              { id: 'subtask4', title: 'Create customer surveys', completed: false },
-              { id: 'subtask5', title: 'Conduct customer interviews', completed: false },
-              { id: 'subtask6', title: 'Test concept with focus groups', completed: false }
-            ],
-            collapsed: false
           }
         ],
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
-      },
-      {
-        id: 'task2',
-        title: 'Develop Business Plan',
-        description: 'Create a comprehensive business plan that outlines your strategy, operations, and financials.',
-        status: 'pending',
-        stepId: 'business-plan',
-        resources: [
-          'Business plan templates',
-          'Financial forecasting tools',
-          'Industry benchmark data'
-        ],
-        categories: [
-          {
-            id: 'cat3',
-            title: 'Strategic Planning',
-            subtasks: [
-              { id: 'subtask7', title: 'Define vision and mission', completed: false },
-              { id: 'subtask8', title: 'Set goals and objectives', completed: false },
-              { id: 'subtask9', title: 'Outline growth strategy', completed: false }
-            ],
-            collapsed: false
-          },
-          {
-            id: 'cat4',
-            title: 'Financial Projections',
-            subtasks: [
-              { id: 'subtask10', title: 'Create sales forecast', completed: false },
-              { id: 'subtask11', title: 'Determine startup costs', completed: false },
-              { id: 'subtask12', title: 'Project cash flow', completed: false }
-            ],
-            collapsed: false
-          }
-        ],
-        deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) // 3 weeks from now
-      },
-      {
-        id: 'task3',
-        title: 'Create Branding and Marketing Strategy',
-        description: 'Develop your brand identity and marketing approach to reach your target audience.',
-        status: 'pending',
-        stepId: 'marketing',
-        resources: [
-          'Brand identity guidelines',
-          'Marketing channel comparison',
-          'Content strategy templates'
-        ],
-        categories: [
-          {
-            id: 'cat5',
-            title: 'Brand Development',
-            subtasks: [
-              { id: 'subtask13', title: 'Design logo and visual elements', completed: false },
-              { id: 'subtask14', title: 'Create brand messaging', completed: false },
-              { id: 'subtask15', title: 'Develop brand guidelines', completed: false }
-            ],
-            collapsed: false
-          },
-          {
-            id: 'cat6',
-            title: 'Marketing Channels',
-            subtasks: [
-              { id: 'subtask16', title: 'Identify primary marketing channels', completed: false },
-              { id: 'subtask17', title: 'Create content calendar', completed: false },
-              { id: 'subtask18', title: 'Set marketing budget', completed: false }
-            ],
-            collapsed: false
-          }
-        ],
-        deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000) // 4 weeks from now
       }
     ];
+  };
+  
+  const initializeJourneyData = (userId: string, journeyId: string) => {
+    // Check if journey data already exists
+    const journeysKey = `journeys_${userId}`;
+    let journeys = [];
+    
+    try {
+      const existingJourneys = localStorage.getItem(journeysKey);
+      journeys = existingJourneys ? JSON.parse(existingJourneys) : [];
+    } catch (error) {
+      console.error("Error parsing journeys:", error);
+      journeys = [];
+    }
+    
+    // Check if this journey exists
+    const journeyExists = journeys.some((j: Journey) => j.id === journeyId);
+    
+    if (!journeyExists) {
+      // Create a new journey entry
+      const newJourney = {
+        id: journeyId,
+        title: "Your Entrepreneurial Journey",
+        description: "A personalized roadmap to help you turn your business idea into reality.",
+        businessIdeaData: null,
+        progress: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      journeys.push(newJourney);
+      localStorage.setItem(journeysKey, JSON.stringify(journeys));
+    }
   };
   
   const handleComplete = () => {
@@ -209,7 +167,11 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         if (userData) {
           const user = JSON.parse(userData);
           const userId = user.id;
+          
           if (userId) {
+            // Initialize journey data structure if it doesn't exist
+            initializeJourneyData(userId, journeyId);
+            
             // Update the user's business data
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const userIndex = users.findIndex((u: any) => u.id === userId);
@@ -227,9 +189,8 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               localStorage.setItem('users', JSON.stringify(users));
               
               // Update current user session data
-              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-              currentUser.businessIdea = businessData.businessIdea;
-              currentUser.businessData = {
+              user.businessIdea = businessData.businessIdea;
+              user.businessData = {
                 solution: businessData.businessIdea,
                 targetMarket: businessData.targetCustomers,
                 stage: businessData.teamComposition,
@@ -237,7 +198,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 problem: businessData.teamWeaknesses,
                 revenueModel: businessData.revenueModel,
               };
-              localStorage.setItem('user', JSON.stringify(currentUser));
+              localStorage.setItem('user', JSON.stringify(user));
             }
             
             // Update journey with business data
@@ -246,6 +207,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
             if (journeysData) {
               const journeys = JSON.parse(journeysData);
               const journeyIndex = journeys.findIndex((j: any) => j.id === journeyId);
+              
               if (journeyIndex !== -1) {
                 journeys[journeyIndex].businessIdeaData = businessData;
                 journeys[journeyIndex].progress = 15;
@@ -255,23 +217,66 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
                 // Create AI-generated tasks
                 createDefaultTasks(userId, journeyId);
                 
-                const journeyDetailsPath = `/journey-details/${journeyId}`;
-                console.log("Navigating to:", journeyDetailsPath);
-                
                 setTimeout(() => {
-                  navigate(journeyDetailsPath);
+                  navigate(`/journey-details/${journeyId}`);
                 }, 100);
                 
                 if (onComplete) {
                   onComplete(businessData);
                 }
-                
                 return;
               } else {
-                console.error("Journey not found with ID:", journeyId);
+                // Journey not found, create a new one
+                const newJourney = {
+                  id: journeyId,
+                  title: "Your Entrepreneurial Journey",
+                  description: "A personalized roadmap to help you turn your business idea into reality.",
+                  businessIdeaData: businessData,
+                  progress: 15,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                };
+                
+                journeys.push(newJourney);
+                localStorage.setItem(journeysKey, JSON.stringify(journeys));
+                
+                // Create AI-generated tasks
+                createDefaultTasks(userId, journeyId);
+                
+                setTimeout(() => {
+                  navigate(`/journey-details/${journeyId}`);
+                }, 100);
+                
+                if (onComplete) {
+                  onComplete(businessData);
+                }
+                return;
               }
             } else {
-              console.error("No journeys data found for user");
+              // No journeys data found, create initial journeys array
+              const newJourneys = [{
+                id: journeyId,
+                title: "Your Entrepreneurial Journey",
+                description: "A personalized roadmap to help you turn your business idea into reality.",
+                businessIdeaData: businessData,
+                progress: 15,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }];
+              
+              localStorage.setItem(journeysKey, JSON.stringify(newJourneys));
+              
+              // Create AI-generated tasks
+              createDefaultTasks(userId, journeyId);
+              
+              setTimeout(() => {
+                navigate(`/journey-details/${journeyId}`);
+              }, 100);
+              
+              if (onComplete) {
+                onComplete(businessData);
+              }
+              return;
             }
           }
         }
@@ -342,7 +347,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
               <div className="w-3 h-3 rounded-full bg-primary"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-75"></div>
               <div className="w-3 h-3 rounded-full bg-primary delay-150"></div>
-              <div className="text-sm text-muted-foreground ml-2">Analyzing your business idea and generating your personalized journey with AI-customized tasks...</div>
+              <div className="text-sm text-muted-foreground ml-2">Creating your personalized journey...</div>
             </div>
           </div>
         );
@@ -351,7 +356,7 @@ const JourneyWizard: React.FC<JourneyWizardProps> = ({ onComplete, journeyId }) 
         console.log("Rendering complete step content with View My Journey button");
         return (
           <div className="space-y-6">
-            {renderAssistantMessage("I've analyzed your business idea and created a personalized entrepreneurial journey for you! Your roadmap now includes detailed tasks customized specifically to your business idea, team composition, and target market.")}
+            {renderAssistantMessage("I've created a personalized entrepreneurial journey for you! Your roadmap now includes tasks customized to your business idea.")}
             <div className="ml-11">
               <Button 
                 onClick={handleComplete}

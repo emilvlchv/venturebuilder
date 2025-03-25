@@ -6,6 +6,8 @@ import Hero from '@/components/home/Hero';
 import Features from '@/components/home/Features';
 import BusinessIdeaGenerator from '@/components/idea-generator/BusinessIdeaGenerator';
 import EntrepreneurTypeSection from '@/components/home/EntrepreneurTypeSection';
+import AutoWaitlistPopup from '@/components/waitlist/AutoWaitlistPopup';
+import WaitlistButton from '@/components/waitlist/WaitlistButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -30,6 +32,14 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <Features />
+        
+        {/* Waitlist Call to Action Section */}
+        <section className="py-16 bg-brand-secondary">
+          <div className="container mx-auto px-4 sm:px-6 text-center">
+            <h2 className="h3 mb-6">Ready to start your entrepreneurial journey?</h2>
+            <WaitlistButton size="lg" className="shadow-md">Join the Waitlist →</WaitlistButton>
+          </div>
+        </section>
         
         {/* Interactive Tools Section */}
         <section className="py-16 md:py-24 bg-secondary/30">
@@ -78,6 +88,9 @@ const Index = () => {
         )}
       </main>
       <Footer />
+      
+      {/* Auto-popup waitlist form */}
+      <AutoWaitlistPopup delay={5000} showOnce={true} />
     </div>
   );
 };

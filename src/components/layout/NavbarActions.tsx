@@ -2,27 +2,22 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Home, LayoutDashboard } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import Button from '../shared/Button';
 import { ChevronRight } from 'lucide-react';
 
 interface NavbarActionsProps {
   isMobile?: boolean;
+  isAuthenticated?: boolean;
+  isAdmin?: boolean;
 }
 
-const NavbarActions: React.FC<NavbarActionsProps> = ({ isMobile = false }) => {
-  // Add a fallback for useAuth in case the component renders outside of AuthProvider
-  let authContext = { isAuthenticated: false, user: null };
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    console.error("AuthProvider not available in NavbarActions:", error);
-  }
-  
-  const { isAuthenticated, user } = authContext;
+const NavbarActions: React.FC<NavbarActionsProps> = ({ 
+  isMobile = false, 
+  isAuthenticated = false,
+  isAdmin = false
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isAdmin = user?.role === 'admin';
 
   const goToMainSite = () => {
     navigate('/', { state: { fromAdmin: true } });

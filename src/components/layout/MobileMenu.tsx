@@ -12,14 +12,9 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
-  // Add a fallback for useAuth in case the component renders outside of AuthProvider
-  let isAuthenticated = false;
-  try {
-    const { isAuthenticated: authStatus } = useAuth();
-    isAuthenticated = authStatus;
-  } catch (error) {
-    console.error("AuthProvider not available in MobileMenu:", error);
-  }
+  // Don't try to access auth context directly here
+  // This component will be conditionally rendered by Navbar
+  // which already handles the auth context availability
 
   if (!isOpen) {
     return (
@@ -42,15 +37,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onToggle }) => {
       >
         <X size={24} />
       </button>
-
-      <div className="md:hidden py-4 animate-fade-in">
-        <NavbarLinks isMobile />
-        {isAuthenticated ? (
-          <NavbarUserMenu isMobile />
-        ) : (
-          <NavbarActions isMobile />
-        )}
-      </div>
     </>
   );
 };

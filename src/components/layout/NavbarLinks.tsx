@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,21 +15,13 @@ import {
 interface NavbarLinksProps {
   className?: string;
   isMobile?: boolean;
+  isAdmin?: boolean;
 }
 
-const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false }) => {
+const NavbarLinks: React.FC<NavbarLinksProps> = ({ className, isMobile = false, isAdmin = false }) => {
   const location = useLocation();
   
-  let user = null;
-  try {
-    const { user: authUser } = useAuth();
-    user = authUser;
-  } catch (error) {
-    console.error("AuthProvider not available in NavbarLinks:", error);
-  }
-  
-  const isAdmin = user?.role === 'admin';
-  
+  // Use isAdmin prop instead of accessing auth context directly
   const navLinks = [
     { name: isAdmin ? 'Admin Panel' : 'Journey', path: isAdmin ? '/admin' : '/journey' },
     { name: 'Education', path: '/education' },

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, LogOut, Settings, Shield, LayoutDashboard } from 'lucide-react';
@@ -17,15 +18,9 @@ interface NavbarUserMenuProps {
 }
 
 const NavbarUserMenu: React.FC<NavbarUserMenuProps> = ({ isMobile = false }) => {
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    console.error("AuthProvider not available in NavbarUserMenu:", error);
-    return null; // Don't render the user menu if auth context is not available
-  }
-  
-  const { user, logout } = authContext;
+  // This component should only be rendered when auth is available
+  // The parent Navbar component ensures this
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();

@@ -21,6 +21,9 @@ const WaitlistButton: React.FC<WaitlistButtonProps> = ({
       <Button
         onClick={() => setOpen(true)}
         className={cn("bg-brand-accent hover:bg-brand-accent/90", className)}
+        data-gtm-category="Waitlist"
+        data-gtm-action="click"
+        data-gtm-label="Join Waitlist Button"
         {...props}
       >
         {text}

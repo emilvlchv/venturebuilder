@@ -7,7 +7,7 @@ const NavbarLogo: React.FC = () => {
     <Link to="/" className="flex items-center space-x-2">
       <div className="w-10 h-10 rounded-lg overflow-hidden">
         <img 
-          src="/lovable-uploads/fed329d4-6ab4-4c2e-bbf3-12167f17f15b.png" 
+          src="/lovable-uploads/928499d2-df35-497b-ab7b-fddcdbf756ef.png" 
           alt="VentureWay Logo" 
           className="w-full h-full object-contain"
         />

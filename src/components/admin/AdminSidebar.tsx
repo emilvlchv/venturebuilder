@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -52,7 +53,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection }) => {
         <Link to="/" className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center">
             <img 
-              src="/lovable-uploads/fed329d4-6ab4-4c2e-bbf3-12167f17f15b.png" 
+              src="/lovable-uploads/928499d2-df35-497b-ab7b-fddcdbf756ef.png" 
               alt="VentureWay Logo" 
               className="w-8 h-8 object-contain"
             />

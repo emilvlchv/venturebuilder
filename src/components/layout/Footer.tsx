@@ -33,7 +33,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 rounded-lg overflow-hidden">
                 <img 
-                  src="/lovable-uploads/fed329d4-6ab4-4c2e-bbf3-12167f17f15b.png" 
+                  src="/lovable-uploads/928499d2-df35-497b-ab7b-fddcdbf756ef.png" 
                   alt="VentureWay Logo" 
                   className="w-full h-full object-contain"
                 />

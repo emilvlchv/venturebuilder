@@ -37,7 +37,8 @@ const Index = () => {
         {/* Waitlist Call to Action Section - Moved to top part */}
         <section className="py-20 bg-brand-main text-white shadow-lg">
           <div className="container mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">Ready to start your entrepreneurial journey?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to validate your business idea?</h2>
+            <p className="text-lg mb-8 max-w-2xl mx-auto">Join our waitlist and be the first to access our proven framework for finding your first 10 customers.</p>
             <WaitlistButton 
               size="lg" 
               className="shadow-xl text-lg py-6 px-10 rounded-xl hover:scale-105 transition-transform"

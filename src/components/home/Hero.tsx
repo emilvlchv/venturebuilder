@@ -21,13 +21,13 @@ const Hero = () => {
 
           {/* Main headline */}
           <h1 className="h1 mb-6 animate-fade-in">
-            Build Your Business with Confidence and Clarity
+            Validate Your Business Idea and Find Your First 10 Customers
           </h1>
           
           {/* Subheadline */}
           <p className="text-xl text-muted-foreground mb-8 animate-fade-in delay-[100ms]">
-            A personalized journey that guides you from idea to implementation with expert advice,
-            educational resources, and community support.
+            VentureWay provides structured guidance and actionable steps to turn your 
+            business idea into reality with clarity and confidence.
           </p>
           
           {/* CTA buttons */}
